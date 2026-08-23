@@ -6,12 +6,18 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5173",
     "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0 --port 5173"
+    "preview": "vite preview --host 0.0.0.0 --port 5173",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@huggingface/transformers": "next"
+    "@huggingface/transformers": "next",
+    "onnxruntime-web": "1.27.0"
+  },
+  "overrides": {
+    "onnxruntime-web": "1.27.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.3"
   }

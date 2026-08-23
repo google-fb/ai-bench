@@ -1,3 +1,4 @@
+import "./ort-setup";
 import { fetchCatPhoto, type CatPhoto } from "./cats";
 import { detectWebGpu, loadModel, summarizeCat, type ModelBundle } from "./model";
 
@@ -52,8 +53,10 @@ async function describeCurrent() {
       summaryEl.textContent = partial;
     });
     summaryEl.textContent = text;
+    summaryEl.dataset.state = "done";
     setStatus("摘要完成。下一張照片到了會再看一次。");
   } catch (error) {
+    summaryEl.dataset.state = "error";
     setStatus(error instanceof Error ? error.message : "推理失敗");
   }
 }
@@ -90,7 +93,7 @@ async function boot() {
   devicePill.textContent = hasGpu ? "WebGPU 可用" : "WebGPU 不可用 · WASM";
   try {
     bundle = await loadModel(setStatus);
-    modelPill.textContent = `Qwen3.5 0.8B · ${bundle.device}`;
+    modelPill.textContent = `Qwen3.5 0.8B · ${bundle.device} · vision ${bundle.dtype.vision_encoder}`;
     setStatus("模型就緒，開始抓第一張貓。");
     await cyclePhoto("manual");
   } catch (error) {

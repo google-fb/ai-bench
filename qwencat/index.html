@@ -14,15 +14,15 @@
           <h1>Qwen3.5 0.8B 看貓</h1>
         </div>
         <div class="meta">
-          <span id="device-pill" class="pill">檢查 WebGPU…</span>
-          <span id="model-pill" class="pill">模型未載入</span>
+          <span id="device-pill" class="pill" data-testid="device-pill">檢查 WebGPU…</span>
+          <span id="model-pill" class="pill" data-testid="model-pill">模型未載入</span>
         </div>
       </header>
 
       <section class="stage">
         <figure class="photo">
-          <img id="cat-image" alt="即將載入的貓照片" />
-          <figcaption id="cat-caption">正在呼叫 Cat API…</figcaption>
+          <img id="cat-image" data-testid="cat-image" alt="即將載入的貓照片" />
+          <figcaption id="cat-caption" data-testid="cat-caption">正在呼叫 Cat API…</figcaption>
         </figure>
         <div class="controls">
           <label>
@@ -41,8 +41,8 @@
 
       <section class="summary" aria-live="polite">
         <h2>圖片摘要</h2>
-        <p id="summary-status" class="status">等待模型與第一張照片。</p>
-        <p id="summary-text" class="summary-text"></p>
+        <p id="summary-status" class="status" data-testid="summary-status">等待模型與第一張照片。</p>
+        <p id="summary-text" class="summary-text" data-testid="summary-text"></p>
       </section>
     </main>
     <script type="module" src="/src/main.ts"></script>
