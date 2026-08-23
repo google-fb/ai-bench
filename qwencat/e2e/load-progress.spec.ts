@@ -41,6 +41,17 @@ test("real model load shows a live progress bar before weights finish", async ({
     }, { timeout: 120_000 })
     .toBeTruthy();
 
+  await expect
+    .poll(async () => {
+      const detail = (await page.getByTestId("load-progress-detail").innerText()) ?? "";
+      const match = detail.match(/([\d.]+)\s*MB\s*\/\s*([\d.]+)\s*MB/);
+      if (!match) {
+        return false;
+      }
+      return Number(match[1]) >= 2;
+    }, { timeout: 30_000 })
+    .toBeTruthy();
+
   const snapshot = {
     stage: await bar.getAttribute("data-stage"),
     label: await page.getByTestId("load-progress-label").innerText(),
