@@ -13,6 +13,10 @@ test("downloads a Cat API photo through the CORS proxy", async ({ page }) => {
 
   const caption = await page.getByTestId("cat-caption").innerText();
   expect(caption).toMatch(/^來源 https?:\/\//);
+  await page.screenshot({
+    path: "/opt/cursor/artifacts/qwencat_e2e_cors_proxy.png",
+    fullPage: true,
+  });
 });
 
 test("browser fetch of S3 cat CDN fails CORS, weserv proxy works", async ({ page }) => {
