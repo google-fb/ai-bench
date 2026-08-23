@@ -7,6 +7,13 @@ import {
   type PreTrainedModel,
   type Processor,
 } from "@huggingface/transformers";
+import {
+  createLoadProgressTracker,
+  type HubProgressInfo,
+  type LoadProgress,
+} from "./progress";
+
+export type { LoadProgress } from "./progress";
 
 const MODEL_ID = "onnx-community/Qwen3.5-0.8B-ONNX-OPT";
 const PROMPT =
@@ -164,6 +171,7 @@ function formatError(error: unknown): string {
 export async function loadModel(
   onStatus: (message: string) => void,
   gpu?: WebGpuInfo,
+  onProgress?: (progress: LoadProgress) => void,
 ): Promise<ModelBundle> {
   const info = gpu ?? (await probeWebGpu());
   const blocked = qwenUnsupportedReason(info);
@@ -171,7 +179,15 @@ export async function loadModel(
     throw new Error(blocked);
   }
 
-  const processor = await AutoProcessor.from_pretrained(MODEL_ID);
+  const tracker = createLoadProgressTracker(onProgress ?? (() => {}));
+  const progressCallback = (event: HubProgressInfo) => tracker.handleHub(event);
+
+  tracker.beginStage("processor");
+  onStatus("正在下載 tokenizer 與影像 processor…");
+  const processor = await AutoProcessor.from_pretrained(MODEL_ID, {
+    progress_callback: progressCallback,
+  });
+
   const fp16 = await hasShaderF16();
   const errors: string[] = [];
   const ortVersion = env.backends?.onnx?.versions?.web ?? "unknown";
@@ -180,11 +196,17 @@ export async function loadModel(
     onStatus(
       `ORT ${ortVersion} / 4-bit，正在載入 Qwen3.5 0.8B（embed=${dtype.embed_tokens} vision=${dtype.vision_encoder} decoder=${dtype.decoder_model_merged}）…`,
     );
+    tracker.beginStage(
+      "weights",
+      `正在下載權重（${dtype.embed_tokens}/${dtype.vision_encoder}/${dtype.decoder_model_merged}）…`,
+    );
     try {
       const model = await Qwen3_5ForConditionalGeneration.from_pretrained(MODEL_ID, {
         dtype,
         device: "webgpu",
+        progress_callback: progressCallback,
       });
+      tracker.setDone();
       return { processor, model, device: "webgpu", dtype };
     } catch (error) {
       errors.push(`${dtype.vision_encoder}: ${formatError(error)}`);

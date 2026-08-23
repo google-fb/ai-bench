@@ -7,6 +7,7 @@ import {
   probeWebGpu,
   qwenUnsupportedReason,
   summarizeCat,
+  type LoadProgress,
   type ModelBundle,
 } from "./model";
 
@@ -19,6 +20,12 @@ const refreshBtn = document.querySelector<HTMLButtonElement>("#refresh")!;
 const countdownEl = document.querySelector<HTMLElement>("#countdown")!;
 const statusEl = document.querySelector<HTMLElement>("#summary-status")!;
 const summaryEl = document.querySelector<HTMLElement>("#summary-text")!;
+const loadProgressEl = document.querySelector<HTMLElement>("#load-progress")!;
+const loadProgressLabel = document.querySelector<HTMLElement>("#load-progress-label")!;
+const loadProgressPct = document.querySelector<HTMLElement>("#load-progress-pct")!;
+const loadProgressBar = document.querySelector<HTMLElement>("#load-progress-bar")!;
+const loadProgressFill = document.querySelector<HTMLElement>("#load-progress-fill")!;
+const loadProgressDetail = document.querySelector<HTMLElement>("#load-progress-detail")!;
 
 let bundle: ModelBundle | null = null;
 let currentPhoto: CatPhoto | null = null;
@@ -28,6 +35,33 @@ let timer = 0;
 
 function setStatus(message: string) {
   statusEl.textContent = message;
+}
+
+function renderLoadProgress(progress: LoadProgress | null) {
+  if (!progress || progress.phase === "idle" || progress.phase === "done" || progress.phase === "error") {
+    loadProgressEl.hidden = true;
+    loadProgressEl.classList.remove("is-indeterminate");
+    delete loadProgressEl.dataset.stage;
+    return;
+  }
+
+  loadProgressEl.hidden = false;
+  loadProgressEl.dataset.stage = progress.stage;
+  const indeterminate = progress.percent === null;
+  loadProgressEl.classList.toggle("is-indeterminate", indeterminate);
+  loadProgressLabel.textContent = progress.label;
+  loadProgressDetail.textContent = progress.detail;
+
+  if (indeterminate) {
+    loadProgressPct.textContent = "";
+    loadProgressFill.style.width = "";
+    loadProgressBar.removeAttribute("aria-valuenow");
+    return;
+  }
+
+  loadProgressPct.textContent = `${progress.percent}%`;
+  loadProgressFill.style.width = `${progress.percent}%`;
+  loadProgressBar.setAttribute("aria-valuenow", String(progress.percent));
 }
 
 function intervalMs() {
@@ -100,6 +134,7 @@ async function boot() {
   if (new URLSearchParams(window.location.search).has("skipModel")) {
     devicePill.textContent = "略過模型";
     modelPill.textContent = "未載入 · 測抓圖";
+    renderLoadProgress(null);
     setStatus("略過模型載入，只測 Cat API / CORS proxy。");
     await cyclePhoto("manual");
     return;
@@ -114,18 +149,22 @@ async function boot() {
   if (blocked) {
     modelPill.textContent = "此裝置不支援";
     summaryEl.dataset.state = "unsupported";
+    renderLoadProgress(null);
     setStatus(blocked);
     return;
   }
 
   try {
-    bundle = await loadModel(setStatus, gpu);
+    catCaptionEl.textContent = "模型還在下載，先不要關掉分頁。";
+    bundle = await loadModel(setStatus, gpu, renderLoadProgress);
+    renderLoadProgress(null);
     modelPill.textContent = `Qwen3.5 0.8B · ${bundle.device} · ${bundle.dtype.embed_tokens}/${bundle.dtype.vision_encoder}/${bundle.dtype.decoder_model_merged}`;
     setStatus(
       `模型就緒（裝置上限 ${formatBytes(gpu.workgroupStorage)}，門檻 ${formatBytes(MIN_GQA_WORKGROUP_STORAGE)}）。開始抓第一張貓。`,
     );
     await cyclePhoto("manual");
   } catch (error) {
+    renderLoadProgress(null);
     modelPill.textContent = "模型載入失敗";
     setStatus(friendlyOrtError(error));
   }
