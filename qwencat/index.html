@@ -19,10 +19,37 @@
         </div>
       </header>
 
+      <section
+        id="load-progress"
+        class="load-progress"
+        hidden
+        data-testid="load-progress"
+      >
+        <div class="load-progress-meta">
+          <strong id="load-progress-label" data-testid="load-progress-label">準備下載模型…</strong>
+          <span id="load-progress-pct" class="load-progress-pct" data-testid="load-progress-pct"></span>
+        </div>
+        <div
+          id="load-progress-bar"
+          class="load-progress-track"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-labelledby="load-progress-label"
+          data-testid="load-progress-bar"
+        >
+          <div id="load-progress-fill" class="load-progress-fill" data-testid="load-progress-fill"></div>
+        </div>
+        <p id="load-progress-detail" class="load-progress-detail" data-testid="load-progress-detail"></p>
+        <p class="load-progress-hint" data-testid="load-progress-hint">
+          首次約 600–700 MB，下載期間請不要關掉分頁。之後會用瀏覽器快取，再開會快很多。
+        </p>
+      </section>
+
       <section class="stage">
         <figure class="photo">
           <img id="cat-image" data-testid="cat-image" alt="即將載入的貓照片" />
-          <figcaption id="cat-caption" data-testid="cat-caption">正在呼叫 Cat API…</figcaption>
+          <figcaption id="cat-caption" data-testid="cat-caption">模型載入後才會抓第一張貓。</figcaption>
         </figure>
         <div class="controls">
           <label>
