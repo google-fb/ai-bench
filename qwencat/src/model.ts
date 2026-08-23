@@ -3,6 +3,7 @@ import {
   Qwen3_5ForConditionalGeneration,
   RawImage,
   TextStreamer,
+  env,
   type PreTrainedModel,
   type Processor,
 } from "@huggingface/transformers";
@@ -92,10 +93,11 @@ export async function loadModel(
   const processor = await AutoProcessor.from_pretrained(MODEL_ID);
   const fp16 = await hasShaderF16();
   const errors: string[] = [];
+  const ortVersion = env.backends?.onnx?.versions?.web ?? "unknown";
 
   for (const dtype of dtypeTries(fp16)) {
     onStatus(
-      `WebGPU${fp16 ? " + fp16" : ""}，正在載入 Qwen3.5 0.8B（vision=${dtype.vision_encoder}）…`,
+      `ORT ${ortVersion} / WebGPU${fp16 ? " + fp16" : ""}，正在載入 Qwen3.5 0.8B（vision=${dtype.vision_encoder}）…`,
     );
     try {
       const model = await Qwen3_5ForConditionalGeneration.from_pretrained(MODEL_ID, {
