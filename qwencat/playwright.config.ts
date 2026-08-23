@@ -13,14 +13,7 @@ export default defineConfig({
     channel: "chrome",
     headless: true,
     launchOptions: {
-      args: [
-        "--enable-unsafe-webgpu",
-        "--enable-webgpu-developer-features",
-        "--ignore-gpu-blocklist",
-        "--disable-gpu-sandbox",
-        "--use-angle=vulkan",
-        "--enable-features=Vulkan,DefaultANGLEVulkan,VulkanFromANGLE",
-      ],
+      args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist"],
       env: {
         ...process.env,
         VK_ICD_FILENAMES: "/usr/share/vulkan/icd.d/lvp_icd.json",
