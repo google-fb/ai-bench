@@ -11,6 +11,8 @@ test("probe WebGPU adapters", async ({ page }) => {
           ? {
               features: [...a.features],
               isFallback: a.isFallbackAdapter,
+              maxComputeWorkgroupStorageSize: a.limits.maxComputeWorkgroupStorageSize,
+              vendor: a.info?.vendor ?? "",
             }
           : null;
       } catch (e) {

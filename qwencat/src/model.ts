@@ -28,24 +28,81 @@ export type ModelBundle = {
 export type WebGpuInfo = {
   available: boolean;
   workgroupStorage: number;
+  detectedWorkgroupStorage: number;
   shaderF16: boolean;
+  vendor: string;
+  device: string;
 };
+
+// ORT 1.30 Flash Attention for head_dim=256 uses max_k_step=16:
+// k_tile + v_tile = 2 * 2 bytes * 256 * 16 = 16KB. Qualcomm o_tile can add ~16KB.
+// We cannot shrink C++ tiles from JS, so refuse devices below 32KB before downloading.
+export const MIN_GQA_WORKGROUP_STORAGE = 32 * 1024;
+
+export function formatBytes(bytes: number): string {
+  if (bytes <= 0) {
+    return "0 bytes";
+  }
+  const kb = bytes / 1024;
+  return Number.isInteger(kb) ? `${kb} KB（${bytes} bytes）` : `${kb.toFixed(1)} KB（${bytes} bytes）`;
+}
+
+function workgroupOverride(): number | null {
+  const raw = Number(new URLSearchParams(window.location.search).get("forceWorkgroup"));
+  return Number.isFinite(raw) && raw > 0 ? Math.floor(raw) : null;
+}
 
 export async function probeWebGpu(): Promise<WebGpuInfo> {
   if (!navigator.gpu) {
-    return { available: false, workgroupStorage: 0, shaderF16: false };
+    return {
+      available: false,
+      workgroupStorage: 0,
+      detectedWorkgroupStorage: 0,
+      shaderF16: false,
+      vendor: "",
+      device: "",
+    };
   }
   const adapter =
     (await navigator.gpu.requestAdapter()) ??
     (await navigator.gpu.requestAdapter({ forceFallbackAdapter: true }));
   if (!adapter) {
-    return { available: false, workgroupStorage: 0, shaderF16: false };
+    return {
+      available: false,
+      workgroupStorage: 0,
+      detectedWorkgroupStorage: 0,
+      shaderF16: false,
+      vendor: "",
+      device: "",
+    };
   }
+  const info = "info" in adapter ? adapter.info : undefined;
+  const detected = adapter.limits.maxComputeWorkgroupStorageSize;
+  const override = workgroupOverride();
   return {
     available: true,
-    workgroupStorage: adapter.limits.maxComputeWorkgroupStorageSize,
+    workgroupStorage: override ?? detected,
+    detectedWorkgroupStorage: detected,
     shaderF16: adapter.features.has("shader-f16"),
+    vendor: info?.vendor ?? "",
+    device: info?.device ?? "",
   };
+}
+
+export function qwenUnsupportedReason(gpu: WebGpuInfo): string | null {
+  if (!gpu.available) {
+    return "這台裝置沒有 WebGPU。Qwen3.5 只能走 WebGPU，因此這個網頁不支援。";
+  }
+  if (gpu.workgroupStorage < MIN_GQA_WORKGROUP_STORAGE) {
+    const who = [gpu.vendor, gpu.device].filter(Boolean).join(" ");
+    return (
+      `偵測到這台裝置的 WebGPU 工作組記憶體上限是 ${formatBytes(gpu.workgroupStorage)}` +
+      `${who ? `（${who}）` : ""}。` +
+      `Qwen3.5 的注意力核至少需要 ${formatBytes(MIN_GQA_WORKGROUP_STORAGE)}，` +
+      `這個上限沒辦法從網頁再往下調，因此這個網頁不支援這台裝置。`
+    );
+  }
+  return null;
 }
 
 export async function detectWebGpu(): Promise<boolean> {
@@ -56,9 +113,8 @@ export function friendlyOrtError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   if (/workgroup storage|GroupQueryAttention/i.test(message)) {
     return (
-      "這支手機的 WebGPU 工作組記憶體不夠跑 Qwen3.5 的注意力核" +
-      "（shader 要 64KB，裝置上限多半是 32KB）。已改用較新的 ONNX Runtime 縮小 tile；" +
-      "請強制重新整理再試。若還是失敗，請改用電腦 Chrome 或較新的旗艦機。"
+      "推理時 WebGPU 工作組記憶體仍不夠（GroupQueryAttention）。" +
+      "這個網頁不支援這台裝置，請改用電腦 Chrome 或工作組記憶體更大的手機。"
     );
   }
   return message;
@@ -107,11 +163,12 @@ function formatError(error: unknown): string {
 
 export async function loadModel(
   onStatus: (message: string) => void,
+  gpu?: WebGpuInfo,
 ): Promise<ModelBundle> {
-  if (!(await detectWebGpu())) {
-    throw new Error(
-      "Qwen3.5 0.8B 需要瀏覽器 WebGPU。Gated DeltaNet 的 CausalConvWithState 只在 WebGPU EP 註冊，WASM/CPU 跑不起來。",
-    );
+  const info = gpu ?? (await probeWebGpu());
+  const blocked = qwenUnsupportedReason(info);
+  if (blocked) {
+    throw new Error(blocked);
   }
 
   const processor = await AutoProcessor.from_pretrained(MODEL_ID);

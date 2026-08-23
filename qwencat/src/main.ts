@@ -1,8 +1,11 @@
 import { fetchCatPhoto, type CatPhoto } from "./cats";
 import {
+  MIN_GQA_WORKGROUP_STORAGE,
+  formatBytes,
   friendlyOrtError,
   loadModel,
   probeWebGpu,
+  qwenUnsupportedReason,
   summarizeCat,
   type ModelBundle,
 } from "./model";
@@ -104,12 +107,23 @@ async function boot() {
 
   const gpu = await probeWebGpu();
   devicePill.textContent = gpu.available
-    ? `WebGPU 可用 · WG ${Math.round(gpu.workgroupStorage / 1024)}KB`
-    : "WebGPU 不可用 · WASM";
+    ? `WebGPU · 上限 ${formatBytes(gpu.workgroupStorage)}`
+    : "沒有 WebGPU";
+
+  const blocked = qwenUnsupportedReason(gpu);
+  if (blocked) {
+    modelPill.textContent = "此裝置不支援";
+    summaryEl.dataset.state = "unsupported";
+    setStatus(blocked);
+    return;
+  }
+
   try {
-    bundle = await loadModel(setStatus);
+    bundle = await loadModel(setStatus, gpu);
     modelPill.textContent = `Qwen3.5 0.8B · ${bundle.device} · ${bundle.dtype.embed_tokens}/${bundle.dtype.vision_encoder}/${bundle.dtype.decoder_model_merged}`;
-    setStatus("模型就緒，開始抓第一張貓。");
+    setStatus(
+      `模型就緒（裝置上限 ${formatBytes(gpu.workgroupStorage)}，門檻 ${formatBytes(MIN_GQA_WORKGROUP_STORAGE)}）。開始抓第一張貓。`,
+    );
     await cyclePhoto("manual");
   } catch (error) {
     modelPill.textContent = "模型載入失敗";
