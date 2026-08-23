@@ -241,6 +241,26 @@ for gallery in "${ROOT}"/*/; do
     continue
   fi
 
+  # A gallery can itself be a single Vite/React project.
+  if [[ -f "${gallery}/package.json" ]] || [[ -f "${gallery}/index.html" && ! -d "${gallery}"*/ ]]; then
+    dest="${SITE}/${gallery_name}"
+    base="${BASE_PREFIX}/${gallery_name}/"
+    if [[ -f "${gallery}/package.json" ]]; then
+      if ! build_react_project "${gallery%/}" "${dest}" "${base}"; then
+        echo "WARN: failed to build ${gallery_name}; writing placeholder" >&2
+        mkdir -p "${dest}"
+        printf '<!doctype html><meta charset="utf-8"><title>Build failed</title><body style="font-family:sans-serif;padding:32px"><h1>這個版本目前建置失敗</h1><p>%s</p></body>' "${gallery_name}" > "${dest}/index.html"
+      fi
+    else
+      copy_static_project "${gallery%/}" "${dest}"
+    fi
+    if [[ -f "${dest}/index.html" && ! -f "${dest}/404.html" ]]; then
+      cp "${dest}/index.html" "${dest}/404.html"
+    fi
+    gallery_entries+=("${gallery_name}" "${BASE_PREFIX}/${gallery_name}/")
+    continue
+  fi
+
   project_pairs=()
   for project in "${gallery}"*/; do
     project_name="$(basename "${project}")"
