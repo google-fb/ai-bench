@@ -1,5 +1,11 @@
 import { fetchCatPhoto, type CatPhoto } from "./cats";
-import { detectWebGpu, loadModel, summarizeCat, type ModelBundle } from "./model";
+import {
+  friendlyOrtError,
+  loadModel,
+  probeWebGpu,
+  summarizeCat,
+  type ModelBundle,
+} from "./model";
 
 const imageEl = document.querySelector<HTMLImageElement>("#cat-image")!;
 const catCaptionEl = document.querySelector<HTMLElement>("#cat-caption")!;
@@ -56,7 +62,7 @@ async function describeCurrent() {
     setStatus("摘要完成。下一張照片到了會再看一次。");
   } catch (error) {
     summaryEl.dataset.state = "error";
-    setStatus(error instanceof Error ? error.message : "推理失敗");
+    setStatus(friendlyOrtError(error));
   }
 }
 
@@ -96,8 +102,10 @@ async function boot() {
     return;
   }
 
-  const hasGpu = await detectWebGpu();
-  devicePill.textContent = hasGpu ? "WebGPU 可用" : "WebGPU 不可用 · WASM";
+  const gpu = await probeWebGpu();
+  devicePill.textContent = gpu.available
+    ? `WebGPU 可用 · WG ${Math.round(gpu.workgroupStorage / 1024)}KB`
+    : "WebGPU 不可用 · WASM";
   try {
     bundle = await loadModel(setStatus);
     modelPill.textContent = `Qwen3.5 0.8B · ${bundle.device} · ${bundle.dtype.embed_tokens}/${bundle.dtype.vision_encoder}/${bundle.dtype.decoder_model_merged}`;
@@ -105,7 +113,7 @@ async function boot() {
     await cyclePhoto("manual");
   } catch (error) {
     modelPill.textContent = "模型載入失敗";
-    setStatus(error instanceof Error ? error.message : "模型載入失敗");
+    setStatus(friendlyOrtError(error));
   }
 }
 

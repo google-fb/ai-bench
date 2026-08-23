@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@huggingface/transformers": "4.2.0",
-    "onnxruntime-web": "1.27.0"
+    "onnxruntime-web": "1.30.0-dev.20260821-a88c1168ca"
   },
   "overrides": {
-    "onnxruntime-web": "1.27.0"
+    "onnxruntime-web": "1.30.0-dev.20260821-a88c1168ca"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",

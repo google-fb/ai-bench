@@ -25,24 +25,47 @@ export type ModelBundle = {
   dtype: DtypeMap;
 };
 
-export async function detectWebGpu(): Promise<boolean> {
+export type WebGpuInfo = {
+  available: boolean;
+  workgroupStorage: number;
+  shaderF16: boolean;
+};
+
+export async function probeWebGpu(): Promise<WebGpuInfo> {
   if (!navigator.gpu) {
-    return false;
+    return { available: false, workgroupStorage: 0, shaderF16: false };
   }
   const adapter =
     (await navigator.gpu.requestAdapter()) ??
     (await navigator.gpu.requestAdapter({ forceFallbackAdapter: true }));
-  return Boolean(adapter);
+  if (!adapter) {
+    return { available: false, workgroupStorage: 0, shaderF16: false };
+  }
+  return {
+    available: true,
+    workgroupStorage: adapter.limits.maxComputeWorkgroupStorageSize,
+    shaderF16: adapter.features.has("shader-f16"),
+  };
+}
+
+export async function detectWebGpu(): Promise<boolean> {
+  return (await probeWebGpu()).available;
+}
+
+export function friendlyOrtError(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+  if (/workgroup storage|GroupQueryAttention/i.test(message)) {
+    return (
+      "這支手機的 WebGPU 工作組記憶體不夠跑 Qwen3.5 的注意力核" +
+      "（shader 要 64KB，裝置上限多半是 32KB）。已改用較新的 ONNX Runtime 縮小 tile；" +
+      "請強制重新整理再試。若還是失敗，請改用電腦 Chrome 或較新的旗艦機。"
+    );
+  }
+  return message;
 }
 
 async function hasShaderF16(): Promise<boolean> {
-  if (!navigator.gpu) {
-    return false;
-  }
-  const adapter =
-    (await navigator.gpu.requestAdapter()) ??
-    (await navigator.gpu.requestAdapter({ forceFallbackAdapter: true }));
-  return Boolean(adapter?.features.has("shader-f16"));
+  return (await probeWebGpu()).shaderF16;
 }
 
 function maxNewTokens(): number {
