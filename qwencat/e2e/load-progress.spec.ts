@@ -35,9 +35,9 @@ test("real model load shows a live progress bar before weights finish", async ({
 
   await expect
     .poll(async () => {
-      const percent = (await page.getByTestId("load-progress-pct").textContent())?.trim() ?? "";
       const detail = (await page.getByTestId("load-progress-detail").innerText()) ?? "";
-      return /^\d+%$/.test(percent) || /\d+(\.\d+)? MB/.test(detail);
+      const percent = (await page.getByTestId("load-progress-pct").textContent())?.trim() ?? "";
+      return /\d+(\.\d+)? MB/.test(detail) && (percent === "" || /^\d+%$/.test(percent));
     }, { timeout: 120_000 })
     .toBeTruthy();
 

@@ -51,9 +51,12 @@ function percentFrom(loaded: number, total: number, reported?: number): number |
   return null;
 }
 
+const WEIGHTS_PERCENT_MIN_BYTES = 10 * 1024 * 1024;
+
 export function createLoadProgressTracker(onProgress: (progress: LoadProgress) => void) {
   const files = new Map<string, { loaded: number; total: number }>();
   let stage: LoadStage = "prepare";
+  let sawAggregateTotal = false;
 
   function totals() {
     let loaded = 0;
@@ -107,10 +110,18 @@ export function createLoadProgressTracker(onProgress: (progress: LoadProgress) =
       return;
     }
 
-    const percent =
-      opts.percent !== undefined ? opts.percent : percentFrom(loaded, total);
+    const canShowPercent = sawAggregateTotal || total >= WEIGHTS_PERCENT_MIN_BYTES;
+    const percent = canShowPercent
+      ? opts.percent !== undefined
+        ? opts.percent
+        : percentFrom(loaded, total)
+      : null;
     const weightsComplete =
-      percent !== null && percent >= 100 && total > 0 && loaded >= total;
+      canShowPercent &&
+      percent !== null &&
+      percent >= 100 &&
+      total > 0 &&
+      loaded >= total;
     emit({
       phase: weightsComplete ? "compile" : "download",
       percent: weightsComplete ? 100 : percent,
@@ -121,7 +132,7 @@ export function createLoadProgressTracker(onProgress: (progress: LoadProgress) =
           : percent !== null
             ? `下載模型權重 ${percent}%`
             : "正在下載模型權重…"),
-      detail: file ? `${size} · ${file}` : size,
+      detail: file ? `${size} · ${file}` : `${size}。還在收集完整權重清單。`,
       loadedBytes: loaded,
       totalBytes: total,
       file,
@@ -132,6 +143,7 @@ export function createLoadProgressTracker(onProgress: (progress: LoadProgress) =
     const file = info.file;
 
     if (info.status === "progress_total") {
+      sawAggregateTotal = true;
       if (info.files) {
         for (const [name, part] of Object.entries(info.files)) {
           files.set(name, { loaded: part.loaded, total: part.total });
@@ -185,6 +197,7 @@ export function createLoadProgressTracker(onProgress: (progress: LoadProgress) =
 
   function beginStage(next: "processor" | "weights", label?: string) {
     files.clear();
+    sawAggregateTotal = false;
     stage = next;
     emit({
       phase: "download",

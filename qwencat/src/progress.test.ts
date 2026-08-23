@@ -52,21 +52,21 @@ test("per-file progress aggregates when totals are known", () => {
   tracker.handleHub({
     status: "progress",
     file: "onnx/a.onnx",
-    loaded: 50,
-    total: 100,
+    loaded: 50 * 1024 * 1024,
+    total: 100 * 1024 * 1024,
   });
   tracker.handleHub({
     status: "progress",
     file: "onnx/b.onnx",
-    loaded: 25,
-    total: 100,
+    loaded: 25 * 1024 * 1024,
+    total: 100 * 1024 * 1024,
   });
 
   const last = seen.at(-1);
   assert.ok(last);
   assert.equal(last.percent, 38);
-  assert.equal(last.loadedBytes, 75);
-  assert.equal(last.totalBytes, 200);
+  assert.equal(last.loadedBytes, 75 * 1024 * 1024);
+  assert.equal(last.totalBytes, 200 * 1024 * 1024);
   assert.equal(last.file, "b.onnx");
 });
 
@@ -96,6 +96,23 @@ test("unknown totals stay indeterminate", () => {
   tracker.setPrepare();
   assert.equal(seen.at(-1)?.percent, null);
   assert.equal(seen.at(-1)?.phase, "download");
+});
+
+test("tiny weight-stage files do not show 100% before ONNX totals arrive", () => {
+  const seen: LoadProgress[] = [];
+  const tracker = createLoadProgressTracker((progress) => seen.push(progress));
+  tracker.beginStage("weights");
+  tracker.handleHub({
+    status: "done",
+    file: "config.json",
+    loaded: 2800,
+    total: 2800,
+  });
+  const last = seen.at(-1);
+  assert.ok(last);
+  assert.equal(last.percent, null);
+  assert.equal(last.phase, "download");
+  assert.match(last.detail, /收集完整權重清單|config\.json/);
 });
 
 test("processor files never report 100% as if the whole model finished", () => {
