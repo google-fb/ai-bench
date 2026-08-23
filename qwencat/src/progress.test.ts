@@ -21,6 +21,7 @@ test("shortFileName keeps the leaf onnx path", () => {
 test("progress_total drives a determinate overall percent", () => {
   const seen: LoadProgress[] = [];
   const tracker = createLoadProgressTracker((progress) => seen.push(progress));
+  tracker.beginStage("weights");
 
   tracker.handleHub({
     status: "progress_total",
@@ -37,6 +38,7 @@ test("progress_total drives a determinate overall percent", () => {
   const last = seen.at(-1);
   assert.ok(last);
   assert.equal(last.phase, "download");
+  assert.equal(last.stage, "weights");
   assert.equal(last.percent, 42);
   assert.match(last.label, /42%/);
   assert.match(last.detail, /256\.0 MB \/ 605\.0 MB/);
@@ -45,6 +47,7 @@ test("progress_total drives a determinate overall percent", () => {
 test("per-file progress aggregates when totals are known", () => {
   const seen: LoadProgress[] = [];
   const tracker = createLoadProgressTracker((progress) => seen.push(progress));
+  tracker.beginStage("weights");
 
   tracker.handleHub({
     status: "progress",
@@ -70,6 +73,7 @@ test("per-file progress aggregates when totals are known", () => {
 test("100% download switches to compile so the bar does not look stuck", () => {
   const seen: LoadProgress[] = [];
   const tracker = createLoadProgressTracker((progress) => seen.push(progress));
+  tracker.beginStage("weights");
 
   tracker.handleHub({
     status: "progress_total",
@@ -92,4 +96,22 @@ test("unknown totals stay indeterminate", () => {
   tracker.setPrepare();
   assert.equal(seen.at(-1)?.percent, null);
   assert.equal(seen.at(-1)?.phase, "download");
+});
+
+test("processor files never report 100% as if the whole model finished", () => {
+  const seen: LoadProgress[] = [];
+  const tracker = createLoadProgressTracker((progress) => seen.push(progress));
+  tracker.beginStage("processor");
+  tracker.handleHub({
+    status: "done",
+    file: "preprocessor_config.json",
+    loaded: 336,
+    total: 336,
+  });
+  const last = seen.at(-1);
+  assert.ok(last);
+  assert.equal(last.stage, "processor");
+  assert.equal(last.phase, "download");
+  assert.equal(last.percent, null);
+  assert.match(last.detail, /權重還在後面/);
 });

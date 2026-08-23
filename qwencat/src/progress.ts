@@ -1,7 +1,9 @@
 export type LoadPhase = "idle" | "download" | "compile" | "done" | "error";
+export type LoadStage = "prepare" | "processor" | "weights" | "compile";
 
 export type LoadProgress = {
   phase: LoadPhase;
+  stage: LoadStage;
   percent: number | null;
   label: string;
   detail: string;
@@ -51,6 +53,7 @@ function percentFrom(loaded: number, total: number, reported?: number): number |
 
 export function createLoadProgressTracker(onProgress: (progress: LoadProgress) => void) {
   const files = new Map<string, { loaded: number; total: number }>();
+  let stage: LoadStage = "prepare";
 
   function totals() {
     let loaded = 0;
@@ -67,8 +70,8 @@ export function createLoadProgressTracker(onProgress: (progress: LoadProgress) =
     return { loaded, total, unknown };
   }
 
-  function emit(progress: LoadProgress) {
-    onProgress(progress);
+  function emit(progress: Omit<LoadProgress, "stage"> & { stage?: LoadStage }) {
+    onProgress({ ...progress, stage: progress.stage ?? stage });
   }
 
   function emitDownload(opts: {
@@ -81,8 +84,6 @@ export function createLoadProgressTracker(onProgress: (progress: LoadProgress) =
     const summed = totals();
     const loaded = opts.loaded ?? summed.loaded;
     const total = opts.total ?? summed.total;
-    const percent =
-      opts.percent !== undefined ? opts.percent : percentFrom(loaded, total);
     const file = opts.file ? shortFileName(opts.file) : undefined;
     const size =
       total > 0
@@ -90,17 +91,36 @@ export function createLoadProgressTracker(onProgress: (progress: LoadProgress) =
         : loaded > 0
           ? `已下載 ${formatDataSize(loaded)}`
           : "正在向 Hugging Face 查檔案大小";
-    const complete = percent !== null && percent >= 100 && total > 0 && loaded >= total;
+
+    if (stage === "processor") {
+      emit({
+        phase: "download",
+        percent: null,
+        label: opts.label ?? "正在下載 tokenizer / processor…",
+        detail: file
+          ? `${file} · ${size}。這段只有小檔，600–700 MB 權重還在後面。`
+          : "先下載設定檔與 tokenizer，主權重還在後面。",
+        loadedBytes: loaded,
+        totalBytes: total,
+        file,
+      });
+      return;
+    }
+
+    const percent =
+      opts.percent !== undefined ? opts.percent : percentFrom(loaded, total);
+    const weightsComplete =
+      percent !== null && percent >= 100 && total > 0 && loaded >= total;
     emit({
-      phase: complete ? "compile" : "download",
-      percent: complete ? 100 : percent,
+      phase: weightsComplete ? "compile" : "download",
+      percent: weightsComplete ? 100 : percent,
       label:
         opts.label ??
-        (complete
+        (weightsComplete
           ? "下載完成，正在編譯 WebGPU session…"
           : percent !== null
-            ? `下載模型 ${percent}%`
-            : "正在下載模型…"),
+            ? `下載模型權重 ${percent}%`
+            : "正在下載模型權重…"),
       detail: file ? `${size} · ${file}` : size,
       loadedBytes: loaded,
       totalBytes: total,
@@ -158,12 +178,33 @@ export function createLoadProgressTracker(onProgress: (progress: LoadProgress) =
       return;
     }
 
-    if (info.status === "ready") {
+    if (info.status === "ready" && stage === "weights") {
       setCompile();
     }
   }
 
+  function beginStage(next: "processor" | "weights", label?: string) {
+    files.clear();
+    stage = next;
+    emit({
+      phase: "download",
+      percent: null,
+      label:
+        label ??
+        (next === "processor"
+          ? "正在下載 tokenizer / processor…"
+          : "正在下載模型權重…"),
+      detail:
+        next === "processor"
+          ? "先下載設定檔與 tokenizer。主權重約 600–700 MB，會在下一步顯示百分比。"
+          : "正在向 Hugging Face 查 ONNX 檔案大小，百分比以這一批權重為準。",
+      loadedBytes: 0,
+      totalBytes: 0,
+    });
+  }
+
   function setPrepare(label = "正在準備下載清單…") {
+    stage = "prepare";
     emit({
       phase: "download",
       percent: null,
@@ -175,6 +216,7 @@ export function createLoadProgressTracker(onProgress: (progress: LoadProgress) =
   }
 
   function setCompile(label = "正在編譯 WebGPU session…") {
+    stage = "compile";
     const { loaded, total } = totals();
     emit({
       phase: "compile",
@@ -210,5 +252,5 @@ export function createLoadProgressTracker(onProgress: (progress: LoadProgress) =
     });
   }
 
-  return { handleHub, setPrepare, setCompile, setDone, setError };
+  return { handleHub, beginStage, setPrepare, setCompile, setDone, setError };
 }

@@ -21,26 +21,38 @@ test("real model load shows a live progress bar before weights finish", async ({
   await expect(page.getByTestId("load-progress-fill")).toBeVisible();
 
   await expect
+    .poll(async () => bar.getAttribute("data-stage"), { timeout: 15_000 })
+    .toMatch(/processor|weights|compile/);
+
+  await page.screenshot({
+    path: "/opt/cursor/artifacts/qwencat_load_progress_processor.png",
+    fullPage: true,
+  });
+
+  await expect
     .poll(async () => {
-      const percent = (await page.getByTestId("load-progress-pct").textContent())?.trim() ?? "";
+      const stage = await bar.getAttribute("data-stage");
       const detail = (await page.getByTestId("load-progress-detail").textContent()) ?? "";
       const label = (await page.getByTestId("load-progress-label").textContent()) ?? "";
-      const indeterminate = await bar.evaluate((el) => el.classList.contains("is-indeterminate"));
+      const text = `${label} ${detail}`;
       return (
-        indeterminate ||
-        /^\d+%$/.test(percent) ||
-        /MB|KB|檔案|下載|編譯/.test(`${label} ${detail}`)
+        stage === "weights" ||
+        stage === "compile" ||
+        /MB/.test(text) ||
+        /權重/.test(text)
       );
-    }, { timeout: 60_000 })
+    }, { timeout: 90_000 })
     .toBeTruthy();
 
   const snapshot = {
+    stage: await bar.getAttribute("data-stage"),
     label: await page.getByTestId("load-progress-label").innerText(),
     percent: await page.getByTestId("load-progress-pct").innerText(),
     detail: await page.getByTestId("load-progress-detail").innerText(),
     indeterminate: await bar.evaluate((el) => el.classList.contains("is-indeterminate")),
   };
   console.log(`load-progress snapshot: ${JSON.stringify(snapshot)}`);
+  expect(snapshot.stage === "processor" && snapshot.percent === "100%").toBeFalsy();
 
   await page.screenshot({
     path: "/opt/cursor/artifacts/qwencat_load_progress.png",

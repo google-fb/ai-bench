@@ -41,10 +41,12 @@ function renderLoadProgress(progress: LoadProgress | null) {
   if (!progress || progress.phase === "idle" || progress.phase === "done" || progress.phase === "error") {
     loadProgressEl.hidden = true;
     loadProgressEl.classList.remove("is-indeterminate");
+    delete loadProgressEl.dataset.stage;
     return;
   }
 
   loadProgressEl.hidden = false;
+  loadProgressEl.dataset.stage = progress.stage;
   const indeterminate = progress.percent === null;
   loadProgressEl.classList.toggle("is-indeterminate", indeterminate);
   loadProgressLabel.textContent = progress.label;

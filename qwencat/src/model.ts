@@ -182,7 +182,7 @@ export async function loadModel(
   const tracker = createLoadProgressTracker(onProgress ?? (() => {}));
   const progressCallback = (event: HubProgressInfo) => tracker.handleHub(event);
 
-  tracker.setPrepare("正在載入 tokenizer / processor…");
+  tracker.beginStage("processor");
   onStatus("正在下載 tokenizer 與影像 processor…");
   const processor = await AutoProcessor.from_pretrained(MODEL_ID, {
     progress_callback: progressCallback,
@@ -196,7 +196,8 @@ export async function loadModel(
     onStatus(
       `ORT ${ortVersion} / 4-bit，正在載入 Qwen3.5 0.8B（embed=${dtype.embed_tokens} vision=${dtype.vision_encoder} decoder=${dtype.decoder_model_merged}）…`,
     );
-    tracker.setPrepare(
+    tracker.beginStage(
+      "weights",
       `正在下載權重（${dtype.embed_tokens}/${dtype.vision_encoder}/${dtype.decoder_model_merged}）…`,
     );
     try {
