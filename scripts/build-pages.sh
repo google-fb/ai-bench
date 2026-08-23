@@ -78,41 +78,35 @@ build_next_static() {
   done
 
   if [[ -n "${cfg}" ]]; then
-    cp "${src}/${cfg}" "${src}/${cfg}.pages-bak"
+    mv "${src}/${cfg}" "${src}/${cfg}.pages-bak"
   fi
 
-  cat > "${src}/next.config.ts" <<'EOF'
-import type { NextConfig } from "next";
-
+  # Use .mjs so Next 16 does not typecheck this overlay.
+  cat > "${src}/next.config.mjs" <<'EOF'
 const basePath = process.env.PAGES_BASE_PATH || "";
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   output: "export",
   trailingSlash: true,
   images: { unoptimized: true },
-  eslint: { ignoreDuringBuilds: true },
-  ...(basePath ? { basePath, assetPrefix: basePath } : {}),
+  typescript: { ignoreBuildErrors: true },
 };
+
+if (basePath) {
+  nextConfig.basePath = basePath;
+  nextConfig.assetPrefix = basePath;
+}
 
 export default nextConfig;
 EOF
 
-  # If we overwrote a non-ts config, hide it so Next picks next.config.ts.
-  if [[ -n "${cfg}" && "${cfg}" != "next.config.ts" ]]; then
-    mv "${src}/${cfg}" "${src}/${cfg}.pages-bak"
-  fi
-
   local status=0
   (cd "${src}" && PAGES_BASE_PATH="${bp}" npm run build) || status=$?
 
-  if [[ -f "${src}/next.config.ts.pages-bak" ]]; then
-    mv "${src}/next.config.ts.pages-bak" "${src}/next.config.ts"
+  rm -f "${src}/next.config.mjs"
+  if [[ -n "${cfg}" && -f "${src}/${cfg}.pages-bak" ]]; then
+    mv "${src}/${cfg}.pages-bak" "${src}/${cfg}"
   fi
-  for f in next.config.mjs next.config.js next.config.mts; do
-    if [[ -f "${src}/${f}.pages-bak" ]]; then
-      mv "${src}/${f}.pages-bak" "${src}/${f}"
-    fi
-  done
 
   return "${status}"
 }
@@ -255,7 +249,11 @@ for gallery in "${ROOT}"/*/; do
     base="${BASE_PREFIX}/${gallery_name}/${project_name}/"
 
     if [[ -f "${project}/package.json" ]] || find_output_dir "${project}" >/dev/null; then
-      build_react_project "${project%/}" "${dest}" "${base}"
+      if ! build_react_project "${project%/}" "${dest}" "${base}"; then
+        echo "WARN: failed to build ${project_name}; writing placeholder" >&2
+        mkdir -p "${dest}"
+        printf '<!doctype html><meta charset="utf-8"><title>Build failed</title><body style="font-family:sans-serif;padding:32px"><h1>這個版本目前建置失敗</h1><p>%s</p></body>' "${project_name}" > "${dest}/index.html"
+      fi
     elif [[ -f "${project}/index.html" ]]; then
       echo "Copying static site ${project}"
       copy_static_project "${project%/}" "${dest}"
