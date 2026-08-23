@@ -33,6 +33,14 @@ test("real model load shows a live progress bar before weights finish", async ({
     .poll(async () => bar.getAttribute("data-stage"), { timeout: 90_000 })
     .toMatch(/weights|compile/);
 
+  await expect
+    .poll(async () => {
+      const percent = (await page.getByTestId("load-progress-pct").textContent())?.trim() ?? "";
+      const detail = (await page.getByTestId("load-progress-detail").innerText()) ?? "";
+      return /^\d+%$/.test(percent) || /\d+(\.\d+)? MB/.test(detail);
+    }, { timeout: 120_000 })
+    .toBeTruthy();
+
   const snapshot = {
     stage: await bar.getAttribute("data-stage"),
     label: await page.getByTestId("load-progress-label").innerText(),
