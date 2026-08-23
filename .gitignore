@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+out/
+_site/
+.DS_Store
+*.log
+.env
+.env.*
+.vite
+.cache
+coverage/
+*.local
