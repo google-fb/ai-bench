@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SITE="${ROOT}/_site"
-SKIP_DIRS='^(\.git|\.github|\.cursor|scripts|node_modules|_site|dist|build|out)$'
+SKIP_DIRS='^(\.git|\.github|\.cursor|scripts|node_modules|_site|dist|build|out|\.next)$'
 
 if [[ -n "${GITHUB_REPOSITORY:-}" ]]; then
   REPO_NAME="${GITHUB_REPOSITORY##*/}"
@@ -63,6 +63,60 @@ find_output_dir() {
   return 1
 }
 
+build_next_static() {
+  local src="$1"
+  local base="$2"
+  local bp="${base%/}"
+  local cfg=""
+  local f
+
+  for f in next.config.ts next.config.mjs next.config.js next.config.mts; do
+    if [[ -f "${src}/${f}" ]]; then
+      cfg="${f}"
+      break
+    fi
+  done
+
+  if [[ -n "${cfg}" ]]; then
+    cp "${src}/${cfg}" "${src}/${cfg}.pages-bak"
+  fi
+
+  cat > "${src}/next.config.ts" <<'EOF'
+import type { NextConfig } from "next";
+
+const basePath = process.env.PAGES_BASE_PATH || "";
+
+const nextConfig: NextConfig = {
+  output: "export",
+  trailingSlash: true,
+  images: { unoptimized: true },
+  eslint: { ignoreDuringBuilds: true },
+  ...(basePath ? { basePath, assetPrefix: basePath } : {}),
+};
+
+export default nextConfig;
+EOF
+
+  # If we overwrote a non-ts config, hide it so Next picks next.config.ts.
+  if [[ -n "${cfg}" && "${cfg}" != "next.config.ts" ]]; then
+    mv "${src}/${cfg}" "${src}/${cfg}.pages-bak"
+  fi
+
+  local status=0
+  (cd "${src}" && PAGES_BASE_PATH="${bp}" npm run build) || status=$?
+
+  if [[ -f "${src}/next.config.ts.pages-bak" ]]; then
+    mv "${src}/next.config.ts.pages-bak" "${src}/next.config.ts"
+  fi
+  for f in next.config.mjs next.config.js next.config.mts; do
+    if [[ -f "${src}/${f}.pages-bak" ]]; then
+      mv "${src}/${f}.pages-bak" "${src}/${f}"
+    fi
+  done
+
+  return "${status}"
+}
+
 build_react_project() {
   local src="$1"
   local dest="$2"
@@ -83,12 +137,12 @@ build_react_project() {
   echo "Building ${src} with base ${base}"
   install_deps "${src}"
 
-  if grep -q '"vite"' "${src}/package.json"; then
+  if grep -q '"next"' "${src}/package.json" && compgen -G "${src}/next.config.*" > /dev/null; then
+    build_next_static "${src}" "${base}"
+  elif grep -q '"vite"' "${src}/package.json"; then
     (cd "${src}" && npx vite build --base "${base}")
   elif grep -q '"react-scripts"' "${src}/package.json"; then
     (cd "${src}" && PUBLIC_URL="${base%/}" npm run build)
-  elif grep -q '"next"' "${src}/package.json"; then
-    (cd "${src}" && npm run build)
   else
     (cd "${src}" && npm run build)
   fi
