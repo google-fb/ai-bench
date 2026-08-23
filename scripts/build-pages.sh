@@ -101,7 +101,10 @@ export default nextConfig;
 EOF
 
   local status=0
-  (cd "${src}" && PAGES_BASE_PATH="${bp}" npm run build) || status=$?
+  if ! (cd "${src}" && PAGES_BASE_PATH="${bp}" npm run build); then
+    echo "Turbopack build failed for ${src}; retrying with webpack" >&2
+    (cd "${src}" && PAGES_BASE_PATH="${bp}" npx next build --webpack) || status=$?
+  fi
 
   rm -f "${src}/next.config.mjs"
   if [[ -n "${cfg}" && -f "${src}/${cfg}.pages-bak" ]]; then
