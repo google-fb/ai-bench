@@ -88,11 +88,19 @@ async function cyclePhoto(reason: "timer" | "manual") {
 }
 
 async function boot() {
+  if (new URLSearchParams(window.location.search).has("skipModel")) {
+    devicePill.textContent = "略過模型";
+    modelPill.textContent = "未載入 · 測抓圖";
+    setStatus("略過模型載入，只測 Cat API / CORS proxy。");
+    await cyclePhoto("manual");
+    return;
+  }
+
   const hasGpu = await detectWebGpu();
   devicePill.textContent = hasGpu ? "WebGPU 可用" : "WebGPU 不可用 · WASM";
   try {
     bundle = await loadModel(setStatus);
-    modelPill.textContent = `Qwen3.5 0.8B · ${bundle.device} · vision ${bundle.dtype.vision_encoder}`;
+    modelPill.textContent = `Qwen3.5 0.8B · ${bundle.device} · ${bundle.dtype.embed_tokens}/${bundle.dtype.vision_encoder}/${bundle.dtype.decoder_model_merged}`;
     setStatus("模型就緒，開始抓第一張貓。");
     await cyclePhoto("manual");
   } catch (error) {

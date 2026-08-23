@@ -13,9 +13,9 @@ const PROMPT =
   "用繁體中文寫 2 到 4 句圖片摘要：描述這隻貓的毛色、姿勢、表情與背景。不要列點。";
 
 type DtypeMap = {
-  embed_tokens: "q4" | "q8" | "fp32";
-  vision_encoder: "fp16" | "q8" | "fp32";
-  decoder_model_merged: "q4" | "q8";
+  embed_tokens: "q4" | "q4f16" | "q8" | "fp32";
+  vision_encoder: "q4" | "q4f16" | "q8" | "fp16" | "fp32";
+  decoder_model_merged: "q4" | "q4f16" | "q8";
 };
 
 export type ModelBundle = {
@@ -55,22 +55,23 @@ function maxNewTokens(): number {
 
 function dtypeTries(fp16: boolean): DtypeMap[] {
   const tries: DtypeMap[] = [];
+  // Official ONNX repo has no FP4/q2. Smallest published packs are q4f16 / q4.
   if (fp16) {
     tries.push({
-      embed_tokens: "q4",
-      vision_encoder: "fp16",
-      decoder_model_merged: "q4",
+      embed_tokens: "q4f16",
+      vision_encoder: "q4f16",
+      decoder_model_merged: "q4f16",
     });
   }
   tries.push(
     {
       embed_tokens: "q4",
-      vision_encoder: "q8",
+      vision_encoder: "q4",
       decoder_model_merged: "q4",
     },
     {
       embed_tokens: "q4",
-      vision_encoder: "fp32",
+      vision_encoder: "q8",
       decoder_model_merged: "q4",
     },
   );
@@ -97,7 +98,7 @@ export async function loadModel(
 
   for (const dtype of dtypeTries(fp16)) {
     onStatus(
-      `ORT ${ortVersion} / WebGPU${fp16 ? " + fp16" : ""}，正在載入 Qwen3.5 0.8B（vision=${dtype.vision_encoder}）…`,
+      `ORT ${ortVersion} / 4-bit，正在載入 Qwen3.5 0.8B（embed=${dtype.embed_tokens} vision=${dtype.vision_encoder} decoder=${dtype.decoder_model_merged}）…`,
     );
     try {
       const model = await Qwen3_5ForConditionalGeneration.from_pretrained(MODEL_ID, {
