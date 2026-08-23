@@ -10,7 +10,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@huggingface/transformers": "next",
+    "@huggingface/transformers": "4.2.0",
     "onnxruntime-web": "1.27.0"
   },
   "overrides": {

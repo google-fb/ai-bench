@@ -52,7 +52,14 @@ test("loads Qwen3.5 0.8B and summarizes a cat photo", async ({ page }, testInfo)
     .toBeGreaterThan(32);
 
   const summary = page.getByTestId("summary-text");
-  await expect(summary).toHaveAttribute("data-state", "done", { timeout: 12 * 60 * 1000 });
+  await expect
+    .poll(async () => summary.getAttribute("data-state"), { timeout: 12 * 60 * 1000 })
+    .toMatch(/done|error/);
+  if ((await summary.getAttribute("data-state")) === "error") {
+    throw new Error(
+      `summarize failed: ${await page.getByTestId("summary-status").innerText()}\nconsole=${consoleErrors.join(" | ")}`,
+    );
+  }
 
   const text = (await summary.innerText()).trim();
   expect(text.length, `summary too short: ${text}`).toBeGreaterThan(12);
