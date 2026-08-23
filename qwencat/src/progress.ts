@@ -132,7 +132,11 @@ export function createLoadProgressTracker(onProgress: (progress: LoadProgress) =
           : percent !== null
             ? `下載模型權重 ${percent}%`
             : "正在下載模型權重…"),
-      detail: file ? `${size} · ${file}` : `${size}。還在收集完整權重清單。`,
+      detail: file
+        ? `${size} · ${file}`
+        : canShowPercent
+          ? size
+          : `${size}。還在收集完整權重清單。`,
       loadedBytes: loaded,
       totalBytes: total,
       file,
