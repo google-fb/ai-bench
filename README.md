@@ -16,6 +16,7 @@
 | 資料夾 | 說明 |
 | --- | --- |
 | [`artificialanalysis/`](artificialanalysis/) | 多個 agent 重製同一份 Artificial Analysis 網頁的結果 |
+| [`qwencat/`](qwencat/) | 瀏覽器 WebGPU 跑 Qwen3.5 0.8B，定時抓貓圖並做摘要 |
 
 每個子專案會對應一個網址：
 

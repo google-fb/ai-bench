@@ -13,3 +13,5 @@ _site/
 .cache
 coverage/
 *.local
+playwright-report/
+test-results/
