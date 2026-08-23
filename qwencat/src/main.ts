@@ -1,5 +1,14 @@
 import { fetchCatPhoto, type CatPhoto } from "./cats";
-import { detectWebGpu, loadModel, summarizeCat, type ModelBundle } from "./model";
+import {
+  MIN_GQA_WORKGROUP_STORAGE,
+  formatBytes,
+  friendlyOrtError,
+  loadModel,
+  probeWebGpu,
+  qwenUnsupportedReason,
+  summarizeCat,
+  type ModelBundle,
+} from "./model";
 
 const imageEl = document.querySelector<HTMLImageElement>("#cat-image")!;
 const catCaptionEl = document.querySelector<HTMLElement>("#cat-caption")!;
@@ -56,7 +65,7 @@ async function describeCurrent() {
     setStatus("摘要完成。下一張照片到了會再看一次。");
   } catch (error) {
     summaryEl.dataset.state = "error";
-    setStatus(error instanceof Error ? error.message : "推理失敗");
+    setStatus(friendlyOrtError(error));
   }
 }
 
@@ -88,16 +97,37 @@ async function cyclePhoto(reason: "timer" | "manual") {
 }
 
 async function boot() {
-  const hasGpu = await detectWebGpu();
-  devicePill.textContent = hasGpu ? "WebGPU 可用" : "WebGPU 不可用 · WASM";
+  if (new URLSearchParams(window.location.search).has("skipModel")) {
+    devicePill.textContent = "略過模型";
+    modelPill.textContent = "未載入 · 測抓圖";
+    setStatus("略過模型載入，只測 Cat API / CORS proxy。");
+    await cyclePhoto("manual");
+    return;
+  }
+
+  const gpu = await probeWebGpu();
+  devicePill.textContent = gpu.available
+    ? `WebGPU · 上限 ${formatBytes(gpu.workgroupStorage)}`
+    : "沒有 WebGPU";
+
+  const blocked = qwenUnsupportedReason(gpu);
+  if (blocked) {
+    modelPill.textContent = "此裝置不支援";
+    summaryEl.dataset.state = "unsupported";
+    setStatus(blocked);
+    return;
+  }
+
   try {
-    bundle = await loadModel(setStatus);
-    modelPill.textContent = `Qwen3.5 0.8B · ${bundle.device} · vision ${bundle.dtype.vision_encoder}`;
-    setStatus("模型就緒，開始抓第一張貓。");
+    bundle = await loadModel(setStatus, gpu);
+    modelPill.textContent = `Qwen3.5 0.8B · ${bundle.device} · ${bundle.dtype.embed_tokens}/${bundle.dtype.vision_encoder}/${bundle.dtype.decoder_model_merged}`;
+    setStatus(
+      `模型就緒（裝置上限 ${formatBytes(gpu.workgroupStorage)}，門檻 ${formatBytes(MIN_GQA_WORKGROUP_STORAGE)}）。開始抓第一張貓。`,
+    );
     await cyclePhoto("manual");
   } catch (error) {
     modelPill.textContent = "模型載入失敗";
-    setStatus(error instanceof Error ? error.message : "模型載入失敗");
+    setStatus(friendlyOrtError(error));
   }
 }
 

@@ -8,12 +8,36 @@ export type CatPhoto = {
 const CAT_API = "https://api.thecatapi.com/v1/images/search?limit=1";
 const CATAAS = "https://cataas.com/cat?json=true";
 
+export function corsProxyUrls(url: string): string[] {
+  const noScheme = url.replace(/^https?:\/\//, "");
+  return [
+    url,
+    `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=jpg`,
+    `https://images.weserv.nl/?url=${encodeURIComponent(noScheme)}`,
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  ];
+}
+
 async function blobFromUrl(url: string): Promise<Blob> {
-  const response = await fetch(url, { cache: "no-store" });
-  if (!response.ok) {
-    throw new Error(`下載圖片失敗：${response.status}`);
+  const errors: string[] = [];
+  for (const candidate of corsProxyUrls(url)) {
+    try {
+      const response = await fetch(candidate, { cache: "no-store" });
+      if (!response.ok) {
+        errors.push(`${candidate} → ${response.status}`);
+        continue;
+      }
+      const blob = await response.blob();
+      if (blob.size < 32) {
+        errors.push(`${candidate} → empty`);
+        continue;
+      }
+      return blob;
+    } catch (error) {
+      errors.push(`${candidate} → ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
-  return response.blob();
+  throw new Error(`下載圖片失敗（含 CORS proxy）：${errors[0] ?? url}`);
 }
 
 async function fromTheCatApi(): Promise<CatPhoto> {
