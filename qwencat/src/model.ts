@@ -1,4 +1,3 @@
-import "./ort-setup";
 import {
   AutoProcessor,
   Qwen3_5ForConditionalGeneration,

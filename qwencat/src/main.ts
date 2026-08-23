@@ -1,4 +1,3 @@
-import "./ort-setup";
 import { fetchCatPhoto, type CatPhoto } from "./cats";
 import { detectWebGpu, loadModel, summarizeCat, type ModelBundle } from "./model";
 
