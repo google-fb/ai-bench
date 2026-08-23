@@ -1,0 +1,2 @@
+/goal 這個網站有很多ai測試的bench mark我需要你建立一個wiki html網頁介紹 翻譯成繁體中文 讓高中生能夠理解ai bench mark項目 分數意義 測試集是什麼 怎麼測試 方法是什麼都能介紹讓學生理解 
+https://artificialanalysis.ai/evaluations

@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+out/
+_site/
+.next/
+*.pages-bak
+.DS_Store
+*.log
+.env
+.env.*
+.vite
+.cache
+coverage/
+*.local
