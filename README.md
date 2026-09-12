@@ -17,6 +17,7 @@
 | --- | --- |
 | [`artificialanalysis/`](artificialanalysis/) | 多個 agent 重製同一份 Artificial Analysis 網頁的結果 |
 | [`qwencat/`](qwencat/) | 瀏覽器 WebGPU 跑 Qwen3.5 0.8B，定時抓貓圖並做摘要 |
+| [`med-summer-2026/`](med-summer-2026/) | 2026 年 7–8 月疫苗與重大醫療筆記，中英對照、可互動細胞畫布 |
 
 每個子專案會對應一個網址：
 
