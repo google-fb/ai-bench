@@ -421,6 +421,7 @@ select:focus-visible,
 
 .lab {
   margin: 36px 0 28px;
+  scroll-margin-top: 84px;
   border: 1px solid var(--line);
   background: var(--lab);
   color: var(--lab-ink);
@@ -486,13 +487,23 @@ select:focus-visible,
 
 .lab-steps li {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px;
+  align-items: flex-start;
+  gap: 8px;
   padding: 6px 10px;
   border: 1px solid #333;
   font-size: 0.78rem;
   color: #cfcfcf;
+}
+
+.lab-step-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+:root[data-lang="both"] .lab-steps [lang="en"] {
+  color: #8f8f8f;
+  font-size: 0.7rem;
 }
 
 .lab-steps li .n {

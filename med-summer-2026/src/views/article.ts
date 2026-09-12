@@ -85,8 +85,10 @@ export function renderArticle(slug: string): string {
               (step, i) => `
             <li data-step="${step.id}" class="${i === 0 ? "is-current" : ""}">
               <span class="n">${i + 1}</span>
-              <span lang="zh">${step.title.zh}</span>
-              <span lang="en">${step.title.en}</span>
+              <span class="lab-step-copy">
+                <span lang="zh">${step.title.zh}</span>
+                <span lang="en">${step.title.en}</span>
+              </span>
             </li>`,
             )
             .join("")}
