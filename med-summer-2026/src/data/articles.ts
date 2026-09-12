@@ -86,10 +86,25 @@ export const articles: Article[] = [
     lab: {
       kind: "mrna-cell",
       title: { zh: "把說明書推進細胞", en: "Slide the memo into the cell" },
-      hint: {
-        zh: "拖曳左邊的 mRNA 便條，放進細胞質。再點細胞核、核糖體、HA 帽子。",
-        en: "Drag the mRNA slip into the cytoplasm. Then tap the nucleus, ribosome, and HA hat.",
+      lesson: {
+        zh: "mRNA 疫苗是一張臨時便條。核糖體照著做蛋白，它不會改細胞核裡的 DNA。",
+        en: "An mRNA vaccine is a temporary slip. Ribosomes build the protein. It does not edit DNA in the nucleus.",
       },
+      how: {
+        zh: "先把左邊便條拖進虛線圈。再依序點核糖體、HA 帽子、細胞核、免疫細胞。畫面上會寫「拖我／點我」。",
+        en: "Drag the slip into the dashed ring. Then tap the ribosome, HA hat, nucleus, and immune cell. Follow the “Drag me / Tap me” tags.",
+      },
+      hint: {
+        zh: "下一步：把 mRNA 便條拖進細胞質的虛線圈。",
+        en: "Next: drag the mRNA slip into the dashed ring inside the cell.",
+      },
+      steps: [
+        { id: "deliver", title: { zh: "送進便條", en: "Deliver the slip" }, how: { zh: "按住左邊 mRNA，拖進細胞裡的虛線圈再放開。", en: "Hold the left mRNA slip, drop it on the dashed ring, then release." } },
+        { id: "ribosome", title: { zh: "看工廠開工", en: "Start the factory" }, how: { zh: "點核糖體。氨基酸會一顆顆接起來。", en: "Tap the ribosome. Amino-acid beads start to chain." } },
+        { id: "ha", title: { zh: "認 HA 帽子", en: "Meet the HA hat" }, how: { zh: "點做出來的 HA 帽子，那是免疫系統要記的臉。", en: "Tap the new HA hat — the face the immune system remembers." } },
+        { id: "nucleus", title: { zh: "確認沒改 DNA", en: "Check the DNA" }, how: { zh: "點細胞核。便條不進圖書館，也不改書。", en: "Tap the nucleus. The slip never enters the library or edits the books." } },
+        { id: "immune", title: { zh: "交給巡警", en: "Show the patrol" }, how: { zh: "點左邊出現的免疫細胞。它靠這頂帽子認流感。", en: "Tap the immune cell that appears. It uses the hat as a wanted face." } },
+      ],
       hotspots: [
         {
           id: "nucleus",
@@ -103,8 +118,8 @@ export const articles: Article[] = [
           id: "mrna",
           label: { zh: "mRNA 便條", en: "mRNA slip" },
           body: {
-            zh: "一張臨時說明書，告訴工廠要做哪種蛋白。",
-            en: "A temporary instruction telling the factory which protein to build.",
+            zh: "一張臨時說明書，告訴工廠要做哪種蛋白。用完會被拆掉。",
+            en: "A temporary instruction telling the factory which protein to build. It gets shredded.",
           },
         },
         {
@@ -121,6 +136,14 @@ export const articles: Article[] = [
           body: {
             zh: "流感病毒用來抓住細胞的表面蛋白。免疫系統靠它認臉。",
             en: "The surface protein flu uses to grab cells. The immune system uses it as a face.",
+          },
+        },
+        {
+          id: "immune",
+          label: { zh: "免疫細胞", en: "Immune cell" },
+          body: {
+            zh: "看到這頂練習用的帽子，以後真的流感來了比較認得出來。",
+            en: "After this practice hat, real flu is easier to recognize.",
           },
         },
       ],
@@ -207,10 +230,24 @@ export const articles: Article[] = [
     lab: {
       kind: "fingerprint",
       title: { zh: "掃描腫瘤指紋，印通緝令", en: "Scan the tumor, print the poster" },
-      hint: {
-        zh: "點腫瘤上的突變點，再點印表機。T 細胞會拿著通緝令去認人。",
-        en: "Tap the mutation dots on the tumor, then the printer. T cells pick up the poster.",
+      lesson: {
+        zh: "個人化癌症疫苗先讀你這顆腫瘤的突變指紋，再印通緝令給 T 細胞。",
+        en: "A personalized cancer vaccine reads this tumor’s mutation fingerprint, then prints a wanted poster for T cells.",
       },
+      how: {
+        zh: "點齊三個錯字 → 點印表機 → 把通緝令拖給 T 細胞 → 再點 T 細胞出擊。",
+        en: "Tap all three typos → tap the printer → drag the poster to the T cell → tap the T cell to hunt.",
+      },
+      hint: {
+        zh: "下一步：點腫瘤上的三個突變點（錯字 1、2、3）。",
+        en: "Next: tap the three mutation dots (typos 1, 2, 3).",
+      },
+      steps: [
+        { id: "scan", title: { zh: "讀三個錯字", en: "Read three typos" }, how: { zh: "分別點錯字 1、2、3。每個人的組合都不一樣。", en: "Tap typos 1, 2, and 3. Everyone’s set is different." } },
+        { id: "print", title: { zh: "印通緝令", en: "Print the poster" }, how: { zh: "點中間的 mRNA 印表機。", en: "Tap the mRNA printer in the middle." } },
+        { id: "arm", title: { zh: "交給 T 細胞", en: "Arm the T cell" }, how: { zh: "把印出來的通緝令拖到右邊 T 細胞上。", en: "Drag the printed poster onto the T cell." } },
+        { id: "hunt", title: { zh: "出擊認人", en: "Send it hunting" }, how: { zh: "點拿到通緝令的 T 細胞，看它走向腫瘤。", en: "Tap the armed T cell and watch it move toward the tumor." } },
+      ],
       hotspots: [
         {
           id: "tumor",
@@ -221,12 +258,32 @@ export const articles: Article[] = [
           },
         },
         {
+          id: "m1",
+          label: { zh: "錯字 1", en: "Typo 1" },
+          body: { zh: "一個突變做出來的怪蛋白，叫新抗原。", en: "A mutant protein — a neoantigen." },
+        },
+        {
+          id: "m2",
+          label: { zh: "錯字 2", en: "Typo 2" },
+          body: { zh: "第二個可被 T 細胞認的標籤。", en: "A second tag T cells can learn." },
+        },
+        {
+          id: "m3",
+          label: { zh: "錯字 3", en: "Typo 3" },
+          body: { zh: "療法最多能選幾十個錯字寫進同一支 mRNA。", en: "The therapy can pack dozens of typos into one mRNA." },
+        },
+        {
           id: "print",
           label: { zh: "mRNA 印表機", en: "mRNA printer" },
           body: {
             zh: "把選出來的錯字印成客製便條。",
             en: "Prints the chosen typos onto a custom slip.",
           },
+        },
+        {
+          id: "poster",
+          label: { zh: "通緝令", en: "Wanted poster" },
+          body: { zh: "給 T 細胞看的臉孔清單，只適用這位病人。", en: "A face list for T cells, unique to this patient." },
         },
         {
           id: "tcell",
@@ -324,10 +381,24 @@ export const articles: Article[] = [
     lab: {
       kind: "lock-key",
       title: { zh: "幫鑰匙換齒", en: "Recut the key" },
-      hint: {
-        zh: "拖曳新的 XFG 鑰匙去對 ACE2 鎖。舊鑰匙會對不準。",
-        en: "Drag the new XFG key onto the ACE2 lock. The old key misses.",
+      lesson: {
+        zh: "病毒換棘蛋白，疫苗就要換鑰匙齒，才對得上細胞上的 ACE2 鎖。",
+        en: "When the virus changes its spike, the vaccine must recut the key so it still matches ACE2.",
       },
+      how: {
+        zh: "先點鎖。把舊鑰匙拖上去會顯示「齒不對」。再把右邊 XFG 新鑰匙拖上去。",
+        en: "Tap the lock first. The old key will fail. Then drag the XFG key onto the lock.",
+      },
+      hint: {
+        zh: "下一步：先點中間的 ACE2 鎖，搞懂病毒要開哪扇門。",
+        en: "Next: tap the ACE2 lock and see which door the virus wants.",
+      },
+      steps: [
+        { id: "lock", title: { zh: "認識這把鎖", en: "Meet the lock" }, how: { zh: "點 ACE2。那是呼吸道細胞門上的受體。", en: "Tap ACE2. It’s a receptor on airway-cell doors." } },
+        { id: "old", title: { zh: "試舊鑰匙", en: "Try the old key" }, how: { zh: "把左邊舊棘蛋白拖到鎖上。它會對不準。", en: "Drag last year’s spike onto the lock. It will miss." } },
+        { id: "neu", title: { zh: "換 XFG 齒", en: "Fit XFG" }, how: { zh: "把右邊 XFG 鑰匙拖到鎖上，看它對上。", en: "Drag the XFG key onto the lock and watch it fit." } },
+        { id: "shot", title: { zh: "對上今年的針", en: "This year’s shot" }, how: { zh: "點右下角出現的「今年的針」。", en: "Tap this year’s shot badge that appears." } },
+      ],
       hotspots: [
         {
           id: "oldkey",
@@ -351,6 +422,14 @@ export const articles: Article[] = [
           body: {
             zh: "許多呼吸道細胞門上的受體。病毒靠它進屋。",
             en: "A receptor on many airway cells. The virus uses it as a door.",
+          },
+        },
+        {
+          id: "shot",
+          label: { zh: "今年的針", en: "This year’s shot" },
+          body: {
+            zh: "2026–27 新冠針改成對 XFG。跟流感一樣，配方要跟著流行株走。",
+            en: "The 2026–27 COVID shot targets XFG. Like flu, the recipe follows the strain.",
           },
         },
       ],
@@ -437,10 +516,24 @@ export const articles: Article[] = [
     lab: {
       kind: "crispr-switch",
       title: { zh: "打開胎兒血紅素開關", en: "Flip the fetal-hemoglobin switch" },
-      hint: {
-        zh: "點 CRISPR 剪刀去剪 BCL11A。再點鐮刀血球，看它能不能變圓。",
-        en: "Tap the CRISPR scissors onto BCL11A. Then tap the sickle cell and watch it round out.",
+      lesson: {
+        zh: "Casgevy 不是去修壞掉的成人血紅素，而是剪掉 BCL11A 開關，讓胎兒血紅素重新上班。",
+        en: "Casgevy does not repair adult hemoglobin. It cuts the BCL11A switch so fetal hemoglobin can come back to work.",
       },
+      how: {
+        zh: "先點 BCL11A。把 CRISPR 剪刀拖到開關上。再點 HbF 計量表與鐮刀血球。",
+        en: "Tap BCL11A, drag the CRISPR scissors onto it, then tap the HbF meter and the sickle cell.",
+      },
+      hint: {
+        zh: "下一步：點左邊的 BCL11A 開關，看它在壓什麼。",
+        en: "Next: tap the BCL11A switch and see what it is holding down.",
+      },
+      steps: [
+        { id: "switch", title: { zh: "找到開關", en: "Find the switch" }, how: { zh: "點 BCL11A。出生後它把胎兒血紅素關掉。", en: "Tap BCL11A. After birth it shut fetal hemoglobin off." } },
+        { id: "cut", title: { zh: "剪開開關", en: "Cut the switch" }, how: { zh: "把右邊 CRISPR 剪刀拖到 BCL11A 的虛線圈。", en: "Drag the CRISPR scissors onto the dashed ring on BCL11A." } },
+        { id: "hbf", title: { zh: "看 HbF 回來", en: "Watch HbF return" }, how: { zh: "點胎兒血紅素計量表，看它從低變高。", en: "Tap the fetal-hemoglobin meter and watch it rise." } },
+        { id: "cell", title: { zh: "血球變圓", en: "Round the cell" }, how: { zh: "點鐮刀型紅血球，看它比較像甜甜圈。", en: "Tap the sickle cell and watch it become more doughnut-shaped." } },
+      ],
       hotspots: [
         {
           id: "bcl11a",
@@ -456,6 +549,14 @@ export const articles: Article[] = [
           body: {
             zh: "帶著導航 RNA 的分子剪刀，只剪指定位置。",
             en: "Molecular scissors with a GPS RNA, cutting one address.",
+          },
+        },
+        {
+          id: "hbf",
+          label: { zh: "胎兒血紅素", en: "Fetal hemoglobin" },
+          body: {
+            zh: "小時候用的血紅素。重新打開，比較不容易聚成鐮刀。",
+            en: "The childhood version. Turned back on, it is less likely to sickle.",
           },
         },
         {
@@ -550,10 +651,24 @@ export const articles: Article[] = [
     lab: {
       kind: "dengue-faces",
       title: { zh: "幫四張臉都做預習", en: "Preview all four faces" },
-      hint: {
-        zh: "點四個血清型，再點疫苗瓶，看弱化病毒被放進同一支針。",
-        en: "Tap the four serotypes, then the vial, and watch weakened copies load into one shot.",
+      lesson: {
+        zh: "登革熱有四張臉。只預習一張，下一張有時更兇；四價疫苗一次給四張弱化臉。",
+        en: "Dengue has four faces. Learning only one can make the next meaner. A tetravalent shot previews all four, weakened.",
       },
+      how: {
+        zh: "分別點 DENV-1～4，再點蚊子看風險說明，最後點疫苗瓶把四型裝進去。",
+        en: "Tap DENV-1 to 4, tap the mosquito for the risk note, then tap the vial to load all four.",
+      },
+      hint: {
+        zh: "下一步：先點左上 DENV-1，一張一張認臉。",
+        en: "Next: tap DENV-1 at top left, then the other three faces.",
+      },
+      steps: [
+        { id: "faces", title: { zh: "認齊四張臉", en: "Meet four faces" }, how: { zh: "分別點 DENV-1、2、3、4。圖案不一樣，代表不同血清型。", en: "Tap DENV-1, 2, 3, and 4. Different patterns mean different serotypes." } },
+        { id: "mosquito", title: { zh: "看傳播者", en: "See the vector" }, how: { zh: "點埃及斑蚊。防蚊還是比任何針都先做。", en: "Tap the Aedes mosquito. Nets still come before any shot." } },
+        { id: "ade", title: { zh: "讀風險字條", en: "Read the risk slip" }, how: { zh: "點蚊子後會跳出字條：只認一張臉，下一張可能更兇。", en: "After the mosquito, a slip appears: one face only can make the next worse." } },
+        { id: "vial", title: { zh: "裝進四價針", en: "Load the shot" }, how: { zh: "點 Qdenga 瓶子，四種弱化病毒會裝進同一支針。", en: "Tap the Qdenga vial. Four weakened copies load into one shot." } },
+      ],
       hotspots: [
         {
           id: "mosquito",
@@ -564,11 +679,31 @@ export const articles: Article[] = [
           },
         },
         {
-          id: "faces",
-          label: { zh: "四個血清型", en: "Four serotypes" },
+          id: "d1",
+          label: { zh: "DENV-1", en: "DENV-1" },
+          body: { zh: "第一張臉。只打過這一型，還不算真正預習完。", en: "Face one. Seeing only this one is not a full preview." },
+        },
+        {
+          id: "d2",
+          label: { zh: "DENV-2", en: "DENV-2" },
+          body: { zh: "第二張臉。血清型不同，抗體不一定互相夠用。", en: "Face two. A different serotype; antibodies may not fully cover it." },
+        },
+        {
+          id: "d3",
+          label: { zh: "DENV-3", en: "DENV-3" },
+          body: { zh: "第三張臉。四價的意思就是四張都要出現在針裡。", en: "Face three. Tetravalent means all four belong in the shot." },
+        },
+        {
+          id: "d4",
+          label: { zh: "DENV-4", en: "DENV-4" },
+          body: { zh: "第四張臉。漏掉任何一張，預習就不完整。", en: "Face four. Skip any one and the preview is incomplete." },
+        },
+        {
+          id: "ade",
+          label: { zh: "偏心風險", en: "One-sided risk" },
           body: {
-            zh: "DENV-1 到 4。只認識一個，下一個有時更兇。",
-            en: "DENV-1 to 4. Knowing only one can make the next one meaner.",
+            zh: "只認識一張臉時，下次遇到另一型，有時病情反而比較重。",
+            en: "If you only know one face, the next type can sometimes hit harder.",
           },
         },
         {
@@ -667,10 +802,24 @@ export const articles: Article[] = [
     lab: {
       kind: "ras-switch",
       title: { zh: "把黏住的開關掰回去", en: "Unstick the switch" },
-      hint: {
-        zh: "先點 RAS 看它卡住。再把藥丸拖到開關上，生長箭頭會停。",
-        en: "Tap RAS to see it jammed. Drag the pill onto the switch and the growth arrows stop.",
+      lesson: {
+        zh: "RAS 是生長開關。胰臟癌裡它卡住常亮；這顆口服藥把它掰回安靜。",
+        en: "RAS is a growth switch. In this pancreatic cancer it sticks ON. The pill forces it quiet.",
       },
+      how: {
+        zh: "點卡住的 RAS 與生長箭頭，再把藥丸拖到開關上，最後點細胞核。",
+        en: "Tap jammed RAS and the growth arrows, drag the pill onto the switch, then tap the nucleus.",
+      },
+      hint: {
+        zh: "下一步：點中間那個翹起來的 RAS 開關。",
+        en: "Next: tap the tilted RAS switch in the middle.",
+      },
+      steps: [
+        { id: "ras", title: { zh: "看開關卡住", en: "See it jammed" }, how: { zh: "點 RAS。正常該亮一下，這裡卻常年開著。", en: "Tap RAS. It should blink; here it stays on." } },
+        { id: "arrows", title: { zh: "看生長訊號", en: "See the signal" }, how: { zh: "點「分裂！」箭頭，那是一路傳到細胞核的指令。", en: "Tap the “divide!” arrows — orders heading for the nucleus." } },
+        { id: "pill", title: { zh: "藥掰回去", en: "Force it quiet" }, how: { zh: "把右下藥丸拖到 RAS 的虛線圈上。", en: "Drag the pill onto the dashed ring on RAS." } },
+        { id: "quiet", title: { zh: "核安靜了", en: "Nucleus goes quiet" }, how: { zh: "點右上細胞核，確認它不再一直聽到「分裂」。", en: "Tap the nucleus and confirm it stopped hearing “divide.”" } },
+      ],
       hotspots: [
         {
           id: "ras",
@@ -694,6 +843,14 @@ export const articles: Article[] = [
           body: {
             zh: "開關打開就一路往核傳「分裂」。",
             en: "When the switch is on, the nucleus keeps hearing “divide.”",
+          },
+        },
+        {
+          id: "nucleus",
+          label: { zh: "細胞核", en: "Nucleus" },
+          body: {
+            zh: "接到 RAS 的信就安排細胞分裂。信停了，它才安靜。",
+            en: "It schedules division when RAS writes. When the mail stops, it quiets down.",
           },
         },
       ],
@@ -776,10 +933,24 @@ export const articles: Article[] = [
     lab: {
       kind: "plaque-clean",
       title: { zh: "擦掉神經元旁邊的灰", en: "Dust the neuron" },
-      hint: {
-        zh: "把抗體拖到斑塊上。灰會被黏走，突觸比較能說話。",
-        en: "Drag antibodies onto the plaques. Dust lifts and the synapse can talk.",
+      lesson: {
+        zh: "類澱粉是神經元外面的垃圾。抗體像專用抹布；擦完突觸比較能說話，但不能把忘記的記憶自動還回來。",
+        en: "Amyloid is junk outside the neuron. Antibodies are a special cloth. A cleaner synapse talks better — it does not restore lost memories by itself.",
       },
+      how: {
+        zh: "先點神經元與一塊灰。再把右邊 Y 形抗體拖到每一塊斑塊上。清完點突觸火花。",
+        en: "Tap the neuron and one plaque. Drag the Y-shaped antibody onto each plaque. Then tap the synapse spark.",
+      },
+      hint: {
+        zh: "下一步：先點神經元，搞懂這是電線不是肌肉。",
+        en: "Next: tap the neuron — it’s a wire, not a muscle.",
+      },
+      steps: [
+        { id: "neuron", title: { zh: "認神經元", en: "Meet the neuron" }, how: { zh: "點細胞本體。它會發電、傳訊。", en: "Tap the cell body. It fires and talks." } },
+        { id: "plaque", title: { zh: "認斑塊", en: "Meet a plaque" }, how: { zh: "點一塊灰色圓點。那是堆在外面的蛋白垃圾。", en: "Tap a grey dot. Protein junk stacked outside." } },
+        { id: "clean", title: { zh: "擦掉三塊灰", en: "Wipe three plaques" }, how: { zh: "把抗體拖到每一塊斑塊上，可重複拖。", en: "Drag the antibody onto each plaque. You can reuse it." } },
+        { id: "spark", title: { zh: "看突觸說話", en: "See the synapse talk" }, how: { zh: "三塊都清完，點右邊火花。訊號會變亮。", en: "After all three are gone, tap the spark. The signal brightens." } },
+      ],
       hotspots: [
         {
           id: "neuron",
@@ -801,8 +972,16 @@ export const articles: Article[] = [
           id: "ab",
           label: { zh: "lecanemab", en: "lecanemab" },
           body: {
-            zh: "Y 形抗體，專門認這層灰。",
-            en: "A Y-shaped antibody that recognizes this dust.",
+            zh: "Y 形抗體，專門認這層灰。擦完可再去下一塊。",
+            en: "A Y-shaped antibody that recognizes this dust. Reuse it on the next lump.",
+          },
+        },
+        {
+          id: "spark",
+          label: { zh: "突觸", en: "Synapse" },
+          body: {
+            zh: "兩顆神經元說話的縫。灰少一點，訊號比較清楚；不是時光機。",
+            en: "The gap where two neurons talk. Less dust, clearer signal — not a time machine.",
           },
         },
       ],
@@ -885,10 +1064,24 @@ export const articles: Article[] = [
     lab: {
       kind: "oncolytic",
       title: { zh: "讓病毒在腫瘤裡開分店", en: "Let the virus open a shop in the tumor" },
-      hint: {
-        zh: "把病毒拖進腫瘤。它會複製、裂開，再召 T 細胞。健康細胞比較不理它。",
-        en: "Drag the virus into the tumor. It copies, bursts, and calls T cells. Healthy cells mostly ignore it.",
+      lesson: {
+        zh: "溶瘤病毒愛在腫瘤裡複製、炸開，順便廣播「這裡有敵人」，叫醒 T 細胞。",
+        en: "An oncolytic virus copies inside the tumor, bursts, and broadcasts “enemy here,” waking T cells.",
       },
+      how: {
+        zh: "先點腫瘤。把病毒拖到健康細胞會彈開；再拖進腫瘤等它裂開，最後點趕來的 T 細胞。",
+        en: "Tap the tumor. Drop the virus on a healthy cell to see it bounce, then drop it in the tumor and tap the arriving T cell.",
+      },
+      hint: {
+        zh: "下一步：先點中間的腫瘤，認清楚工廠在哪。",
+        en: "Next: tap the tumor so you know where the factory is.",
+      },
+      steps: [
+        { id: "tumor", title: { zh: "認腫瘤工廠", en: "Find the factory" }, how: { zh: "點中間大圓。病毒想在這裡開分店。", en: "Tap the big circle. That’s where the virus wants a shop." } },
+        { id: "bounce", title: { zh: "健康細胞彈開", en: "Bounce off healthy" }, how: { zh: "把左邊病毒拖到右邊健康細胞，看它不住。", en: "Drag the virus onto the healthy cell. It will not stay." } },
+        { id: "infect", title: { zh: "在腫瘤裡裂開", en: "Burst in the tumor" }, how: { zh: "再把病毒拖進中間腫瘤，看它複製後炸開。", en: "Drag the virus into the tumor. It copies, then bursts." } },
+        { id: "tcell", title: { zh: "叫醒巡警", en: "Wake the patrol" }, how: { zh: "點裂開後出現的 T 細胞。警報就是裂開本身。", en: "Tap the T cell that appears. The burst is the alarm." } },
+      ],
       hotspots: [
         {
           id: "virus",
@@ -912,6 +1105,14 @@ export const articles: Article[] = [
           body: {
             zh: "不是完美零傷害，但病毒比較不想在這裡住。",
             en: "Not zero risk — just a much worse neighborhood for this virus.",
+          },
+        },
+        {
+          id: "tcell",
+          label: { zh: "T 細胞", en: "T cell" },
+          body: {
+            zh: "被裂開的腫瘤叫醒。這支藥常跟鬆剎車的免疫藥一起用。",
+            en: "Woken by the burst. This drug is often paired with a brake-lifting checkpoint drug.",
           },
         },
       ],
@@ -998,10 +1199,24 @@ export const articles: Article[] = [
     lab: {
       kind: "shingles-nerve",
       title: { zh: "病毒在神經裡睡醒", en: "The virus wakes in the nerve" },
-      hint: {
-        zh: "點休眠的病毒看它醒來。再點疫苗，沿路的抗體會攔截。",
-        en: "Tap the sleeping virus to wake it. Then tap the vaccine so antibodies block the path.",
+      lesson: {
+        zh: "水痘病毒會在神經節裝睡，醒來沿著軸突爬到皮膚就是帶狀皰疹。疫苗把攔截部隊提前放在路上。",
+        en: "Chickenpox virus naps in a ganglion, then walks the axon to the skin as shingles. The vaccine stations blockers on that road.",
       },
+      how: {
+        zh: "先點神經節宿舍，再點一次叫醒病毒，看它沿電線爬。點軸突認識路，最後點疫苗攔截。",
+        en: "Tap the ganglion, tap again to wake the virus, tap the axon, then tap the vaccine to block the road.",
+      },
+      hint: {
+        zh: "下一步：點左邊神經節，看病毒在宿舍裝睡。",
+        en: "Next: tap the ganglion on the left — the virus is napping there.",
+      },
+      steps: [
+        { id: "ganglion", title: { zh: "找到宿舍", en: "Find the dorm" }, how: { zh: "點左邊神經節。水痘病毒最會在這裡裝睡。", en: "Tap the ganglion. That’s the favorite nap spot." } },
+        { id: "wake", title: { zh: "叫醒病毒", en: "Wake it" }, how: { zh: "再點同一顆神經節，看白點沿電線爬向皮膚。", en: "Tap the same ganglion again and watch the white dot walk the wire." } },
+        { id: "axon", title: { zh: "認軸突", en: "Meet the axon" }, how: { zh: "點中間那條粗線。那是神經的長電線。", en: "Tap the thick line. That’s the nerve’s long wire." } },
+        { id: "vax", title: { zh: "路上攔截", en: "Block the road" }, how: { zh: "點下方 LZ901。抗體會擋在半路。", en: "Tap LZ901. Antibodies step onto the road." } },
+      ],
       hotspots: [
         {
           id: "ganglion",
@@ -1009,6 +1224,14 @@ export const articles: Article[] = [
           body: {
             zh: "一串神經細胞體聚在一起。病毒最會在這裡裝睡。",
             en: "A bundle of nerve-cell bodies. The favorite nap spot.",
+          },
+        },
+        {
+          id: "virus",
+          label: { zh: "水痘／帶狀皰疹病毒", en: "Varicella-zoster virus" },
+          body: {
+            zh: "小時候是水痘，裝睡多年後醒來就變帶狀皰疹。",
+            en: "Chickenpox in childhood. Years later the same virus can wake as shingles.",
           },
         },
         {
@@ -1025,6 +1248,14 @@ export const articles: Article[] = [
           body: {
             zh: "給免疫系統看外套碎片，提前部署攔截。",
             en: "Shows the coat fragment so patrols are already in place.",
+          },
+        },
+        {
+          id: "skin",
+          label: { zh: "皮膚疹", en: "Skin rash" },
+          body: {
+            zh: "病毒爬到皮膚末端就起疹、會痛。攔截愈早，愈不容易走到這裡。",
+            en: "When the virus reaches the skin it rashes and hurts. Earlier blockers help.",
           },
         },
       ],
@@ -1111,10 +1342,25 @@ export const articles: Article[] = [
     lab: {
       kind: "reprogram",
       title: { zh: "勸星狀細胞轉行", en: "Talk the star cell into a new job" },
-      hint: {
-        zh: "把奈米粒子拖進星狀膠細胞。PTBP1 變淡，細胞慢慢長出軸突。",
-        en: "Drag the nanoparticle into the astrocyte. PTBP1 fades and an axon starts to grow.",
+      lesson: {
+        zh: "星狀膠細胞是後勤，不是電線。實驗室用奈米粒子關掉 PTBP1，勸它轉行當神經元——現在只在老鼠與類器官。",
+        en: "Astrocytes are logistics, not wires. A nanoparticle turns PTBP1 down so they try a neuron job — in mice and organoids, not clinics.",
       },
+      how: {
+        zh: "點星星細胞，再點中間 PTBP1 剎車。把奈米粒子拖進去，點轉行後的神經元，最後一定要點右下警告牌。",
+        en: "Tap the star cell, tap the PTBP1 brake, drag the nanoparticle in, tap the new neuron, then tap the warning stamp.",
+      },
+      hint: {
+        zh: "下一步：點中間的星狀膠細胞，它是後勤不是電線。",
+        en: "Next: tap the star-shaped astrocyte. Support, not sparks.",
+      },
+      steps: [
+        { id: "astro", title: { zh: "認後勤細胞", en: "Meet the support cell" }, how: { zh: "點星星。形狀像星星，工作是支援。", en: "Tap the star. Star-shaped. Support, not sparks." } },
+        { id: "ptbp1", title: { zh: "找到剎車", en: "Find the brake" }, how: { zh: "再點正中間的方塊 PTBP1。", en: "Tap the square in the middle: PTBP1." } },
+        { id: "nano", title: { zh: "送進粒子", en: "Send the particle" }, how: { zh: "把右邊白點拖進虛線圈，剎車會消失。", en: "Drag the white dot into the dashed ring. The brake fades." } },
+        { id: "neuron", title: { zh: "看它轉行", en: "See the new job" }, how: { zh: "點長出軸突的細胞。它開始比較像神經元。", en: "Tap the cell with a new axon. It is trying a neuron job." } },
+        { id: "caveat", title: { zh: "讀實驗警告", en: "Read the warning" }, how: { zh: "點右下「老鼠／類器官，不是處方」。這還不能給病人用。", en: "Tap the stamp: mice / organoids, not a prescription." } },
+      ],
       hotspots: [
         {
           id: "astro",
@@ -1138,6 +1384,22 @@ export const articles: Article[] = [
           body: {
             zh: "過血腦屏障的粒子，去降低 PTBP1。",
             en: "A particle that can cross the barrier and turn PTBP1 down.",
+          },
+        },
+        {
+          id: "neuron",
+          label: { zh: "轉行後的神經元", en: "New neuron" },
+          body: {
+            zh: "後勤細胞被勸去發電。這是實驗室畫面，不是醫院常規。",
+            en: "A support cell talked into firing. Lab picture, not hospital routine.",
+          },
+        },
+        {
+          id: "caveat",
+          label: { zh: "還不能開藥", en: "Not a prescription" },
+          body: {
+            zh: "老鼠記憶任務變好，不代表明年診所就有。再現性也還在吵。",
+            en: "Better mouse memory is not a clinic product. Reproducibility is still argued.",
           },
         },
       ],
