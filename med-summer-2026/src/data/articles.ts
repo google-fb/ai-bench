@@ -168,8 +168,8 @@ export const articles: Article[] = [
       {
         label: { zh: "發生了什麼", en: "What happened" },
         body: {
-          zh: "8 月 19 日，兩家公司公布 INTerpath-001：1137 位高風險、腫瘤已切乾淨的黑色素瘤病人。個人化療法 intismeran（mRNA-4157 / V940）加上 pembrolizumab（K 藥），無復發存活與無遠端轉移都比單用 K 藥好。這是第一個個人化新抗原療法、也是第一個 mRNA 癌症療法走到第三期還達標的。還沒上市，預計接下來才跟各國藥證單位談。",
-          en: "On 19 August the companies reported INTerpath-001: 1,137 people with high-risk melanoma that had already been fully removed. Personalized intismeran (mRNA-4157 / V940) plus pembrolizumab beat Keytruda alone on recurrence-free and distant-metastasis-free survival. First positive phase 3 for an individualized neoantigen therapy and for an mRNA cancer treatment. Not approved yet — filings come next.",
+          zh: "8 月 19 日，兩家公司公布 INTerpath-001：1137 位高風險、腫瘤已切乾淨的黑色素瘤病人。個人化療法 intismeran（mRNA-4157 / V940）加上 pembrolizumab（K 藥），無復發存活與無遠端轉移都比單用 K 藥好。這是第一個個人化新抗原療法、也是第一個 mRNA 癌症療法走到第三期還達標的。完整風險比跟總存活還沒公開，不要把比較早的第二期 b 數字當成這一期的成績。還沒上市，接下來才跟藥證單位談。",
+          en: "On 19 August the companies reported INTerpath-001: 1,137 people with high-risk melanoma that had already been fully removed. Personalized intismeran (mRNA-4157 / V940) plus pembrolizumab beat Keytruda alone on recurrence-free and distant-metastasis-free survival. First positive phase 3 for an individualized neoantigen therapy and for an mRNA cancer treatment. Hazard ratios and overall survival were not released — do not treat earlier phase 2b numbers as this readout. Not approved yet; filings come next.",
         },
       },
       {
@@ -251,8 +251,8 @@ export const articles: Article[] = [
       en: "COVID changed the lock again. This year’s key is XFG",
     },
     dek: {
-      zh: "Pfizer、Moderna、Sanofi 的 2026–27 新冠針通過 FDA。病毒流行株換了，疫苗就像每年重配的流感針。",
-      en: "FDA cleared 2026–27 COVID shots from Pfizer, Moderna and Sanofi. The circulating strain moved, so the recipe moved — like flu.",
+      zh: "Pfizer、Moderna、Novavax/Sanofi 的 2026–27 新冠針通過 FDA。病毒流行株換了，疫苗就像每年重配的流感針。",
+      en: "FDA cleared 2026–27 COVID shots from Pfizer, Moderna and Novavax/Sanofi. The circulating strain moved, so the recipe moved — like flu.",
     },
     images: [
       {
@@ -281,8 +281,8 @@ export const articles: Article[] = [
       {
         label: { zh: "發生了什麼", en: "What happened" },
         body: {
-          zh: "8 月 27–28 日，FDA 核准針對 XFG 的更新針：Pfizer/BioNTech 的 COMIRNATY XFG、Moderna 的 Spikevax 與 mNEXSPIKE，還有 Sanofi 的蛋白疫苗。適應症縮在 65 歲以上，以及有高風險慢性病的較年輕族群（各廠年齡下限不同）。7 月 CDC 資料裡，XFG 大約占美國病例四成。",
-          en: "On 27–28 August the FDA cleared XFG-updated shots: Pfizer/BioNTech COMIRNATY XFG, Moderna Spikevax and mNEXSPIKE, plus Sanofi’s protein shot. Labels focus on ages 65+ and younger people with high-risk conditions (age floors differ by brand). CDC data in July put XFG at about 40% of U.S. cases.",
+          zh: "8 月 27 日前後，FDA 核准針對 XFG 的更新針：Pfizer/BioNTech 的 COMIRNATY XFG、Moderna 的 Spikevax 與 mNEXSPIKE，還有 Novavax/Sanofi 的 NUVAXOVID 蛋白疫苗。美國標籤縮在 65 歲以上，以及有高風險慢性病的較年輕族群（各廠年齡下限不同）。歐盟 7 月底就先核准同配方，而且年齡寫得比較寬。",
+          en: "Around 27 August the FDA cleared XFG-updated shots: Pfizer/BioNTech COMIRNATY XFG, Moderna Spikevax and mNEXSPIKE, plus Novavax/Sanofi’s NUVAXOVID protein shot. U.S. labels focus on ages 65+ and younger people with high-risk conditions (age floors differ by brand). The EU authorized the same formula in late July with a wider age band.",
         },
       },
       {
@@ -359,8 +359,8 @@ export const articles: Article[] = [
   {
     slug: "casgevy",
     rank: 4,
-    date: "2026-07-02",
-    dateLabel: { zh: "2026.07.02", en: "2 Jul 2026" },
+    date: "2026-07-01",
+    dateLabel: { zh: "2026.07.01", en: "1 Jul 2026" },
     tag: "gene",
     stage: "approved",
     title: {
@@ -398,8 +398,8 @@ export const articles: Article[] = [
       {
         label: { zh: "發生了什麼", en: "What happened" },
         body: {
-          zh: "7 月 1–2 日，FDA 把 Casgevy（exagamglogene autotemcel）適應症擴大到 2 歲以上，涵蓋反覆疼痛危機的鐮刀型血球疾病，以及需要輸血的 β 地中海貧血。Vertex 說美國大約再多 5500 名小孩符合資格。這仍是一次住院等級的治療，不是社區診所的針。",
-          en: "On 1–2 July the FDA expanded Casgevy (exagamglogene autotemcel) to ages 2+ for sickle cell with repeated pain crises and transfusion-dependent beta thalassemia. Vertex says about 5,500 extra U.S. children become eligible. It is still a hospital-scale one-time therapy, not a clinic shot.",
+          zh: "7 月 1 日，FDA 把 Casgevy（exagamglogene autotemcel）適應症擴大到 2 歲以上，涵蓋反覆疼痛危機的鐮刀型血球疾病，以及需要輸血的 β 地中海貧血。2 到 4 歲是外推，不是直接收進試驗。Vertex 說美國大約再多 5500 名小孩符合資格。這仍是一次住院等級的治療，不是社區診所的針。",
+          en: "On 1 July the FDA expanded Casgevy (exagamglogene autotemcel) to ages 2+ for sickle cell with repeated pain crises and transfusion-dependent beta thalassemia. Ages 2–4 rest on extrapolation, not a direct toddler trial. Vertex says about 5,500 extra U.S. children become eligible. It is still a hospital-scale one-time therapy, not a clinic shot.",
         },
       },
       {
@@ -426,8 +426,8 @@ export const articles: Article[] = [
     ],
     sources: [
       {
-        label: "Vertex — FDA expands CASGEVY to ages 2+ (2 Jul 2026)",
-        href: "https://www.biospace.com/press-releases/vertex-announces-us-fda-approval-for-expanded-use-of-casgevy-for-the-treatment-of-people-ages-2-years-and-older-with-sickle-cell-disease-or-transfusion-dependent-beta-thalassemia",
+        label: "Vertex — FDA expands CASGEVY to ages 2+ (1 Jul 2026)",
+        href: "https://investors.vrtx.com/news-releases/news-release-details/vertex-announces-us-fda-approval-expanded-use-casgevyr-treatment",
       },
       {
         label: "Medical Daily — CRISPR therapy for children as young as 2",
@@ -652,6 +652,10 @@ export const articles: Article[] = [
     ],
     sources: [
       {
+        label: "FDA — daraxonrasib for metastatic pancreatic adenocarcinoma",
+        href: "https://www.fda.gov/drugs/resources-information-approved-drugs/fda-approves-daraxonrasib-metastatic-pancreatic-adenocarcinoma",
+      },
+      {
         label: "NEJM — Daraxonrasib or chemotherapy in metastatic pancreatic cancer",
         href: "https://www.nejm.org/doi/full/10.1056/NEJMoa2605555",
       },
@@ -874,8 +878,8 @@ export const articles: Article[] = [
     ],
     sources: [
       {
-        label: "FDA — Tudriqev with nivolumab for advanced melanoma",
-        href: "https://www.cancer123.com/news/20260807/2026080812624.html",
+        label: "FDA — Tudriqev (RP1) with nivolumab for advanced melanoma",
+        href: "https://www.fda.gov/drugs/resources-information-approved-drugs/fda-grants-accelerated-approval-vusolimogene-oderparepvec-wtpg-combination-nivolumab-melanoma",
       },
     ],
     lab: {
@@ -1089,14 +1093,18 @@ export const articles: Article[] = [
       {
         label: { zh: "還沒做完的事", en: "Still open" },
         body: {
-          zh: "沒有人體試驗。新神經元會不會接到正確迴路、會不會致瘤、能不能穩定過血腦屏障，全都不知道。",
-          en: "No human trial. We do not know if new neurons wire correctly, whether tumors appear, or if brain-barrier delivery stays reliable.",
+          zh: "沒有人體試驗。把膠細胞轉成神經元這條路，過去就有人質疑能不能穩穩重現。新神經元會不會接到正確迴路、會不會致瘤、能不能穩定過血腦屏障，全都不知道。",
+          en: "No human trial. Turning glia into neurons already has a reproducibility argument in the field. We also do not know if new neurons wire correctly, whether tumors appear, or if barrier delivery stays reliable.",
         },
       },
     ],
     sources: [
       {
-        label: "Phys.org — nanoparticles induce neuroregeneration (26 Aug 2026)",
+        label: "Cell Biomaterials — Nano-ERASER / PTBP1 (26 Aug 2026)",
+        href: "https://www.cell.com/cell-biomaterials/fulltext/S3050-5623(26)00231-X",
+      },
+      {
+        label: "Phys.org — nanoparticles induce neuroregeneration",
         href: "https://phys.org/news/2026-08-nanoparticles-neuroregeneration-alzheimer-disease.html",
       },
     ],
