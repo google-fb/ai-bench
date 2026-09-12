@@ -50,6 +50,7 @@ export function mountLab(section: HTMLElement): void {
 
   const state: LabState = { hover: null, selected: null, flags: {}, drag: null, missAt: 0 };
   let raf = 0;
+  let downHit = false;
 
   const explain = (id: string | null, missed = false) => {
     const done = api.done(state);
@@ -135,6 +136,7 @@ export function mountLab(section: HTMLElement): void {
   canvas.addEventListener("pointerdown", (event) => {
     const p = pointerOnCanvas(canvas, event);
     const id = api.hit(p, state);
+    downHit = Boolean(id);
     if (id) {
       state.selected = id;
       api.down?.(id, p, state);
@@ -154,8 +156,10 @@ export function mountLab(section: HTMLElement): void {
   });
   canvas.addEventListener("pointerup", (event) => {
     const p = pointerOnCanvas(canvas, event);
+    const hadDrag = Boolean(state.drag);
     api.up?.(p, state);
-    explain(state.selected);
+    if (downHit || hadDrag) explain(state.selected);
+    downHit = false;
   });
 
   section.querySelector("[data-lab-reset]")?.addEventListener("click", () => {

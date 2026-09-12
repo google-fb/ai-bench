@@ -188,7 +188,7 @@ export const scenes: Record<string, LabApi> = {
       const poster = state.drag?.id === "poster"
         ? { x: state.drag.x, y: state.drag.y }
         : printed && state.flags.armed !== 1
-          ? { x: 570, y: 200 }
+          ? { x: 570, y: 330 }
           : printed
             ? { x: 760, y: 250 }
             : null;
@@ -223,14 +223,14 @@ export const scenes: Record<string, LabApi> = {
       const near = dots.find((dot) => hitCircle(p, dot, 22));
       if (near) return near.id;
       if (hitCircle(p, { x: 230, y: 260 }, 118)) return "tumor";
-      if (hitRect(p, 500, 150, 140, 100)) return "print";
       const printed = state.flags.printed === 1;
       const poster = state.drag?.id === "poster"
         ? state.drag
         : printed && state.flags.armed !== 1
-          ? { x: 570, y: 200 }
+          ? { x: 570, y: 330 }
           : null;
-      if (poster && hitCircle(p, poster, 34)) return "poster";
+      if (poster && hitCircle(p, poster, 36)) return "poster";
+      if (hitRect(p, 500, 150, 140, 100)) return "print";
       const tx = state.flags.hunt === 1 ? 340 : 760;
       if (hitCircle(p, { x: tx, y: 280 }, 48)) return "tcell";
       return null;
@@ -276,7 +276,7 @@ export const scenes: Record<string, LabApi> = {
       if (!state.flags.printed) return { x: 570, y: 200, kind: "tap", zh: "印表機", en: "printer" };
       if (!state.flags.armed) {
         if (state.drag?.id === "poster") return { x: 760, y: 280, kind: "drop", zh: "T 細胞", en: "T cell" };
-        return { x: 570, y: 200, kind: "drag", zh: "通緝令", en: "poster" };
+        return { x: 570, y: 330, kind: "drag", zh: "通緝令", en: "poster" };
       }
       if (!state.flags.hunt) return { x: 760, y: 280, kind: "tap", zh: "T 細胞出擊", en: "send T cell" };
       return null;
