@@ -23,6 +23,22 @@ export type LabHotspot = {
   body: Copy;
 };
 
+export type LabStep = {
+  id: string;
+  title: Copy;
+  how: Copy;
+};
+
+export type Lab = {
+  kind: string;
+  title: Copy;
+  lesson: Copy;
+  how: Copy;
+  hint: Copy;
+  steps: LabStep[];
+  hotspots: LabHotspot[];
+};
+
 export type Article = {
   slug: string;
   rank: number;
@@ -35,12 +51,7 @@ export type Article = {
   images: Array<{ src: string; alt: Copy }>;
   sections: Section[];
   sources: Source[];
-  lab: {
-    kind: string;
-    title: Copy;
-    hint: Copy;
-    hotspots: LabHotspot[];
-  };
+  lab: Lab;
 };
 
 export type Prefs = {

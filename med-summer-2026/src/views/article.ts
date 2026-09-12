@@ -67,10 +67,40 @@ export function renderArticle(slug: string): string {
           <strong>${article.lab.title.zh}</strong>
           <span>${article.lab.title.en}</span>
         </div>
+        <div class="lab-brief">
+          <div>
+            <small>這堂在學什麼 / What you learn</small>
+            <p lang="zh">${article.lab.lesson.zh}</p>
+            <p lang="en">${article.lab.lesson.en}</p>
+          </div>
+          <div>
+            <small>怎麼玩 / How to play</small>
+            <p lang="zh">${article.lab.how.zh}</p>
+            <p lang="en">${article.lab.how.en}</p>
+          </div>
+        </div>
+        <ol class="lab-steps">
+          ${article.lab.steps
+            .map(
+              (step, i) => `
+            <li data-step="${step.id}" class="${i === 0 ? "is-current" : ""}">
+              <span class="n">${i + 1}</span>
+              <span class="lab-step-copy">
+                <span lang="zh">${step.title.zh}</span>
+                <span lang="en">${step.title.en}</span>
+              </span>
+            </li>`,
+            )
+            .join("")}
+        </ol>
         <canvas width="960" height="540" aria-label="${article.lab.title.zh}"></canvas>
-        <div class="lab-note">
-          <b class="hint">${article.lab.hint.zh}</b>
-          <p class="hint">${article.lab.hint.en}</p>
+        <div class="lab-note" aria-live="polite">
+          <b>${article.lab.hint.zh}</b>
+          <p>${article.lab.hint.en}</p>
+        </div>
+        <div class="lab-bar">
+          <button type="button" data-lab-reset>重來 / Reset</button>
+          <span data-lab-progress>0/${article.lab.steps.length}</span>
         </div>
       </section>
       <p class="section-label">來源 / Sources</p>
