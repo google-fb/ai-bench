@@ -49,8 +49,8 @@ export function renderArticle(slug: string): string {
         <span>${tag.zh} / ${tag.en}</span>
         <span>${stage.zh} / ${stage.en}</span>
       </p>
-      <h1 class="article-title">${article.title.zh}</h1>
-      <p class="article-title-en">${article.title.en}</p>
+      <h1 class="article-title" lang="zh">${article.title.zh}</h1>
+      <h1 class="article-title" lang="en">${article.title.en}</h1>
       ${pair(article.dek)}
       ${figure(article, 0)}
       ${article.sections

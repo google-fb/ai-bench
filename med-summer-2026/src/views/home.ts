@@ -14,8 +14,8 @@ function card(article: Article): string {
           <span>${tag.zh} / ${tag.en}</span>
           <span>${stage.zh} / ${stage.en}</span>
         </div>
-        <h2 class="card-title">${article.title.zh}</h2>
-        <p class="card-en">${article.title.en}</p>
+        <h2 class="card-title" lang="zh">${article.title.zh}</h2>
+        <p class="card-en" lang="en">${article.title.en}</p>
         <p lang="zh">${article.dek.zh}</p>
         <p lang="en">${article.dek.en}</p>
       </div>
@@ -37,8 +37,10 @@ export function renderHome(): string {
             <animateTransform attributeName="transform" type="rotate" from="0 40 40" to="360 40 40" dur="8s" repeatCount="indefinite"/>
           </circle>
         </svg>
-        <h1>今年夏天，醫學界在吵什麼</h1>
-        <p class="subhead">Ten stories. Cells you can poke. No exam at the end.</p>
+        <h1 lang="zh">今年夏天，醫學界在吵什麼</h1>
+        <h1 lang="en">What medicine was shouting about this summer</h1>
+        <p class="subhead" lang="zh">十篇故事。細胞可以戳。最後沒有考卷。</p>
+        <p class="subhead" lang="en">Ten stories. Cells you can poke. No exam at the end.</p>
         <div class="pair lede">
           <p lang="zh">我們把 7、8 月跟疫苗、基因、癌症、大腦有關的大事收成十篇。用國中生物那種「點細胞核、看細胞壁」的方式，讓你動手摸一摸原理。口語、中英對照，不是考卷。</p>
           <p lang="en">Ten vaccine-first plus big-medicine stories from July and August. Each piece has a biology-class canvas — tap a nucleus, drag a memo, unstick a switch. Colloquial, bilingual, zero pop quiz.</p>

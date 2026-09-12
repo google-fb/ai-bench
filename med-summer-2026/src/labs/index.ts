@@ -1,3 +1,4 @@
+import { prefs } from "../store";
 import {
   articleBySlug,
   copyText,
@@ -610,6 +611,10 @@ export function mountLab(section: HTMLElement): void {
     }
     const spot = article.lab.hotspots.find((item) => item.id === id);
     if (!spot) return;
+    if (prefs.lang === "both") {
+      setNote(note, `${spot.label.zh} / ${spot.label.en}`, `${spot.body.zh} ${spot.body.en}`);
+      return;
+    }
     setNote(note, copyText(spot.label), copyText(spot.body));
   };
 

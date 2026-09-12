@@ -204,6 +204,15 @@ select:focus-visible,
   margin: 0 0 10px;
 }
 
+:root[data-lang="both"] .hero h1[lang="en"],
+:root[data-lang="both"] .article-title[lang="en"] {
+  font-size: 1.2rem;
+  color: var(--muted);
+  letter-spacing: -0.03em;
+  font-weight: 450;
+  margin: 0 0 18px;
+}
+
 .subhead {
   font-size: clamp(1.05rem, 2vw, 1.35rem);
   color: var(--muted);
@@ -301,6 +310,15 @@ select:focus-visible,
   color: var(--muted);
   margin: 0 0 10px;
   font-size: 0.95rem;
+}
+
+:root[data-lang="en"] .card-en {
+  color: inherit;
+  font-size: 1.35rem;
+  letter-spacing: -0.04em;
+  line-height: 1.25;
+  margin: 8px 0 10px;
+  font-weight: 540;
 }
 
 .card p {
