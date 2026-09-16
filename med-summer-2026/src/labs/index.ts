@@ -1,5 +1,4 @@
-import { prefs } from "../store";
-import type { Article } from "../types";
+import type { Article, Copy } from "../types";
 import {
   articleBySlug,
   copyText,
@@ -14,12 +13,6 @@ import {
 } from "./engine";
 import { scenes } from "./scenes";
 
-function pairNote(titleZh: string, titleEn: string, bodyZh: string, bodyEn: string): { title: string; body: string } {
-  if (prefs.lang === "en") return { title: titleEn, body: bodyEn };
-  if (prefs.lang === "zh") return { title: titleZh, body: bodyZh };
-  return { title: `${titleZh} / ${titleEn}`, body: `${bodyZh} ${bodyEn}` };
-}
-
 function paintHud(section: HTMLElement, article: Article, done: Record<string, boolean>): string | null {
   const ids = article.lab.steps.map((step) => step.id);
   const current = currentStep(ids, done);
@@ -29,6 +22,7 @@ function paintHud(section: HTMLElement, article: Article, done: Record<string, b
     const id = item.dataset.step ?? "";
     item.classList.toggle("is-done", !!done[id]);
     item.classList.toggle("is-current", id === current);
+    item.setAttribute("aria-current", id === current ? "step" : "false");
   });
   const progress = section.querySelector("[data-lab-progress]");
   if (progress) progress.textContent = `${cleared}/${total}`;
@@ -52,51 +46,86 @@ export function mountLab(section: HTMLElement): void {
   let raf = 0;
   let downHit = false;
 
+  const reset = () => {
+    state.hover = null;
+    state.selected = null;
+    state.flags = {};
+    state.drag = null;
+    state.missAt = 0;
+    explain(null);
+  };
+
   const explain = (id: string | null, missed = false) => {
     const done = api.done(state);
     const current = paintHud(section, article, done);
     const complete = article.lab.steps.every((step) => done[step.id]);
 
     if (complete) {
-      const recap = pairNote(
-        "做完了：這就是這篇的知識點",
-        "Done — that’s the idea",
-        article.lab.lesson.zh,
-        article.lab.lesson.en,
-      );
-      setNote(note, recap.title, recap.body);
+      setNote(note, { zh: "做完了：這就是這篇的知識點", en: "Done — that’s the idea" }, article.lab.lesson);
       return;
     }
 
     if (id) {
       const spot = article.lab.hotspots.find((item) => item.id === id);
       if (spot) {
-        const text = pairNote(spot.label.zh, spot.label.en, spot.body.zh, spot.body.en);
-        setNote(note, text.title, text.body);
+        setNote(note, spot.label, spot.body);
         return;
       }
     }
 
     const step = article.lab.steps.find((item) => item.id === current);
     if (missed) {
-      const miss = pairNote(
-        "這裡點不到",
-        "Nothing to tap there",
-        step ? `請看畫面上的「點我／拖我」。下一步：${step.how.zh}` : article.lab.how.zh,
-        step ? `Follow the “Tap me / Drag me” tag. Next: ${step.how.en}` : article.lab.how.en,
-      );
-      setNote(note, miss.title, miss.body);
+      const missTitle: Copy = { zh: "這裡點不到", en: "Nothing to tap there" };
+      const missBody: Copy = step
+        ? {
+            zh: `請看畫面上的「點我／拖我」。下一步：${step.how.zh}`,
+            en: `Follow the “Tap me / Drag me” tag. Next: ${step.how.en}`,
+          }
+        : article.lab.how;
+      setNote(note, missTitle, missBody);
       return;
     }
 
     if (step) {
-      const text = pairNote(`下一步：${step.title.zh}`, `Next: ${step.title.en}`, step.how.zh, step.how.en);
-      setNote(note, text.title, text.body);
+      setNote(note, { zh: `下一步：${step.title.zh}`, en: `Next: ${step.title.en}` }, step.how);
       return;
     }
 
-    const idle = pairNote(article.lab.hint.zh, article.lab.hint.en, article.lab.how.zh, article.lab.how.en);
-    setNote(note, idle.title, idle.body);
+    setNote(note, article.lab.hint, article.lab.how);
+  };
+
+  const activateCoach = () => {
+    const coach = api.coach(state, performance.now());
+    if (!coach) return;
+    const p = { x: coach.x, y: coach.y };
+    const id = api.hit(p, state);
+    if (coach.kind === "tap" && id) {
+      api.down?.(id, p, state);
+      api.up?.(p, state);
+      explain(id);
+      return;
+    }
+    if (coach.kind === "drag" && id) {
+      api.down?.(id, p, state);
+      const drop = api.coach(state, performance.now());
+      if (drop?.kind === "drop") {
+        if (state.drag) {
+          state.drag.x = drop.x;
+          state.drag.y = drop.y;
+        }
+        api.up?.({ x: drop.x, y: drop.y }, state);
+      }
+      explain(id);
+      return;
+    }
+    if (coach.kind === "drop") {
+      if (state.drag) {
+        state.drag.x = coach.x;
+        state.drag.y = coach.y;
+      }
+      api.up?.(p, state);
+      explain(state.selected);
+    }
   };
 
   const loop = (t: number) => {
@@ -133,6 +162,10 @@ export function mountLab(section: HTMLElement): void {
   raf = requestAnimationFrame(loop);
   explain(null);
 
+  canvas.tabIndex = 0;
+  canvas.setAttribute("role", "img");
+  if (note.id) canvas.setAttribute("aria-describedby", note.id);
+
   canvas.addEventListener("pointerdown", (event) => {
     const p = pointerOnCanvas(canvas, event);
     const id = api.hit(p, state);
@@ -157,19 +190,24 @@ export function mountLab(section: HTMLElement): void {
   canvas.addEventListener("pointerup", (event) => {
     const p = pointerOnCanvas(canvas, event);
     const hadDrag = Boolean(state.drag);
+    const last = state.selected;
     api.up?.(p, state);
-    if (downHit || hadDrag) explain(state.selected);
+    if (downHit || hadDrag) explain(state.selected ?? last);
     downHit = false;
+    state.selected = null;
+  });
+  canvas.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      activateCoach();
+    }
+    if (event.key === "r" || event.key === "R") {
+      event.preventDefault();
+      reset();
+    }
   });
 
-  section.querySelector("[data-lab-reset]")?.addEventListener("click", () => {
-    state.hover = null;
-    state.selected = null;
-    state.flags = {};
-    state.drag = null;
-    state.missAt = 0;
-    explain(null);
-  });
+  section.querySelector("[data-lab-reset]")?.addEventListener("click", reset);
 
   section.addEventListener(
     "remove",

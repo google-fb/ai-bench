@@ -13,8 +13,8 @@ export const articles: Article[] = [
       en: "The first mRNA flu shot: texting your cells a memo",
     },
     dek: {
-      zh: "FDA 核准 Moderna 的 mFLUSIVA。50 歲以上可以打，這是第一支「不是把病毒碎片打進去，而是讓細胞自己做練習題」的流感疫苗。",
-      en: "FDA cleared Moderna’s mFLUSIVA for adults 50+. It’s the first flu shot that hands your cells a message instead of a ready-made virus chunk.",
+      zh: "FDA 核准第一支 mRNA 流感疫苗，50 歲以上能打。它不帶病毒碎片，只傳一則簡訊，請你的細胞自己做出練習用的外皮。",
+      en: "FDA cleared the first mRNA flu shot for adults 50+. It does not carry a virus chunk — it texts your cells to build a practice coat.",
     },
     images: [
       {
@@ -87,8 +87,8 @@ export const articles: Article[] = [
       kind: "mrna-cell",
       title: { zh: "把說明書推進細胞", en: "Slide the memo into the cell" },
       lesson: {
-        zh: "mRNA 疫苗是一張臨時便條。核糖體照著做蛋白，它不會改細胞核裡的 DNA。",
-        en: "An mRNA vaccine is a temporary slip. Ribosomes build the protein. It does not edit DNA in the nucleus.",
+        zh: "流感 mRNA 針送 HA 便條進細胞質；核糖體做出練習用外皮，DNA 不動。",
+        en: "Flu mRNA sends an HA memo to the cytoplasm; ribosomes build a practice coat — DNA stays untouched.",
       },
       how: {
         zh: "先把左邊便條拖進虛線圈。再依序點核糖體、HA 帽子、細胞核、免疫細胞。畫面上會寫「拖我／點我」。",
@@ -157,8 +157,8 @@ export const articles: Article[] = [
     tag: "vaccine",
     stage: "phase3",
     title: {
-      zh: "癌症疫苗不是預防針，是幫你客製通緝令",
-      en: "A cancer vaccine is a custom wanted poster, not a school shot",
+      zh: "黑色素瘤疫苗不是學校預防針，是術後客製通緝令",
+      en: "Not a school shot: a custom wanted poster after melanoma surgery",
     },
     dek: {
       zh: "默沙東 + Moderna 的個人化 mRNA 療法第一次在第三期達標：手術拿掉黑色素瘤之後，復發跟遠端轉移都比單用 K 藥更好。",
@@ -231,8 +231,8 @@ export const articles: Article[] = [
       kind: "fingerprint",
       title: { zh: "掃描腫瘤指紋，印通緝令", en: "Scan the tumor, print the poster" },
       lesson: {
-        zh: "個人化癌症疫苗先讀你這顆腫瘤的突變指紋，再印通緝令給 T 細胞。",
-        en: "A personalized cancer vaccine reads this tumor’s mutation fingerprint, then prints a wanted poster for T cells.",
+        zh: "術後個人化，不是預防針：先讀這顆腫瘤的突變指紋，再印通緝令給 T 細胞。",
+        en: "After surgery, personalized — not a prevention shot. It reads this tumor’s fingerprint, then prints a wanted poster for T cells.",
       },
       how: {
         zh: "點齊三個錯字 → 點印表機 → 把通緝令拖給 T 細胞 → 再點 T 細胞出擊。",
@@ -304,8 +304,8 @@ export const articles: Article[] = [
     tag: "vaccine",
     stage: "approved",
     title: {
-      zh: "新冠又換鎖：今年的鑰匙叫 XFG",
-      en: "COVID changed the lock again. This year’s key is XFG",
+      zh: "新冠棘蛋白又換齒：今年流行株叫 XFG",
+      en: "COVID’s spike key changed teeth again. This season’s strain is XFG",
     },
     dek: {
       zh: "Pfizer、Moderna、Novavax/Sanofi 的 2026–27 新冠針通過 FDA。病毒流行株換了，疫苗就像每年重配的流感針。",
@@ -322,8 +322,8 @@ export const articles: Article[] = [
       {
         src: "images/covid-lock.png",
         alt: {
-          zh: "細胞受體 ACE2 像鎖孔，疫苗更新齒形。",
-          en: "ACE2 as a lock; the updated vaccine recuts the key.",
+          zh: "細胞上的 ACE2 像鎖孔；病毒棘蛋白是鑰匙。疫苗更新的是給免疫系統看的棘蛋白齒形，不是去改鎖。",
+          en: "ACE2 as the lock; XFG spike as the key — and why the shot’s recipe updates the practice spike shape.",
         },
       },
     ],
@@ -345,8 +345,8 @@ export const articles: Article[] = [
       {
         label: { zh: "用國中生物講", en: "Like year-9 biology" },
         body: {
-          zh: "棘蛋白是病毒插進細胞的鑰匙，細胞上的 ACE2 是鎖。鑰匙齒形變了，舊抗體就比較對不太準。更新疫苗等於重磨一把接近新鎖的鑰匙給免疫系統看。你不會因此「得一次疫苗裡的新冠」，mRNA 與蛋白疫苗都只是展示零件。",
-          en: "Spike is the key; ACE2 on cells is the lock. When the teeth change, old antibodies miss. An updated shot shows the immune system a newly cut key. You do not catch COVID from the memo or the protein piece.",
+          zh: "棘蛋白是病毒插進細胞的鑰匙，細胞上的 ACE2 是鎖。鑰匙齒形變了，舊抗體就比較對不太準。更新疫苗改成讓免疫系統練習認新款齒形的棘蛋白鑰匙。ACE2 鎖沒換，是病毒鑰匙變了。你不會因此「得一次疫苗裡的新冠」，mRNA 與蛋白疫苗都只是展示零件。",
+          en: "Spike is the key; ACE2 on cells is the lock. When the teeth change, old antibodies miss. An updated shot shows your immune system the new spike teeth to practice on. ACE2 stays the same lock; the virus’s key is what changed. You do not catch COVID from the memo or the protein piece.",
         },
       },
       {
@@ -380,10 +380,10 @@ export const articles: Article[] = [
     ],
     lab: {
       kind: "lock-key",
-      title: { zh: "幫鑰匙換齒", en: "Recut the key" },
+      title: { zh: "認鎖、試鑰匙、對今年的針", en: "Same lock, new teeth, new shot" },
       lesson: {
-        zh: "病毒換棘蛋白，疫苗就要換鑰匙齒，才對得上細胞上的 ACE2 鎖。",
-        en: "When the virus changes its spike, the vaccine must recut the key so it still matches ACE2.",
+        zh: "病毒棘蛋白（鑰匙）換齒，舊抗體對不準；更新疫苗改成教免疫系統認新齒形。ACE2 鎖在細胞上沒換。",
+        en: "When spike (the key) changes teeth, old antibodies miss. The updated shot teaches your immune system the new teeth. ACE2 (the lock) does not change.",
       },
       how: {
         zh: "先點鎖。把舊鑰匙拖上去會顯示「齒不對」。再把右邊 XFG 新鑰匙拖上去。",
@@ -397,15 +397,15 @@ export const articles: Article[] = [
         { id: "lock", title: { zh: "認識這把鎖", en: "Meet the lock" }, how: { zh: "點 ACE2。那是呼吸道細胞門上的受體。", en: "Tap ACE2. It’s a receptor on airway-cell doors." } },
         { id: "old", title: { zh: "試舊鑰匙", en: "Try the old key" }, how: { zh: "把左邊舊棘蛋白拖到鎖上。它會對不準。", en: "Drag last year’s spike onto the lock. It will miss." } },
         { id: "neu", title: { zh: "換 XFG 齒", en: "Fit XFG" }, how: { zh: "把右邊 XFG 鑰匙拖到鎖上，看它對上。", en: "Drag the XFG key onto the lock and watch it fit." } },
-        { id: "shot", title: { zh: "對上今年的針", en: "This year’s shot" }, how: { zh: "點右下角出現的「今年的針」。", en: "Tap this year’s shot badge that appears." } },
+        { id: "shot", title: { zh: "對上今年的針", en: "This year’s shot" }, how: { zh: "點右下角「今年的針」。這是給免疫系統看的鑰匙模型，不是去改 ACE2 鎖。", en: "Tap this year’s shot badge. It’s a practice key model for the immune system — not a new ACE2 lock." } },
       ],
       hotspots: [
         {
           id: "oldkey",
           label: { zh: "舊棘蛋白", en: "Old spike" },
           body: {
-            zh: "去年的齒形。對新鎖還有一點用，但比較鬆。",
-            en: "Last year’s teeth. Still a little useful, but sloppy on the new lock.",
+            zh: "去年的齒形。對同一把 ACE2 鎖還勉強插得進，但比較鬆，舊抗體也比較對不準。",
+            en: "Last year’s teeth. Still a little useful on the same ACE2 lock, but sloppy; old antibodies miss more too.",
           },
         },
         {
@@ -428,8 +428,8 @@ export const articles: Article[] = [
           id: "shot",
           label: { zh: "今年的針", en: "This year’s shot" },
           body: {
-            zh: "2026–27 新冠針改成對 XFG。跟流感一樣，配方要跟著流行株走。",
-            en: "The 2026–27 COVID shot targets XFG. Like flu, the recipe follows the strain.",
+            zh: "2026–27 新冠針改成教免疫系統認 XFG 棘蛋白齒形（練習用鑰匙模型），不是去改 ACE2 鎖。",
+            en: "The 2026–27 shot teaches your immune system XFG spike teeth (a practice key model) — not a change to the ACE2 lock.",
           },
         },
       ],
@@ -532,7 +532,7 @@ export const articles: Article[] = [
         { id: "switch", title: { zh: "找到開關", en: "Find the switch" }, how: { zh: "點 BCL11A。出生後它把胎兒血紅素關掉。", en: "Tap BCL11A. After birth it shut fetal hemoglobin off." } },
         { id: "cut", title: { zh: "剪開開關", en: "Cut the switch" }, how: { zh: "把右邊 CRISPR 剪刀拖到 BCL11A 的虛線圈。", en: "Drag the CRISPR scissors onto the dashed ring on BCL11A." } },
         { id: "hbf", title: { zh: "看 HbF 回來", en: "Watch HbF return" }, how: { zh: "點胎兒血紅素計量表，看它從低變高。", en: "Tap the fetal-hemoglobin meter and watch it rise." } },
-        { id: "cell", title: { zh: "血球變圓", en: "Round the cell" }, how: { zh: "點鐮刀型紅血球，看它比較像甜甜圈。", en: "Tap the sickle cell and watch it become more doughnut-shaped." } },
+        { id: "cell", title: { zh: "血球變圓", en: "Round the cell" }, how: { zh: "點鐮刀型紅血球，看它比較像扁圓碟。", en: "Tap the sickle cell and watch it become a biconcave disc." } },
       ],
       hotspots: [
         {
@@ -563,8 +563,8 @@ export const articles: Article[] = [
           id: "cell",
           label: { zh: "紅血球", en: "Red cell" },
           body: {
-            zh: "沒改之前像彎刀，卡住血管就痛。改完比較像甜甜圈。",
-            en: "Before the edit it bends like a blade. After, it is more doughnut-shaped.",
+            zh: "沒改之前像彎刀，卡住血管就痛。改完比較像扁圓碟。",
+            en: "Before the edit it bends like a blade. After, it is more like a biconcave disc.",
           },
         },
       ],
@@ -656,8 +656,8 @@ export const articles: Article[] = [
         en: "Dengue has four faces. Learning only one can make the next meaner. A tetravalent shot previews all four, weakened.",
       },
       how: {
-        zh: "分別點 DENV-1～4，再點蚊子看風險說明，最後點疫苗瓶把四型裝進去。",
-        en: "Tap DENV-1 to 4, tap the mosquito for the risk note, then tap the vial to load all four.",
+        zh: "分別點 DENV-1～4，再點蚊子，接著點跳出的風險字條，最後點疫苗瓶把四型裝進去。",
+        en: "Tap DENV-1 to 4, tap the mosquito, tap the risk slip, then tap the vial to load all four.",
       },
       hint: {
         zh: "下一步：先點左上 DENV-1，一張一張認臉。",
@@ -766,8 +766,8 @@ export const articles: Article[] = [
       {
         label: { zh: "用國中生物講", en: "Like year-9 biology" },
         body: {
-          zh: "細胞膜上有接收器。RAS 蛋白像電燈開關，接到「可以長」就亮一下再關掉。突變之後開關黏住，下游一路喊「繼續分裂」。舊的 KRAS 藥多半只打得中少見的 G12C。daraxonrasib 瞄的是打開狀態的多種 RAS，覆蓋面比較寬。",
-          en: "Receptors sit in the membrane. RAS is a light switch: it should blink on, then off. A mutation glues it on, so the cell never stops dividing. Older KRAS drugs mostly hit rare G12C. Daraxonrasib goes after many RAS proteins in the ON state.",
+          zh: "接收器在細胞膜上。RAS 漂在膜內側：接到「可以長」就亮一下再關掉。突變之後開關黏住，下游一路喊「繼續分裂」。舊的 KRAS 藥多半只打得中少見的 G12C。daraxonrasib 瞄的是打開狀態的多種 RAS，覆蓋面比較寬。",
+          en: "Receptors sit in the membrane. RAS floats just inside: it should blink on, then off. A mutation glues it on, so the cell never stops dividing. Older KRAS drugs mostly hit rare G12C. Daraxonrasib goes after many RAS proteins in the ON state.",
         },
       },
       {
@@ -803,8 +803,8 @@ export const articles: Article[] = [
       kind: "ras-switch",
       title: { zh: "把黏住的開關掰回去", en: "Unstick the switch" },
       lesson: {
-        zh: "RAS 是生長開關。胰臟癌裡它卡住常亮；這顆口服藥把它掰回安靜。",
-        en: "RAS is a growth switch. In this pancreatic cancer it sticks ON. The pill forces it quiet.",
+        zh: "胰臟癌常見 RAS 黏在 ON；口服藥把開關掰回 OFF，分裂訊號才停。",
+        en: "In this cancer RAS sticks ON; the pill forces it OFF so “divide!” mail slows.",
       },
       how: {
         zh: "點卡住的 RAS 與生長箭頭，再把藥丸拖到開關上，最後點細胞核。",
@@ -891,8 +891,8 @@ export const articles: Article[] = [
       {
         label: { zh: "一句話", en: "One line" },
         body: {
-          zh: "Lecanemab 是抓腦裡類澱粉蛋白的抗體。以前開始治療常要靜脈滴注，現在起始也能改成皮下，對病人跟家人都少一點醫院 commutes。",
-          en: "Lecanemab is an antibody that grabs amyloid in the brain. Starting treatment used to mean IV drips. Now initiation can be a subcutaneous shot, which means fewer hospital commutes.",
+          zh: "Lecanemab 是抓腦裡類澱粉蛋白的抗體。以前開始治療常要靜脈滴注，現在起始也能改成皮下，對病人跟家人都少跑幾趟醫院。",
+          en: "Lecanemab is an antibody that grabs amyloid in the brain. Starting treatment used to mean IV drips. Now initiation can be a subcutaneous shot, which means fewer hospital trips.",
         },
       },
       {
@@ -934,8 +934,8 @@ export const articles: Article[] = [
       kind: "plaque-clean",
       title: { zh: "擦掉神經元旁邊的灰", en: "Dust the neuron" },
       lesson: {
-        zh: "類澱粉是神經元外面的垃圾。抗體像專用抹布；擦完突觸比較能說話，但不能把忘記的記憶自動還回來。",
-        en: "Amyloid is junk outside the neuron. Antibodies are a special cloth. A cleaner synapse talks better — it does not restore lost memories by itself.",
+        zh: "類澱粉是神經元外面的垃圾。在這個模型裡，擦掉斑塊後訊號比較清楚；但不能把忘記的記憶自動還回來。",
+        en: "Amyloid is junk outside the neuron. In this model, less plaque → a clearer signal. It does not restore lost memories by itself.",
       },
       how: {
         zh: "先點神經元與一塊灰。再把右邊 Y 形抗體拖到每一塊斑塊上。清完點突觸火花。",
@@ -1065,8 +1065,8 @@ export const articles: Article[] = [
       kind: "oncolytic",
       title: { zh: "讓病毒在腫瘤裡開分店", en: "Let the virus open a shop in the tumor" },
       lesson: {
-        zh: "溶瘤病毒愛在腫瘤裡複製、炸開，順便廣播「這裡有敵人」，叫醒 T 細胞。",
-        en: "An oncolytic virus copies inside the tumor, bursts, and broadcasts “enemy here,” waking T cells.",
+        zh: "改造病毒偏愛在腫瘤複製→腫瘤裂開→釋出警報；加 PD-1 鬆剎讓 T 細胞跟上。",
+        en: "Engineered virus copies in tumors → burst → alarm; plus PD-1 brake off so T cells join.",
       },
       how: {
         zh: "先點腫瘤。把病毒拖到健康細胞會彈開；再拖進腫瘤等它裂開，最後點趕來的 T 細胞。",
@@ -1126,12 +1126,12 @@ export const articles: Article[] = [
     tag: "vaccine",
     stage: "phase3",
     title: {
-      zh: "帶狀皰疹疫苗新數據：2.6 萬人裡，保護力 91.6%",
-      en: "New shingles data: 91.6% protection in 26,000 adults",
+      zh: "帶狀皰疹：病毒在神經裡裝睡，LZ901 試著攔路",
+      en: "Shingles: virus naps in nerves — LZ901’s big phase 3 head count",
     },
     dek: {
-      zh: "中國 LZ901 的第三期登在《Nature Communications》。40 歲以上打兩劑，一年內得帶狀皰疹的人少很多。藥證還在審。",
-      en: "China’s LZ901 phase 3 landed in Nature Communications. Two doses in adults 40+ cut shingles sharply over a year. The license is still under review.",
+      zh: "2.6 萬人試驗：兩劑後一年，帶狀皰疹少很多；還在等中國藥證。",
+      en: "Phase 3 in 26,000 adults: two doses, far fewer shingles in a year — license still pending in China.",
     },
     images: [
       {
@@ -1303,7 +1303,7 @@ export const articles: Article[] = [
       {
         label: { zh: "發生了什麼", en: "What happened" },
         body: {
-          zh: "8 月 26 日《Cell Biomaterials》報告：Nano-ERASER 在人類星狀膠細胞與阿茲海默類器官裡，讓膠細胞轉成會放電的神經元；在小鼠身上，築巢與水迷宫表現變好，神經元密度上升、發炎與類澱粉下降。作者說下一步是更長追蹤與靈長類，這不是治癒宣告。",
+          zh: "8 月 26 日《Cell Biomaterials》報告：Nano-ERASER 在人類星狀膠細胞與阿茲海默類器官裡，讓膠細胞轉成會放電的神經元；在小鼠身上，築巢與水迷宮表現變好，神經元密度上升、發炎與類澱粉下降。作者說下一步是更長追蹤與靈長類，這不是治癒宣告。",
           en: "On 26 August Cell Biomaterials reported that Nano-ERASER turned human astrocytes and Alzheimer’s organoids into firing neurons. Mice nested better and solved a water maze faster; neuron density rose, inflammation and amyloid fell. The authors want longer follow-up and primates. This is not a cure announcement.",
         },
       },

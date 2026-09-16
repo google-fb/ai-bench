@@ -10,7 +10,8 @@ function card(article: Article): string {
       <div class="rank">NO. ${String(article.rank).padStart(2, "0")}</div>
       <div>
         <div class="meta">
-          <span>${article.dateLabel.zh}</span>
+          <span lang="zh">${article.dateLabel.zh}</span>
+          <span lang="en">${article.dateLabel.en}</span>
           <span>${tag.zh} / ${tag.en}</span>
           <span>${stage.zh} / ${stage.en}</span>
         </div>
@@ -45,7 +46,7 @@ export function renderHome(): string {
           <p lang="zh">我們把 7、8 月跟疫苗、基因、癌症、大腦有關的大事收成十篇。用國中生物那種「點細胞核、看細胞壁」的方式，讓你動手摸一摸原理。口語、中英對照，不是考卷。</p>
           <p lang="en">Ten vaccine-first plus big-medicine stories from July and August. Each piece has a biology-class canvas — tap a nucleus, drag a memo, unstick a switch. Colloquial, bilingual, zero pop quiz.</p>
         </div>
-        <div class="toolbar" role="tablist" aria-label="篩選">
+        <div class="toolbar" role="group" aria-label="篩選 / Filter">
           <button class="chip" type="button" data-filter="all" aria-pressed="true">全部 / All</button>
           <button class="chip" type="button" data-filter="vaccine">疫苗 / Vaccine</button>
           <button class="chip" type="button" data-filter="gene">基因 / Gene</button>
@@ -53,7 +54,13 @@ export function renderHome(): string {
           <button class="chip" type="button" data-filter="brain">大腦 / Brain</button>
         </div>
       </section>
-      <section class="feed">${articles.map(card).join("")}</section>
+      <section class="feed">
+        ${articles.map(card).join("")}
+        <div class="feed-empty" hidden>
+          <p lang="zh">這個分類現在沒有文章。</p>
+          <p lang="en">Nothing in this filter yet.</p>
+        </div>
+      </section>
     </main>
   `;
 }
@@ -61,6 +68,7 @@ export function renderHome(): string {
 export function bindHome(root: HTMLElement): void {
   const chips = root.querySelectorAll<HTMLButtonElement>("[data-filter]");
   const cards = root.querySelectorAll<HTMLElement>(".card");
+  const empty = root.querySelector<HTMLElement>(".feed-empty");
   chips.forEach((chip) => {
     chip.addEventListener("click", () => {
       const filter = chip.dataset.filter ?? "all";
@@ -69,6 +77,7 @@ export function bindHome(root: HTMLElement): void {
         const show = filter === "all" || cardEl.dataset.tag === filter;
         cardEl.style.display = show ? "" : "none";
       });
+      if (empty) empty.hidden = [...cards].every((cardEl) => cardEl.style.display === "none");
     });
   });
 }

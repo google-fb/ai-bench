@@ -15,7 +15,7 @@ export function renderHeader(): string {
           <strong>夏日醫學筆記</strong>
           <span>SUMMER MED NOTES · 2026</span>
         </a>
-        <div class="controls" role="toolbar" aria-label="閱讀設定">
+        <div class="controls" role="toolbar" aria-label="閱讀設定 / Reading settings">
           <button type="button" ${toggle("theme", "light")}>Light</button>
           <button type="button" ${toggle("theme", "dark")}>Dark</button>
           <button type="button" ${toggle("size", "sm")}>A−</button>
@@ -41,7 +41,7 @@ export function renderFooter(): string {
   `;
 }
 
-export function bindChrome(root: HTMLElement): void {
+export function bindChrome(root: HTMLElement, hooks?: { onLangChange?: () => void }): void {
   root.querySelectorAll<HTMLButtonElement>("[data-key]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const key = btn.dataset.key as keyof Prefs;
@@ -50,6 +50,7 @@ export function bindChrome(root: HTMLElement): void {
       root.querySelectorAll<HTMLButtonElement>(`[data-key="${key}"]`).forEach((b) => {
         b.setAttribute("aria-pressed", String(b.dataset.value === value));
       });
+      if (key === "lang") hooks?.onLangChange?.();
     });
   });
 }

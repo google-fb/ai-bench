@@ -31,11 +31,13 @@ export type LabApi = {
 };
 
 export function copyText(copy: Copy): string {
-  return prefs.lang === "en" ? copy.en : copy.zh;
+  if (prefs.lang === "en") return copy.en;
+  if (prefs.lang === "zh") return copy.zh;
+  return `${copy.zh} · ${copy.en}`;
 }
 
 export function L(zh: string, en: string): string {
-  return prefs.lang === "en" ? en : zh;
+  return copyText({ zh, en });
 }
 
 export function hitCircle(p: Point, c: Point, r: number): boolean {
@@ -151,7 +153,7 @@ export function badge(
   y: number,
 ): void {
   ctx.font = "12px Geist, ui-sans-serif, sans-serif";
-  const w = Math.min(ctx.measureText(text).width + 16, 280);
+  const w = Math.min(ctx.measureText(text).width + 16, 320);
   ctx.fillStyle = "#fff";
   roundRectPath(ctx, x, y, w, 22, 3);
   ctx.fill();
@@ -161,19 +163,32 @@ export function badge(
 
 export function drawCoachMark(ctx: CanvasRenderingContext2D, coach: Coach, t: number): void {
   pulseRing(ctx, coach.x, coach.y, 28, t);
-  const verb =
-    coach.kind === "drag"
-      ? L("拖我", "Drag me")
-      : coach.kind === "drop"
-        ? L("放這裡", "Drop here")
-        : L("點我", "Tap me");
-  badge(ctx, `${verb} · ${L(coach.zh, coach.en)}`, coach.x + 36, coach.y - 36);
+  const verbZh = coach.kind === "drag" ? "拖我" : coach.kind === "drop" ? "放這裡" : "點我";
+  const verbEn = coach.kind === "drag" ? "Drag me" : coach.kind === "drop" ? "Drop here" : "Tap me";
+  const lines =
+    prefs.lang === "en"
+      ? [`${verbEn} · ${coach.en}`]
+      : prefs.lang === "zh"
+        ? [`${verbZh} · ${coach.zh}`]
+        : [`${verbZh} · ${coach.zh}`, `${verbEn} · ${coach.en}`];
+  ctx.font = "12px Geist, ui-sans-serif, sans-serif";
+  const bw = Math.min(Math.max(...lines.map((line) => ctx.measureText(line).width)) + 16, 300);
+  const bh = lines.length * 16 + 8;
+  const badgeX = coach.x > 700 ? coach.x - bw - 20 : coach.x + 36;
+  const badgeY = Math.max(90, Math.min(470 - bh, coach.y - 36));
+  ctx.fillStyle = "#fff";
+  roundRectPath(ctx, badgeX, badgeY, bw, bh, 3);
+  ctx.fill();
+  ctx.fillStyle = "#111";
+  lines.forEach((line, i) => {
+    ctx.fillText(line, badgeX + 8, badgeY + 16 + i * 16);
+  });
   if (coach.kind === "drag" || coach.kind === "drop") {
     ctx.strokeStyle = "#fff";
     ctx.lineWidth = 1.6;
     ctx.beginPath();
-    ctx.moveTo(coach.x + 22, coach.y - 8);
-    ctx.lineTo(coach.x + 48, coach.y - 18);
+    ctx.moveTo(coach.x + (coach.x > 700 ? -18 : 22), coach.y - 8);
+    ctx.lineTo(badgeX + (coach.x > 700 ? bw : 12), badgeY + 11);
     ctx.stroke();
   }
 }
@@ -286,12 +301,267 @@ export function currentStep(stepIds: string[], done: Record<string, boolean>): s
   return stepIds.find((id) => !done[id]) ?? null;
 }
 
-export function setNote(box: HTMLElement, title: string, body: string): void {
-  box.innerHTML = `<b>${title}</b><p>${body}</p>`;
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+export function setNote(box: HTMLElement, title: Copy, body: Copy): void {
+  if (prefs.lang === "en") {
+    box.innerHTML = `<b lang="en">${escapeHtml(title.en)}</b><p lang="en">${escapeHtml(body.en)}</p>`;
+    return;
+  }
+  if (prefs.lang === "zh") {
+    box.innerHTML = `<b lang="zh">${escapeHtml(title.zh)}</b><p lang="zh">${escapeHtml(body.zh)}</p>`;
+    return;
+  }
+  box.innerHTML = `<b lang="zh">${escapeHtml(title.zh)}</b><p lang="zh">${escapeHtml(body.zh)}</p><b lang="en">${escapeHtml(title.en)}</b><p lang="en">${escapeHtml(body.en)}</p>`;
 }
 
 export function articleBySlug(slug: string) {
   return articles.find((item) => item.slug === slug);
+}
+
+export function wrapLabel(
+  ctx: CanvasRenderingContext2D,
+  zh: string,
+  en: string,
+  x: number,
+  y: number,
+  maxW = 150,
+  active = false,
+): void {
+  ctx.font = "12px Geist, ui-sans-serif, sans-serif";
+  const zhLines = prefs.lang === "en" ? [] : wrapLines(ctx, zh, maxW, 2);
+  const enLines = prefs.lang === "zh" ? [] : wrapLines(ctx, en, maxW, 2);
+  const lines = [...zhLines.map((line) => ({ line, dim: false })), ...enLines.map((line) => ({ line, dim: prefs.lang === "both" }))];
+  const w = Math.min(maxW, Math.max(40, ...lines.map((item) => ctx.measureText(item.line).width)) + 16);
+  const h = lines.length * 16 + 10;
+  ctx.fillStyle = "rgba(0,0,0,0.72)";
+  roundRectPath(ctx, x, y, w, h, 3);
+  ctx.fill();
+  lines.forEach((item, i) => {
+    ctx.fillStyle = item.dim ? "#9a9a9a" : active ? "#fff" : "#c4c4c4";
+    ctx.fillText(item.line, x + 8, y + 18 + i * 16);
+  });
+}
+
+export function leaderLine(
+  ctx: CanvasRenderingContext2D,
+  ax: number,
+  ay: number,
+  lx: number,
+  ly: number,
+  zh: string,
+  en: string,
+  active = false,
+): void {
+  ctx.fillStyle = active ? "#fff" : "#9a9a9a";
+  ctx.beginPath();
+  ctx.arc(ax, ay, 3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#9a9a9a";
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(ax, ay);
+  if (Math.abs(lx - ax) > Math.abs(ly - ay)) {
+    ctx.lineTo(lx, ay);
+    ctx.lineTo(lx, ly + 10);
+  } else {
+    ctx.lineTo(ax, ly + 10);
+    ctx.lineTo(lx, ly + 10);
+  }
+  ctx.stroke();
+  wrapLabel(ctx, zh, en, lx, ly, 148, active);
+}
+
+export function dropZone(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  r: number,
+  t: number,
+  zh: string,
+  en: string,
+): void {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(255,255,255,0.08)";
+  ctx.fill();
+  dashedCircle(ctx, x, y, r, t);
+  wrapLabel(ctx, `放這裡｜${zh}`, `Drop · ${en}`, x - 48, y + r + 6, 140, true);
+}
+
+export function drawArrow(
+  ctx: CanvasRenderingContext2D,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  color = "rgba(255,255,255,0.7)",
+): void {
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - 10 * Math.cos(a - 0.4), y2 - 10 * Math.sin(a - 0.4));
+  ctx.lineTo(x2 - 10 * Math.cos(a + 0.4), y2 - 10 * Math.sin(a + 0.4));
+  ctx.closePath();
+  ctx.fill();
+}
+
+export function organelleFill(
+  ctx: CanvasRenderingContext2D,
+  kind: "cytoplasm" | "membrane" | "nucleus" | "ribosome" | "lymphocyte" | "tumor" | "rbc" | "astrocyte",
+  x: number,
+  y: number,
+  r: number,
+  extra?: { ry?: number; sickle?: boolean },
+): void {
+  const ry = extra?.ry ?? r;
+  if (kind === "cytoplasm") {
+    ctx.beginPath();
+    ctx.ellipse(x, y, r, ry, 0, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    ctx.fill();
+    for (let i = 0; i < 28; i += 1) {
+      const a = (i / 28) * Math.PI * 2;
+      ctx.fillStyle = "rgba(255,255,255,0.12)";
+      ctx.fillRect(x + Math.cos(a) * r * 0.55, y + Math.sin(a) * ry * 0.5, 1.2, 1.2);
+    }
+    return;
+  }
+  if (kind === "membrane") {
+    ctx.strokeStyle = "#ececec";
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.ellipse(x, y, r, ry, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(255,255,255,0.28)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(x, y, r + 6, ry + 6, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    return;
+  }
+  if (kind === "nucleus") {
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = "#161616";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.62, 0, Math.PI * 2);
+    ctx.fillStyle = "#242424";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.28, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.strokeStyle = "#888";
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.stroke();
+    return;
+  }
+  if (kind === "ribosome") {
+    ctx.fillStyle = "#d9d9d9";
+    ctx.beginPath();
+    ctx.arc(x - 8, y - 4, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x + 8, y + 6, r * 0.72, 0, Math.PI * 2);
+    ctx.fill();
+    return;
+  }
+  if (kind === "lymphocyte") {
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = "#2a2a2a";
+    ctx.fill();
+    ctx.strokeStyle = "#ddd";
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.62, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    return;
+  }
+  if (kind === "tumor") {
+    ctx.fillStyle = "#1a1a1a";
+    ctx.beginPath();
+    ctx.ellipse(x - 16, y - 12, r * 0.62, r * 0.5, -0.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(x + 18, y + 8, r * 0.55, r * 0.46, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.72, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#777";
+    ctx.stroke();
+    return;
+  }
+  if (kind === "rbc") {
+    ctx.strokeStyle = "#ddd";
+    ctx.lineWidth = 2.2;
+    ctx.fillStyle = "rgba(255,255,255,0.08)";
+    ctx.beginPath();
+    if (extra?.sickle) ctx.ellipse(x, y, r + 10, r * 0.42, 0.55, 0, Math.PI * 2);
+    else ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    if (!extra?.sickle) {
+      ctx.beginPath();
+      ctx.arc(x, y, r * 0.42, 0, Math.PI * 2);
+      ctx.strokeStyle = "#666";
+      ctx.stroke();
+    }
+    return;
+  }
+  ctx.strokeStyle = "#fff";
+  for (let i = 0; i < 6; i += 1) {
+    const a = (i / 6) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.quadraticCurveTo(x + Math.cos(a) * r * 0.45, y + Math.sin(a) * r * 0.45, x + Math.cos(a) * r, y + Math.sin(a) * r);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x + Math.cos(a) * r, y + Math.sin(a) * r, 5, 0, Math.PI * 2);
+    ctx.fillStyle = "#2a2a2a";
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.ellipse(x, y, 22, 16, 0, 0, Math.PI * 2);
+  ctx.fillStyle = "#1c1c1c";
+  ctx.fill();
+  ctx.strokeStyle = "#fff";
+  ctx.stroke();
+}
+
+function wrapLines(ctx: CanvasRenderingContext2D, text: string, maxW: number, maxLines = 3): string[] {
+  if (ctx.measureText(text).width <= maxW) return [text];
+  const chars = [...text];
+  const lines: string[] = [];
+  let cur = "";
+  chars.forEach((ch) => {
+    const next = `${cur}${ch}`;
+    if (ctx.measureText(next).width > maxW && cur) {
+      lines.push(cur);
+      cur = ch;
+    } else cur = next;
+  });
+  if (cur) lines.push(cur);
+  return lines.slice(0, maxLines);
 }
 
 function ellipsize(ctx: CanvasRenderingContext2D, text: string, max: number): string {

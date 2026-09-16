@@ -25,6 +25,7 @@ export function applyPrefs(): void {
   root.dataset.theme = prefs.theme;
   root.dataset.size = prefs.size;
   root.dataset.lang = prefs.lang;
+  root.lang = prefs.lang === "en" ? "en" : "zh-Hant";
 }
 
 export function savePrefs(patch: Partial<Prefs>): void {

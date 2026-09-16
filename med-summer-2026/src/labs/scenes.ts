@@ -1,13 +1,18 @@
 import {
   dashedCircle,
+  drawArrow,
   drawVirus,
   drawY,
+  dropZone,
   fillRound,
   glowCircle,
   hitCircle,
   hitRect,
   L,
+  leaderLine,
   nameAt,
+  organelleFill,
+  wrapLabel,
   type Coach,
   type LabApi,
   type LabState,
@@ -28,34 +33,34 @@ export const scenes: Record<string, LabApi> = {
       const delivered = state.flags.delivered === 1;
       const cx = 560;
       const cy = 300;
-      ctx.strokeStyle = "#ececec";
-      ctx.lineWidth = 2.2;
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, 270, 198, 0, 0, Math.PI * 2);
-      ctx.stroke();
-      nameAt(ctx, "細胞膜", "membrane", cx + 160, cy + 186);
+      organelleFill(ctx, "cytoplasm", cx, cy, 270, { ry: 184 });
+      organelleFill(ctx, "membrane", cx, cy, 270, { ry: 184 });
+      leaderLine(ctx, 790, 420, 800, 430, "細胞膜", "membrane");
+      leaderLine(ctx, 680, 340, 800, 350, "細胞質", "cytoplasm");
 
+      organelleFill(ctx, "nucleus", cx - 70, cy - 10, 68);
       glowCircle(ctx, cx - 70, cy - 10, 68, on(state, "nucleus"));
-      ctx.beginPath();
-      ctx.arc(cx - 70, cy - 10, 20, 0, Math.PI * 2);
-      ctx.fillStyle = "#fff";
-      ctx.fill();
       ctx.strokeStyle = "#888";
       ctx.beginPath();
       ctx.moveTo(cx - 88, cy - 18);
       ctx.bezierCurveTo(cx - 70, cy - 40, cx - 50, cy, cx - 52, cy + 8);
       ctx.stroke();
-      nameAt(ctx, "細胞核（DNA 圖書館）", "nucleus (DNA library)", cx - 150, cy + 82, on(state, "nucleus"));
-
-      glowCircle(ctx, cx + 90, cy + 36, 30, on(state, "ribosome"));
+      ctx.strokeStyle = "#aaa";
       ctx.beginPath();
-      ctx.arc(cx + 80, cy + 30, 12, 0, Math.PI * 2);
-      ctx.arc(cx + 100, cy + 42, 10, 0, Math.PI * 2);
-      ctx.fillStyle = "#d9d9d9";
-      ctx.fill();
-      nameAt(ctx, "核糖體工廠", "ribosome factory", cx + 64, cy + 80, on(state, "ribosome"));
+      ctx.moveTo(cx - 96, cy - 4);
+      ctx.bezierCurveTo(cx - 80, cy - 28, cx - 62, cy + 10, cx - 48, cy - 6);
+      ctx.bezierCurveTo(cx - 38, cy - 18, cx - 28, cy + 8, cx - 44, cy + 12);
+      ctx.stroke();
+      leaderLine(ctx, 430, 280, 36, 280, "細胞核（DNA 圖書館）", "nucleus (DNA library)", on(state, "nucleus"));
 
-      if (!delivered) dashedCircle(ctx, cx + 40, cy + 24, 52, t);
+      organelleFill(ctx, "ribosome", cx + 90, cy + 36, 16);
+      organelleFill(ctx, "ribosome", cx + 36, cy + 88, 10);
+      organelleFill(ctx, "ribosome", cx + 128, cy + 78, 9);
+      glowCircle(ctx, cx + 90, cy + 36, 30, on(state, "ribosome"));
+      leaderLine(ctx, 670, 340, 800, 270, "核糖體工廠", "ribosome factory", on(state, "ribosome"));
+      wrapLabel(ctx, "≈ 1 個細胞", "≈ 1 cell", 36, 470, 110);
+
+      if (!delivered) dropZone(ctx, cx + 40, cy + 24, 52, t, "細胞質", "cytoplasm");
 
       const slip = state.drag?.id === "mrna"
         ? { x: state.drag.x, y: state.drag.y }
@@ -70,33 +75,44 @@ export const scenes: Record<string, LabApi> = {
       ctx.font = "11px Geist, sans-serif";
       ctx.fillText("mRNA", -20, 5);
       ctx.restore();
-      nameAt(ctx, "mRNA 便條", "mRNA slip", slip.x - 28, slip.y + 34, on(state, "mrna"));
+      if (!delivered && !state.drag) {
+        leaderLine(ctx, slip.x, slip.y, 36, 200, "mRNA 便條", "mRNA slip", on(state, "mrna"));
+      }
 
       if (delivered) {
         const beads = Math.min(6, 2 + Math.floor(((t / 280) % 8)));
         for (let i = 0; i < beads; i += 1) {
           ctx.beginPath();
-          ctx.arc(cx + 118 + i * 12, cy + 8 - i * 3, 4, 0, Math.PI * 2);
+          ctx.arc(cx + 118 + i * 12, cy + 8 - i * 3, 5, 0, Math.PI * 2);
           ctx.fillStyle = i % 2 ? "#fff" : "#999";
           ctx.fill();
+          if (i) {
+            ctx.strokeStyle = "#888";
+            ctx.beginPath();
+            ctx.moveTo(cx + 106 + i * 12, cy + 11 - (i - 1) * 3);
+            ctx.lineTo(cx + 118 + i * 12, cy + 8 - i * 3);
+            ctx.stroke();
+          }
         }
         const pulse = 8 + Math.sin(t / 260) * 3;
-        glowCircle(ctx, cx + 188, cy - 78, 24 + pulse / 10, on(state, "ha"));
         ctx.beginPath();
-        ctx.moveTo(cx + 188, cy - 54);
-        ctx.lineTo(cx + 188, cy - 20);
-        ctx.strokeStyle = "#fff";
-        ctx.stroke();
-        nameAt(ctx, "HA 帽子蛋白", "HA hat protein", cx + 154, cy - 42, on(state, "ha"));
-
-        glowCircle(ctx, 150, 400, 34, on(state, "immune"));
-        ctx.beginPath();
-        ctx.arc(150, 400, 16, 0, Math.PI * 2);
+        ctx.ellipse(cx + 188, cy - 82, 22, 12 + pulse / 10, 0, 0, Math.PI * 2);
         ctx.fillStyle = "#fff";
         ctx.fill();
-        nameAt(ctx, "免疫細胞", "immune cell", 118, 450, on(state, "immune"));
+        ctx.beginPath();
+        ctx.moveTo(cx + 188, cy - 70);
+        ctx.lineTo(cx + 188, cy - 20);
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        glowCircle(ctx, cx + 188, cy - 78, 24 + pulse / 10, on(state, "ha"));
+        drawArrow(ctx, cx + 54, cy + 12, cx + 160, cy - 58);
+        leaderLine(ctx, 760, 200, 800, 120, "HA 帽子蛋白", "HA hat protein", on(state, "ha"));
+
+        organelleFill(ctx, "lymphocyte", 150, 400, 34);
+        glowCircle(ctx, 150, 400, 34, on(state, "immune"));
+        leaderLine(ctx, 150, 400, 36, 430, "免疫細胞", "immune cell", on(state, "immune"));
       }
-      nameAt(ctx, "細胞質", "cytoplasm", cx + 150, cy + 150);
     },
     hit(p, state) {
       if (hitCircle(p, { x: 490, y: 290 }, 68)) return "nucleus";
@@ -160,37 +176,56 @@ export const scenes: Record<string, LabApi> = {
         { id: "m2", x: 268, y: 268, n: "2" },
         { id: "m3", x: 188, y: 312, n: "3" },
       ];
+      organelleFill(ctx, "tumor", 230, 260, 118);
       glowCircle(ctx, 230, 260, 118, on(state, "tumor"));
-      nameAt(ctx, "腫瘤", "tumor", 208, 400, on(state, "tumor"));
+      leaderLine(ctx, 200, 330, 36, 400, "腫瘤", "tumor", on(state, "tumor"));
       dots.forEach((dot, i) => {
         const lit = state.flags[dot.id] === 1;
         ctx.beginPath();
         ctx.arc(dot.x, dot.y + Math.sin(t / 380 + i) * 2, 9, 0, Math.PI * 2);
         ctx.fillStyle = lit ? "#fff" : "#777";
         ctx.fill();
-        nameAt(ctx, `錯字 ${dot.n}`, `typo ${dot.n}`, dot.x + 14, dot.y + 4, lit);
         if (lit) {
           ctx.strokeStyle = "rgba(255,255,255,0.35)";
           ctx.beginPath();
           ctx.moveTo(dot.x, dot.y);
-          ctx.lineTo(520, 200);
+          ctx.lineTo(dot.x, 118);
+          ctx.lineTo(500, 200);
           ctx.stroke();
         }
       });
+      leaderLine(ctx, 210, 210, 36, 120, "錯字 1", "typo 1", state.flags.m1 === 1);
+      leaderLine(ctx, 268, 268, 36, 200, "錯字 2", "typo 2", state.flags.m2 === 1);
+      leaderLine(ctx, 188, 312, 36, 280, "錯字 3", "typo 3", state.flags.m3 === 1);
 
+      ctx.fillStyle = "#141414";
+      ctx.fillRect(500, 150, 140, 100);
       ctx.strokeStyle = on(state, "print") ? "#fff" : "#777";
       ctx.strokeRect(500, 150, 140, 100);
-      ctx.fillStyle = "#1a1a1a";
+      ctx.fillStyle = "#0a0a0a";
       ctx.fillRect(512, 162, 116, 54);
-      nameAt(ctx, "mRNA 印表機", "mRNA printer", 514, 274, on(state, "print"));
+      if (state.flags.printed === 1) {
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(520, 176, 28, 8);
+        ctx.fillRect(552, 176, 18, 8);
+        ctx.fillRect(574, 176, 22, 8);
+      }
+      ctx.fillStyle = "#0f0f0f";
+      ctx.fillRect(500, 252, 140, 22);
+      ctx.strokeStyle = "#444";
+      ctx.strokeRect(500, 252, 140, 22);
+      wrapLabel(ctx, "讀序儀 → 三個錯字", "sequencer → 3 typos", 800, 200, 150);
+      leaderLine(ctx, 640, 170, 800, 120, "mRNA 印表機", "mRNA printer", on(state, "print"));
 
       const printed = state.flags.printed === 1;
+      const hunt = state.flags.hunt === 1;
+      const tx = hunt ? 340 : 760;
       const poster = state.drag?.id === "poster"
         ? { x: state.drag.x, y: state.drag.y }
         : printed && state.flags.armed !== 1
           ? { x: 570, y: 330 }
           : printed
-            ? { x: 760, y: 250 }
+            ? { x: tx - 28, y: 248 }
             : null;
       if (poster) {
         ctx.fillStyle = on(state, "poster") ? "#fff" : "#e8e8e8";
@@ -200,19 +235,16 @@ export const scenes: Record<string, LabApi> = {
         nameAt(ctx, "通緝令", "wanted poster", poster.x - 24, poster.y + 40, on(state, "poster"));
       }
 
-      const hunt = state.flags.hunt === 1;
-      const tx = hunt ? 340 : 760;
+      organelleFill(ctx, "lymphocyte", tx, 280, 44);
       glowCircle(ctx, tx, 280, 44, on(state, "tcell"));
-      ctx.beginPath();
-      ctx.arc(tx, 280, 16, 0, Math.PI * 2);
-      ctx.fillStyle = "#fff";
-      ctx.fill();
-      nameAt(ctx, "T 細胞", "T cell", tx - 22, 346, on(state, "tcell"));
+      leaderLine(ctx, tx, 280, 800, 360, "T 細胞", "T cell", on(state, "tcell"));
       if (state.flags.armed === 1) {
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(tx - 10, 250, 20, 26);
+        drawY(ctx, tx, 248, true);
       }
-      if (hunt) nameAt(ctx, "認出癌了", "cancer spotted", 300, 180, true);
+      if (printed && state.flags.armed !== 1 && !state.drag) {
+        dropZone(ctx, 760, 280, 56, t, "T 細胞", "T cell");
+      }
+      if (hunt) wrapLabel(ctx, "認出癌了", "cancer spotted", 230, 96, 160, true);
     },
     hit(p, state) {
       const dots = [
@@ -237,11 +269,6 @@ export const scenes: Record<string, LabApi> = {
     },
     down(id, p, state) {
       if (id === "m1" || id === "m2" || id === "m3") mark(state, id);
-      if (id === "tumor") {
-        mark(state, "m1");
-        mark(state, "m2");
-        mark(state, "m3");
-      }
       if (id === "print" && state.flags.m1 && state.flags.m2 && state.flags.m3) mark(state, "printed");
       if (id === "poster" && state.flags.printed === 1 && state.flags.armed !== 1) {
         state.drag = { id: "poster", x: p.x, y: p.y };
@@ -270,9 +297,9 @@ export const scenes: Record<string, LabApi> = {
       };
     },
     coach(state) {
-      if (!state.flags.m1) return { x: 210, y: 210, kind: "tap", zh: "突變 1", en: "typo 1" };
-      if (!state.flags.m2) return { x: 268, y: 268, kind: "tap", zh: "突變 2", en: "typo 2" };
-      if (!state.flags.m3) return { x: 188, y: 312, kind: "tap", zh: "突變 3", en: "typo 3" };
+      if (!state.flags.m1) return { x: 210, y: 210, kind: "tap", zh: "錯字 1", en: "typo 1" };
+      if (!state.flags.m2) return { x: 268, y: 268, kind: "tap", zh: "錯字 2", en: "typo 2" };
+      if (!state.flags.m3) return { x: 188, y: 312, kind: "tap", zh: "錯字 3", en: "typo 3" };
       if (!state.flags.printed) return { x: 570, y: 200, kind: "tap", zh: "印表機", en: "printer" };
       if (!state.flags.armed) {
         if (state.drag?.id === "poster") return { x: 760, y: 280, kind: "drop", zh: "T 細胞", en: "T cell" };
@@ -284,14 +311,30 @@ export const scenes: Record<string, LabApi> = {
   },
 
   "lock-key": {
-    draw(ctx, state) {
-      ctx.strokeStyle = "#666";
+    draw(ctx, state, t) {
+      ctx.fillStyle = "#141414";
       ctx.beginPath();
-      ctx.moveTo(280, 430);
-      ctx.bezierCurveTo(360, 250, 600, 250, 700, 430);
-      ctx.stroke();
-      nameAt(ctx, "呼吸道細胞", "airway cell", 430, 450);
+      ctx.moveTo(120, 470);
+      ctx.lineTo(840, 470);
+      ctx.lineTo(780, 400);
+      ctx.bezierCurveTo(600, 250, 360, 250, 200, 400);
+      ctx.closePath();
+      ctx.fill();
+      for (let i = 0; i < 6; i += 1) {
+        ctx.strokeStyle = "#555";
+        ctx.strokeRect(160 + i * 90, 410, 70, 48);
+        for (let c = 0; c < 4; c += 1) {
+          ctx.beginPath();
+          ctx.moveTo(175 + i * 90 + c * 12, 410);
+          ctx.lineTo(175 + i * 90 + c * 12, 396);
+          ctx.strokeStyle = "#aaa";
+          ctx.stroke();
+        }
+      }
+      leaderLine(ctx, 200, 430, 36, 430, "呼吸道細胞", "airway cell");
 
+      ctx.fillStyle = "#141414";
+      ctx.fillRect(410, 188, 140, 176);
       ctx.strokeStyle = on(state, "lock") ? "#fff" : "#8a8a8a";
       ctx.lineWidth = 3;
       ctx.strokeRect(410, 188, 140, 176);
@@ -300,14 +343,23 @@ export const scenes: Record<string, LabApi> = {
       ctx.stroke();
       ctx.fillStyle = "#0a0a0a";
       ctx.fillRect(466, 250, 28, 64);
-      nameAt(ctx, "ACE2 鎖", "ACE2 lock", 444, 390, on(state, "lock"));
+      for (let i = 0; i < 6; i += 1) {
+        ctx.fillStyle = "#2a2a2a";
+        ctx.fillRect(452 + i * 8, 268, 5, 36);
+      }
+      leaderLine(ctx, 480, 188, 36, 120, "ACE2 鎖（沒換）", "ACE2 lock (unchanged)", on(state, "lock"));
+      wrapLabel(ctx, "這把鎖在細胞上，季節不會換", "This lock stays on the cell", 36, 80, 170);
+      if (state.drag?.id === "oldkey" || state.drag?.id === "newkey") {
+        dropZone(ctx, 480, 250, 70, t, "試鑰匙", "try key");
+      }
 
       const oldP = state.drag?.id === "oldkey" ? state.drag : { x: 150, y: 250 };
       const newP = state.drag?.id === "newkey" ? state.drag : state.flags.fit === 1 ? { x: 480, y: 236 } : { x: 800, y: 250 };
       drawKey(ctx, oldP.x, oldP.y, false, on(state, "oldkey"));
       drawKey(ctx, newP.x, newP.y, true, on(state, "newkey"));
-      nameAt(ctx, "舊棘蛋白", "old spike", oldP.x - 28, oldP.y + 52, on(state, "oldkey"));
+      nameAt(ctx, "舊棘蛋白鑰匙", "old spike key", oldP.x - 36, oldP.y + 52, on(state, "oldkey"));
       nameAt(ctx, "XFG 新鑰匙", "XFG key", newP.x - 18, newP.y + 52, on(state, "newkey"));
+      wrapLabel(ctx, "棘蛋白＝病毒鑰匙", "Spike = viral key", 800, 120, 150);
 
       if (state.flags.miss === 1 && state.flags.fit !== 1) {
         ctx.fillStyle = "#fff";
@@ -318,8 +370,17 @@ export const scenes: Record<string, LabApi> = {
         ctx.fillStyle = "#fff";
         ctx.font = "16px Geist, sans-serif";
         ctx.fillText(L("對上了", "It fits"), 448, 168);
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(772, 388, 14, 44);
+        ctx.fillRect(776, 376, 6, 14);
+        ctx.beginPath();
+        ctx.moveTo(779, 432);
+        ctx.lineTo(779, 456);
+        ctx.strokeStyle = "#fff";
+        ctx.stroke();
         glowCircle(ctx, 780, 400, 32, on(state, "shot"));
-        nameAt(ctx, "今年的針", "this year’s shot", 740, 450, on(state, "shot"));
+        leaderLine(ctx, 780, 400, 800, 430, "今年的針＝練習鑰匙模型", "shot = practice key model", on(state, "shot"));
+        wrapLabel(ctx, "抗體學的是齒形，不是去改鎖", "Antibodies learn teeth, not a new lock", 560, 430, 190);
       }
     },
     hit(p, state) {
@@ -380,52 +441,72 @@ export const scenes: Record<string, LabApi> = {
   "crispr-switch": {
     draw(ctx, state, t) {
       const cut = state.flags.cut === 1;
+      ctx.fillStyle = "#141414";
+      ctx.fillRect(170, 150, 240, 88);
       ctx.strokeStyle = on(state, "bcl11a") ? "#fff" : "#777";
       ctx.strokeRect(170, 150, 240, 88);
+      for (let i = 0; i < 12; i += 1) {
+        ctx.beginPath();
+        ctx.arc(186 + i * 18, 156, 3, 0, Math.PI);
+        ctx.strokeStyle = "#666";
+        ctx.stroke();
+      }
       ctx.fillStyle = cut ? "#2a2a2a" : "#fff";
       ctx.fillRect(cut ? 188 : 330, 166, 52, 56);
-      nameAt(ctx, "BCL11A 開關", "BCL11A switch", 220, 140, on(state, "bcl11a"));
-      nameAt(ctx, cut ? "已剪開，關不了胎兒血紅素" : "正把胎兒血紅素壓住", cut ? "cut — fetal Hb can return" : "holding fetal Hb off", 170, 258);
+      if (cut) {
+        ctx.fillStyle = "#0a0a0a";
+        ctx.fillRect(284, 150, 12, 88);
+      }
+      leaderLine(ctx, 220, 150, 36, 120, "BCL11A 開關", "BCL11A switch", on(state, "bcl11a"));
+      wrapLabel(
+        ctx,
+        cut ? "已剪開，關不了胎兒血紅素" : "正把胎兒血紅素壓住",
+        cut ? "cut — fetal Hb can return" : "holding fetal Hb off",
+        430,
+        160,
+        220,
+        cut,
+      );
 
-      if (!cut) dashedCircle(ctx, 290, 194, 46, t);
+      if (!cut) dropZone(ctx, 290, 194, 46, t, "BCL11A", "BCL11A");
       const scissors = state.drag?.id === "scissors" ? state.drag : cut ? { x: 290, y: 194 } : { x: 720, y: 190 };
       glowCircle(ctx, scissors.x, scissors.y, 34, on(state, "scissors"));
       ctx.strokeStyle = "#fff";
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(scissors.x - 16, scissors.y - 12);
-      ctx.lineTo(scissors.x + 16, scissors.y + 12);
-      ctx.moveTo(scissors.x + 16, scissors.y - 12);
-      ctx.lineTo(scissors.x - 16, scissors.y + 12);
+      ctx.arc(scissors.x - 10, scissors.y + 10, 8, 0, Math.PI * 2);
+      ctx.arc(scissors.x + 10, scissors.y + 10, 8, 0, Math.PI * 2);
+      ctx.moveTo(scissors.x - 6, scissors.y + 4);
+      ctx.lineTo(scissors.x + 16, scissors.y - 16);
+      ctx.moveTo(scissors.x + 6, scissors.y + 4);
+      ctx.lineTo(scissors.x - 16, scissors.y - 16);
       ctx.stroke();
-      nameAt(ctx, "CRISPR 剪刀", "CRISPR scissors", scissors.x - 36, scissors.y + 52, on(state, "scissors"));
+      leaderLine(ctx, scissors.x, scissors.y, 800, 200, "CRISPR 剪刀", "CRISPR scissors", on(state, "scissors"));
 
       const hbf = cut ? 0.86 : 0.12;
       ctx.strokeStyle = on(state, "hbf") ? "#fff" : "#666";
-      ctx.strokeRect(170, 300, 240, 22);
+      ctx.strokeRect(170, 292, 240, 36);
       ctx.fillStyle = "#fff";
-      ctx.fillRect(172, 302, 236 * hbf, 18);
-      nameAt(ctx, "胎兒血紅素 HbF", "fetal hemoglobin HbF", 170, 344, on(state, "hbf"));
+      ctx.fillRect(172, 294, 236 * hbf, 32);
+      ctx.fillStyle = "#888";
+      ctx.font = "11px Geist, sans-serif";
+      ctx.fillText("0", 172, 344);
+      ctx.fillText("100", 384, 344);
+      leaderLine(ctx, 290, 310, 36, 360, "胎兒血紅素 HbF", "fetal hemoglobin HbF", on(state, "hbf"));
 
       const round = cut && state.flags.sawCell === 1;
-      ctx.save();
-      ctx.translate(620, 320);
-      if (!round) ctx.rotate(0.55);
-      ctx.strokeStyle = on(state, "cell") ? "#fff" : "#bbb";
-      ctx.lineWidth = 2.2;
-      ctx.beginPath();
-      if (round) ctx.arc(0, 0, 48, 0, Math.PI * 2);
-      else ctx.ellipse(0, 0, 58, 22, 0, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-      nameAt(ctx, round ? "變圓的紅血球" : "鐮刀型紅血球", round ? "round red cell" : "sickle red cell", 560, 400, on(state, "cell"));
+      organelleFill(ctx, "rbc", 560, 340, 28, { sickle: true });
+      organelleFill(ctx, "rbc", 680, 320, 48, { sickle: !round });
+      glowCircle(ctx, 680, 320, 48, on(state, "cell"));
+      wrapLabel(ctx, "對照：鐮刀", "control: sickle", 500, 400, 120);
+      leaderLine(ctx, 680, 320, 800, 400, round ? "變圓的紅血球" : "鐮刀型紅血球", round ? "round red cell" : "sickle red cell", on(state, "cell"));
     },
     hit(p, state) {
       if (hitRect(p, 170, 150, 240, 88)) return "bcl11a";
       if (hitRect(p, 170, 300, 240, 44)) return "hbf";
       const scissors = state.drag?.id === "scissors" ? state.drag : state.flags.cut === 1 ? { x: 290, y: 194 } : { x: 720, y: 190 };
       if (hitCircle(p, scissors, 42)) return "scissors";
-      if (hitCircle(p, { x: 620, y: 320 }, 64)) return "cell";
+      if (hitCircle(p, { x: 680, y: 320 }, 64)) return "cell";
       return null;
     },
     down(id, p, state) {
@@ -462,7 +543,7 @@ export const scenes: Record<string, LabApi> = {
         return { x: 720, y: 190, kind: "drag", zh: "CRISPR", en: "CRISPR" };
       }
       if (!state.flags.sawHbf) return { x: 290, y: 311, kind: "tap", zh: "HbF 計量表", en: "HbF meter" };
-      if (!state.flags.sawCell) return { x: 620, y: 320, kind: "tap", zh: "紅血球", en: "red cell" };
+      if (!state.flags.sawCell) return { x: 680, y: 320, kind: "tap", zh: "紅血球", en: "red cell" };
       return null;
     },
   },
@@ -477,46 +558,61 @@ export const scenes: Record<string, LabApi> = {
       ];
       faces.forEach((face) => {
         const lit = state.flags[face.id] === 1;
+        ctx.strokeStyle = lit ? "#fff" : "#444";
+        ctx.strokeRect(face.x - 58, face.y - 58, 116, 132);
+        ctx.fillStyle = "rgba(255,255,255,0.03)";
+        ctx.fillRect(face.x - 58, face.y - 58, 116, 132);
         glowCircle(ctx, face.x, face.y, 44, lit || on(state, face.id));
+        drawVirus(ctx, face.x, face.y, 16, 8);
         drawFace(ctx, face.x, face.y, face.pat, lit);
-        nameAt(ctx, `DENV-${face.n}`, `DENV-${face.n}`, face.x - 26, face.y + 62, lit);
+        wrapLabel(ctx, `通緝 DENV-${face.n}`, `Wanted DENV-${face.n}`, face.x - 46, face.y + 52, 100, lit);
       });
 
-      glowCircle(ctx, 540, 190, 38, on(state, "mosquito"));
+      ctx.fillStyle = "#2a2a2a";
+      ctx.beginPath();
+      ctx.ellipse(540, 196, 16, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
       ctx.strokeStyle = "#fff";
       ctx.beginPath();
-      ctx.moveTo(518, 190);
-      ctx.lineTo(568, 160);
-      ctx.moveTo(518, 190);
-      ctx.lineTo(568, 220);
+      ctx.moveTo(524, 196);
+      ctx.lineTo(575, 168);
+      ctx.moveTo(528, 190);
+      ctx.quadraticCurveTo(560, 150, 590, 170);
+      ctx.moveTo(528, 202);
+      ctx.quadraticCurveTo(560, 240, 590, 210);
       ctx.stroke();
-      nameAt(ctx, "埃及斑蚊", "Aedes mosquito", 504, 248, on(state, "mosquito"));
+      glowCircle(ctx, 540, 190, 38, on(state, "mosquito"));
+      leaderLine(ctx, 560, 170, 800, 120, "埃及斑蚊", "Aedes mosquito", on(state, "mosquito"));
 
       const loaded = faces.filter((f) => state.flags[f.id] === 1).length;
+      ctx.fillStyle = "#1a1a1a";
+      ctx.fillRect(720, 200, 74, 160);
+      ctx.fillStyle = "#444";
+      ctx.fillRect(728, 188, 58, 16);
       ctx.strokeStyle = on(state, "vial") ? "#fff" : "#777";
       ctx.strokeRect(720, 200, 74, 160);
       ctx.fillStyle = "#fff";
       ctx.fillRect(724, 356 - loaded * 38, 66, loaded * 38);
-      nameAt(ctx, "Qdenga 四價", "Qdenga 4-in-1", 704, 384, on(state, "vial"));
+      leaderLine(ctx, 757, 188, 800, 200, "Qdenga 四價", "Qdenga 4-in-1", on(state, "vial"));
       if (loaded < 4) {
         const next = faces.find((face) => state.flags[face.id] !== 1);
         if (next) dashedCircle(ctx, next.x, next.y, 50, t);
       }
 
-      if (state.flags.ade === 1) {
-        fillRound(ctx, 430, 300, 260, 54, 4, "#fff");
-        ctx.fillStyle = "#111";
+      if (state.flags.sawMos === 1) {
+        fillRound(ctx, 480, 420, 260, 54, 4, state.flags.ade === 1 ? "#fff" : "#2a2a2a");
+        ctx.fillStyle = state.flags.ade === 1 ? "#111" : "#eee";
         ctx.font = "13px Geist, sans-serif";
         ctx.fillText(
           loaded < 4
             ? L("只認識一張臉，下一張可能更兇", "One face only can make the next worse")
             : L("四張都預習，比較不會偏心", "All four faces: less one-sided risk"),
-          442,
-          332,
+          492,
+          452,
         );
       }
     },
-    hit(p) {
+    hit(p, state) {
       const faces = [
         { id: "d1", x: 170, y: 200 },
         { id: "d2", x: 320, y: 200 },
@@ -527,20 +623,14 @@ export const scenes: Record<string, LabApi> = {
       if (face) return face.id;
       if (hitCircle(p, { x: 540, y: 190 }, 42)) return "mosquito";
       if (hitRect(p, 720, 200, 74, 160)) return "vial";
-      if (hitRect(p, 470, 300, 210, 54)) return "ade";
+      if (state.flags.sawMos === 1 && hitRect(p, 480, 420, 260, 54)) return "ade";
       return null;
     },
     down(id, _p, state) {
       if (id.startsWith("d")) mark(state, id);
-      if (id === "mosquito") {
-        mark(state, "sawMos");
-        mark(state, "ade");
-      }
+      if (id === "mosquito") mark(state, "sawMos");
       if (id === "ade") mark(state, "ade");
-      if (id === "vial") {
-        ["d1", "d2", "d3", "d4"].forEach((key) => mark(state, key));
-        mark(state, "loaded");
-      }
+      if (id === "vial") mark(state, "loaded");
     },
     done(state) {
       return {
@@ -556,20 +646,28 @@ export const scenes: Record<string, LabApi> = {
       if (!state.flags.d3) return { x: 170, y: 350, kind: "tap", zh: "第三張臉", en: "face 3" };
       if (!state.flags.d4) return { x: 320, y: 350, kind: "tap", zh: "第四張臉", en: "face 4" };
       if (!state.flags.sawMos) return { x: 540, y: 190, kind: "tap", zh: "蚊子", en: "mosquito" };
+      if (!state.flags.ade) return { x: 610, y: 447, kind: "tap", zh: "ADE 警語", en: "ADE warning" };
       if (!state.flags.loaded) return { x: 757, y: 280, kind: "tap", zh: "疫苗瓶", en: "vial" };
       return null;
     },
   },
 
   "ras-switch": {
-    draw(ctx, state) {
+    draw(ctx, state, t) {
       ctx.strokeStyle = "#666";
       ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(500, 250, 420, 160, 0, 0, Math.PI * 2);
+      ctx.stroke();
       ctx.beginPath();
       ctx.moveTo(70, 230);
       ctx.bezierCurveTo(220, 160, 420, 290, 900, 210);
       ctx.stroke();
-      nameAt(ctx, "細胞膜", "membrane", 80, 200);
+      ctx.beginPath();
+      ctx.moveTo(70, 244);
+      ctx.bezierCurveTo(220, 174, 420, 304, 900, 224);
+      ctx.stroke();
+      leaderLine(ctx, 90, 220, 36, 200, "細胞膜（RAS 在內側）", "membrane (RAS inside)");
 
       const stuckOn = state.flags.off !== 1;
       ctx.save();
@@ -578,30 +676,40 @@ export const scenes: Record<string, LabApi> = {
       ctx.fillStyle = stuckOn ? "#fff" : "#666";
       ctx.fillRect(-8, -50, 16, 78);
       ctx.restore();
+      ctx.beginPath();
+      ctx.arc(380, 220, 22, 0, Math.PI * 2);
+      ctx.fillStyle = stuckOn ? "#fff" : "#444";
+      ctx.fill();
       glowCircle(ctx, 380, 220, 28, on(state, "ras"));
-      nameAt(ctx, "RAS 開關", "RAS switch", 350, 270, on(state, "ras"));
-      nameAt(ctx, stuckOn ? "卡住：常亮" : "被藥掰回安靜", stuckOn ? "jammed ON" : "forced quiet", 320, 292);
+      leaderLine(ctx, 380, 220, 36, 280, "RAS 開關", "RAS switch", on(state, "ras"));
+      wrapLabel(ctx, stuckOn ? "卡住：常亮" : "被藥掰回安靜", stuckOn ? "jammed ON" : "forced quiet", 36, 360, 140, !stuckOn);
 
+      organelleFill(ctx, "nucleus", 780, 160, 36);
       glowCircle(ctx, 780, 160, 36, on(state, "nucleus"));
-      nameAt(ctx, "細胞核", "nucleus", 752, 214, on(state, "nucleus"));
+      leaderLine(ctx, 780, 160, 800, 120, "細胞核", "nucleus", on(state, "nucleus"));
 
       if (stuckOn) {
         for (let i = 0; i < 5; i += 1) {
           ctx.beginPath();
           ctx.moveTo(430 + i * 48, 188 - i * 16);
           ctx.lineTo(458 + i * 48, 160 - i * 16);
-          ctx.strokeStyle = "#fff";
-          ctx.stroke();
+          ctx.lineTo(446 + i * 48, 178 - i * 16);
+          ctx.closePath();
+          ctx.fillStyle = "#fff";
+          ctx.fill();
         }
-        nameAt(ctx, "生長訊號：分裂！", "growth: divide!", 560, 118, on(state, "arrows"));
+        wrapLabel(ctx, "生長訊號：分裂！", "growth: divide!", 500, 96, 180, on(state, "arrows"));
       } else {
-        nameAt(ctx, "訊號停了", "signal off", 560, 130, true);
+        wrapLabel(ctx, "訊號停了", "signal off", 500, 96, 140, true);
       }
 
       const pill = state.drag?.id === "pill" ? state.drag : state.flags.off === 1 ? { x: 380, y: 220 } : { x: 720, y: 380 };
-      fillRound(ctx, pill.x - 30, pill.y - 13, 60, 26, 13, on(state, "pill") ? "#fff" : "#c8c8c8");
-      nameAt(ctx, "口服藥丸", "oral pill", pill.x - 24, pill.y + 36, on(state, "pill"));
-      if (state.flags.off !== 1) dashedCircle(ctx, 380, 220, 40, 900);
+      fillRound(ctx, pill.x - 30, pill.y - 13, 30, 26, 13, "#fff");
+      fillRound(ctx, pill.x, pill.y - 13, 30, 26, 13, "#888");
+      if (state.flags.off !== 1) {
+        if (!state.drag) leaderLine(ctx, pill.x, pill.y, 800, 400, "口服藥丸", "oral pill", on(state, "pill"));
+        dropZone(ctx, 380, 220, 40, t, "RAS", "RAS");
+      }
     },
     hit(p, state) {
       const pill = state.drag?.id === "pill" ? state.drag : state.flags.off === 1 ? { x: 380, y: 220 } : { x: 720, y: 380 };
@@ -648,7 +756,7 @@ export const scenes: Record<string, LabApi> = {
         if (state.drag?.id === "pill") return { x: 380, y: 220, kind: "drop", zh: "放到開關上", en: "onto the switch" };
         return { x: 720, y: 380, kind: "drag", zh: "藥丸", en: "pill" };
       }
-      if (!state.flags.sawNuc) return { x: 780, y: 160, kind: "tap", zh: "細胞核", en: "nucleus" };
+      if (!state.flags.sawQuiet) return { x: 780, y: 160, kind: "tap", zh: "細胞核安靜了", en: "nucleus quiet" };
       return null;
     },
   },
@@ -662,8 +770,17 @@ export const scenes: Record<string, LabApi> = {
       ctx.bezierCurveTo(220, 170, 430, 170, 540, 320);
       ctx.bezierCurveTo(430, 270, 220, 270, 110, 320);
       ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(300, 236);
+      ctx.lineTo(240, 140);
+      ctx.moveTo(300, 236);
+      ctx.lineTo(300, 120);
+      ctx.moveTo(300, 236);
+      ctx.lineTo(360, 140);
+      ctx.stroke();
+      organelleFill(ctx, "nucleus", 300, 236, 30);
       glowCircle(ctx, 300, 236, 30, on(state, "neuron"));
-      nameAt(ctx, "神經元", "neuron", 274, 160, on(state, "neuron"));
+      leaderLine(ctx, 300, 236, 36, 120, "神經元", "neuron", on(state, "neuron"));
 
       const plaques = [
         { id: "p1", x: 210, y: 252 },
@@ -678,7 +795,8 @@ export const scenes: Record<string, LabApi> = {
         ctx.fill();
       });
       const left = plaques.filter((pl) => state.flags[pl.id] !== 1).length;
-      nameAt(ctx, `斑塊還有 ${left} 塊`, `${left} plaques left`, 200, 360, on(state, "plaque"));
+      wrapLabel(ctx, `細胞外斑塊還有 ${left} 塊`, `${left} extracellular plaques`, 36, 360, 170, on(state, "plaque"));
+      wrapLabel(ctx, "突觸前 → 突觸後", "pre → post synapse", 540, 360, 150);
 
       const cleaned = left === 0;
       const spark = cleaned ? 1 : 0.25;
@@ -689,7 +807,7 @@ export const scenes: Record<string, LabApi> = {
       ctx.lineTo(640 + Math.sin(t / 180) * 8 * spark, 250);
       ctx.stroke();
       glowCircle(ctx, 700, 240, 22, on(state, "spark"));
-      nameAt(ctx, cleaned ? "突觸：訊號清楚了" : "突觸：被灰擋住", cleaned ? "synapse: clear" : "synapse: muffled", 620, 290, on(state, "spark"));
+      leaderLine(ctx, 700, 240, 800, 120, cleaned ? "突觸：訊號清楚了" : "突觸：被灰擋住", cleaned ? "synapse: clear" : "synapse: muffled", on(state, "spark"));
 
       const home = { x: 820, y: 210 };
       const ab = state.drag?.id === "ab" ? state.drag : home;
@@ -769,10 +887,13 @@ export const scenes: Record<string, LabApi> = {
     draw(ctx, state, t) {
       const burst = state.flags.burst === 1;
       const copies = burst ? 5 : state.flags.infect === 1 ? 3 : 0;
+      organelleFill(ctx, "tumor", 360, 260, 82);
       glowCircle(ctx, 360, 260, burst ? 96 + Math.sin(t / 200) * 5 : 82, on(state, "tumor"));
-      nameAt(ctx, "腫瘤", "tumor", 336, 370, on(state, "tumor"));
+      leaderLine(ctx, 360, 340, 36, 400, "腫瘤", "tumor", on(state, "tumor"));
+      organelleFill(ctx, "nucleus", 760, 300, 22);
       glowCircle(ctx, 760, 300, 40, on(state, "healthy"));
-      nameAt(ctx, "健康細胞", "healthy cell", 724, 360, on(state, "healthy"));
+      leaderLine(ctx, 760, 300, 800, 400, "健康細胞（缺受體）", "healthy (no receptor)", on(state, "healthy"));
+      wrapLabel(ctx, "選擇性：只在腫瘤複製", "SELECTIVE: copies in tumor", 36, 120, 180);
 
       const virus = state.drag?.id === "virus"
         ? state.drag
@@ -783,7 +904,7 @@ export const scenes: Record<string, LabApi> = {
       nameAt(ctx, "改造病毒", "engineered virus", virus.x - 30, virus.y + 40, on(state, "virus"));
 
       if (state.flags.bounce === 1 && !burst) {
-        nameAt(ctx, "這裡不好住，彈開", "won’t stay here", 700, 230, true);
+        wrapLabel(ctx, "這裡不好住，彈開", "won’t stay here", 760, 210, 150, true);
       }
       if (copies) {
         for (let i = 0; i < copies; i += 1) {
@@ -792,11 +913,13 @@ export const scenes: Record<string, LabApi> = {
         }
       }
       if (burst) {
+        organelleFill(ctx, "lymphocyte", 560, 150, 26);
         glowCircle(ctx, 560, 150, 26, on(state, "tcell"));
-        nameAt(ctx, "趕來的 T 細胞", "arriving T cell", 520, 196, on(state, "tcell"));
-        nameAt(ctx, "腫瘤裂開＝警報", "burst = alarm", 300, 140, true);
+        leaderLine(ctx, 560, 150, 800, 120, "趕來的 T 細胞", "arriving T cell", on(state, "tcell"));
+        wrapLabel(ctx, "腫瘤裂開＝警報", "burst = alarm", 36, 120, 160, true);
       } else if (!state.flags.infect) {
-        dashedCircle(ctx, 360, 260, 90, t);
+        if (state.flags.bounce === 1) dropZone(ctx, 360, 260, 90, t, "腫瘤", "tumor");
+        else dropZone(ctx, 760, 300, 48, t, "健康細胞", "healthy");
       }
     },
     hit(p, state) {
@@ -862,10 +985,27 @@ export const scenes: Record<string, LabApi> = {
       ctx.moveTo(150, 230);
       ctx.bezierCurveTo(360, 150, 560, 310, 820, 220);
       ctx.stroke();
-      nameAt(ctx, "軸突（神經電線）", "axon (nerve wire)", 430, 140, on(state, "axon"));
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#0a0a0a";
+      for (let i = 1; i < 6; i += 1) {
+        const p = bezierPoint(150, 230, 360, 150, 560, 310, 820, 220, i / 6);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      leaderLine(ctx, 500, 200, 36, 120, "軸突（神經電線）", "axon (nerve wire)", on(state, "axon"));
 
+      for (let i = 0; i < 5; i += 1) {
+        const a = (i / 5) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.arc(150 + Math.cos(a) * 18, 230 + Math.sin(a) * 18, 12, 0, Math.PI * 2);
+        ctx.fillStyle = "#1a1a1a";
+        ctx.fill();
+        ctx.strokeStyle = "#888";
+        ctx.stroke();
+      }
       glowCircle(ctx, 150, 230, 52, on(state, "ganglion"));
-      nameAt(ctx, "神經節宿舍", "ganglion dorm", 110, 304, on(state, "ganglion"));
+      leaderLine(ctx, 150, 260, 36, 360, "神經節宿舍", "ganglion dorm", on(state, "ganglion"));
 
       const awake = state.flags.awake === 1;
       const blocked = state.flags.blocked === 1;
@@ -875,8 +1015,11 @@ export const scenes: Record<string, LabApi> = {
       ctx.arc(path.x, path.y, 11, 0, Math.PI * 2);
       ctx.fillStyle = awake && !blocked ? "#fff" : "#777";
       ctx.fill();
-      nameAt(ctx, awake ? (blocked ? "被擋住了" : "水痘病毒在爬") : "zzz 裝睡", awake ? (blocked ? "blocked" : "virus walking") : "zzz asleep", path.x - 20, path.y + 32, on(state, "virus"));
-      if (!awake) nameAt(ctx, "Zzz", "Zzz", 132, 200, true);
+      wrapLabel(ctx, awake ? (blocked ? "被擋住了" : "水痘病毒在爬") : "zzz 裝睡", awake ? (blocked ? "blocked" : "virus walking") : "zzz asleep", Math.min(760, Math.max(160, path.x - 20)), path.y + 24, 140, on(state, "virus"));
+      if (!awake) wrapLabel(ctx, "Zzz　再點一次叫醒", "Zzz — tap again to wake", 36, 200, 150, true);
+      ctx.strokeStyle = "#555";
+      ctx.strokeRect(780, 170, 90, 90);
+      wrapLabel(ctx, "皮膚皮節", "skin dermatome", 800, 280, 120);
 
       ctx.strokeStyle = on(state, "vaccine") ? "#fff" : "#666";
       ctx.strokeRect(420, 380, 110, 72);
@@ -947,28 +1090,31 @@ export const scenes: Record<string, LabApi> = {
       const y = 270;
       ctx.strokeStyle = "#fff";
       if (!changed) {
-        for (let i = 0; i < 8; i += 1) {
-          const a = (i / 8) * Math.PI * 2 + t / 2400;
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(x + Math.cos(a) * 96, y + Math.sin(a) * 96);
-          ctx.stroke();
-        }
+        organelleFill(ctx, "astrocyte", x, y, 96);
       } else {
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.bezierCurveTo(x + 90, y - 24, x + 200, y + 16, x + 280, y - 46);
         ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - 40, y - 50);
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - 20, y - 70);
+        ctx.stroke();
         glowCircle(ctx, x + 280, y - 46, 10, true);
       }
       glowCircle(ctx, x, y, changed ? 36 : 24, on(state, "astro") || on(state, "neuron"));
-      nameAt(ctx, changed ? "轉行後的神經元" : "星狀膠細胞（後勤）", changed ? "new neuron" : "astrocyte (support)", x - 40, y + 128, on(state, "astro") || on(state, "neuron"));
+      leaderLine(ctx, x, y, 36, 280, changed ? "轉行後的神經元" : "星狀膠細胞（後勤）", changed ? "new neuron" : "astrocyte (support)", on(state, "astro") || on(state, "neuron"));
 
       if (!changed) {
-        ctx.fillStyle = on(state, "ptbp1") ? "#fff" : "#888";
-        ctx.fillRect(x - 18, y - 18, 36, 36);
-        nameAt(ctx, "PTBP1 剎車", "PTBP1 brake", x - 28, y + 60, on(state, "ptbp1"));
-        dashedCircle(ctx, x, y, 50, t);
+        ctx.strokeStyle = on(state, "ptbp1") ? "#fff" : "#888";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(x, y, 20, 0.4, Math.PI * 1.6);
+        ctx.stroke();
+        leaderLine(ctx, x, y - 8, 36, 120, "PTBP1 剎車踏板", "PTBP1 brake pedal", on(state, "ptbp1"));
+        dropZone(ctx, x, y, 50, t, "送進細胞", "into the cell");
       }
 
       const nano = state.drag?.id === "nano" ? state.drag : changed ? { x, y } : { x: 780, y: 190 };
@@ -976,7 +1122,13 @@ export const scenes: Record<string, LabApi> = {
       ctx.arc(nano.x, nano.y, 9, 0, Math.PI * 2);
       ctx.fillStyle = "#fff";
       ctx.fill();
-      nameAt(ctx, "奈米粒子", "nanoparticle", nano.x - 24, nano.y + 30, on(state, "nano"));
+      ctx.beginPath();
+      ctx.arc(nano.x, nano.y, 14, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(255,255,255,0.4)";
+      ctx.stroke();
+      if (!changed && !state.drag) {
+        leaderLine(ctx, nano.x, nano.y, 800, 200, "奈米粒子", "nanoparticle", on(state, "nano"));
+      }
 
       fillRound(ctx, 700, 400, 220, 44, 3, on(state, "caveat") ? "#fff" : "#2a2a2a");
       ctx.fillStyle = on(state, "caveat") ? "#111" : "#eee";
@@ -989,7 +1141,7 @@ export const scenes: Record<string, LabApi> = {
       if (hitRect(p, 700, 400, 220, 44)) return "caveat";
       if (hitCircle(p, { x: 360, y: 270 }, 110)) {
         if (state.flags.changed === 1) return "neuron";
-        if (state.flags.sawAstro === 1 && hitCircle(p, { x: 360, y: 270 }, 46)) return "ptbp1";
+        if (state.flags.sawAstro === 1 && hitCircle(p, { x: 360, y: 270 }, 56)) return "ptbp1";
         return "astro";
       }
       return null;
