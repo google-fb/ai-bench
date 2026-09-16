@@ -202,8 +202,8 @@ export class UI {
     for (const item of this.moduleList.querySelectorAll<HTMLButtonElement>(".module-item")) {
       item.classList.toggle("is-active", item.dataset.blockId === block?.id);
     }
-    // The detail card sits at the top of the panel; bring it into view when a new module is chosen.
-    if (block && changed) this.panelScroll.scrollTo({ top: 0, behavior: "smooth" });
+    // The detail card sits at the top of the panel; jump there when a new module is chosen.
+    if (block && changed) this.panelScroll.scrollTo({ top: 0 });
   }
 
   private renderChrome(): void {

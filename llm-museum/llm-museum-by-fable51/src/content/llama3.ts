@@ -11,7 +11,7 @@ const tokenEmbedding: Block = {
   },
   detail: {
     zh: "Llama 3 的詞彙表有 128,256 個 token，比 Llama 2 的 32,000 大了四倍，讓同一段文字可以用更少的 token 表示，對中文等非英語文字特別有幫助。每個 token 查表換成一個 4,096 維（8B 版）的向量。注意這裡沒有再加位置編碼——位置資訊改由每一層注意力裡的 RoPE 提供。",
-    en: "Llama 3’s vocabulary has 128,256 tokens, four times Llama 2’s 32,000, so the same text needs fewer tokens, which helps non-English scripts in particular. Each token is looked up as a 4,096-dimensional vector (in the 8B model). Notice that no positional code is added here: position information is supplied by RoPE inside every attention layer instead.",
+    en: "Llama 3's vocabulary has 128,256 tokens, four times Llama 2's 32,000, so the same text needs fewer tokens, which helps non-English scripts in particular. Each token is looked up as a 4,096-dimensional vector (in the 8B model). Notice that no positional code is added here: position information is supplied by RoPE inside every attention layer instead.",
   },
   facts: [
     { label: { zh: "詞彙表", en: "Vocabulary" }, value: "128,256" },
@@ -47,7 +47,7 @@ const rope: Block = {
   },
   detail: {
     zh: "RoPE 不把位置加進向量，而是把查詢與鍵向量兩兩一組當成平面上的點，依照位置旋轉一個角度。兩個向量做內積時，旋轉角會相減，結果只跟「相對距離」有關。這讓模型自然懂得「前面第三個詞」這種關係，也比較容易把上下文從 8K 延長到 128K——Llama 3.1 就是把旋轉的基頻調到 500,000 來做到的。",
-    en: "RoPE does not add position to the vector; it treats pairs of query and key dimensions as points on a plane and rotates them by an angle proportional to the position. When two vectors are dotted, the angles subtract, so the result depends only on relative distance. The model naturally understands relations like “three tokens back”, and context is easier to stretch from 8K to 128K, which Llama 3.1 did by raising the rotation base to 500,000.",
+    en: "RoPE does not add position to the vector; it treats pairs of query and key dimensions as points on a plane and rotates them by an angle proportional to the position. When two vectors are dotted, the angles subtract, so the result depends only on relative distance. The model naturally understands relations like \"three tokens back\", and context is easier to stretch from 8K to 128K, which Llama 3.1 did by raising the rotation base to 500,000.",
   },
   facts: [{ label: { zh: "基頻 θ", en: "Base θ" }, value: "500,000" }],
   height: 0.5,
@@ -98,7 +98,7 @@ const swiglu: Block = {
   },
   detail: {
     zh: "Llama 把 ReLU 前饋換成 SwiGLU。輸入同時經過兩個放大矩陣：一條過 SiLU 啟動函數當作「閘門」，逐元素乘上另一條，最後再用第三個矩陣壓回原維度。閘門讓網路能選擇性地放行資訊，同樣參數量下效果更好。8B 版的中間維度是 14,336。今天幾乎所有開源模型的前饋層都是這個設計。",
-    en: "Llama swaps the ReLU feed-forward for SwiGLU. The input goes through two expansion matrices at once: one path passes through the SiLU activation and acts as a gate that multiplies the other element-wise, and a third matrix projects back to the original size. The gate lets the network pass information selectively, giving better quality for the same parameter count. The 8B model’s hidden size is 14,336. Nearly every open model’s feed-forward layer now uses this design.",
+    en: "Llama swaps the ReLU feed-forward for SwiGLU. The input goes through two expansion matrices at once: one path passes through the SiLU activation and acts as a gate that multiplies the other element-wise, and a third matrix projects back to the original size. The gate lets the network pass information selectively, giving better quality for the same parameter count. The 8B model's hidden size is 14,336. Nearly every open model's feed-forward layer now uses this design.",
   },
   facts: [{ label: { zh: "隱藏維度", en: "Hidden size" }, value: "14,336 / 28,672 / 53,248" }],
   height: 1.1,
@@ -153,11 +153,11 @@ const kvCache: Block = {
   label: { zh: "KV 快取", en: "KV Cache" },
   brief: {
     zh: "推理時保存每層每個 token 的鍵與值，避免重算",
-    en: "Stores every layer’s keys and values for each token during inference so they are not recomputed",
+    en: "Stores every layer's keys and values for each token during inference so they are not recomputed",
   },
   detail: {
     zh: "生成第 100 個 token 時，前 99 個 token 的鍵和值其實不會改變，所以把它們存起來。8B 版每個 token 每層要存 8 個 KV 頭 × 128 維 × 2（K 和 V），32 層加起來約 128 KB（bf16）。上下文越長、快取越大，這正是 DeepSeek 一連串壓縮技術要解決的問題。",
-    en: "When generating token 100, the keys and values of the first 99 tokens do not change, so they are cached. In the 8B model each token stores 8 KV heads × 128 dims × 2 (K and V) per layer, about 128 KB across 32 layers in bf16. The longer the context, the larger the cache, and this is precisely the problem DeepSeek’s series of compression techniques set out to solve.",
+    en: "When generating token 100, the keys and values of the first 99 tokens do not change, so they are cached. In the 8B model each token stores 8 KV heads × 128 dims × 2 (K and V) per layer, about 128 KB across 32 layers in bf16. The longer the context, the larger the cache, and this is precisely the problem DeepSeek's series of compression techniques set out to solve.",
   },
   facts: [{ label: { zh: "每 token（8B，bf16）", en: "Per token (8B, bf16)" }, value: "≈ 128 KB" }],
   height: 1.2,
@@ -176,7 +176,7 @@ export const llama3: ModelSpec = {
   },
   intro: {
     zh: "Llama 3 是 Meta 在 2024 年開放權重的模型家族，有 8B、70B、405B 三種尺寸。它代表了今天「純解碼器」稠密模型的標準配方：拿掉編碼器，只留下一疊解碼器層；把 LayerNorm 換成前置的 RMSNorm、位置編碼換成旋轉式的 RoPE、ReLU 前饋換成 SwiGLU，注意力則用分組查詢（GQA）來縮小推理時的 KV 快取。Qwen、Mistral、Gemma 等開源模型幾乎都沿用同一套骨架。",
-    en: "Llama 3 is Meta’s open-weight model family from 2024, in 8B, 70B and 405B sizes. It represents today’s standard recipe for dense decoder-only models: drop the encoder and keep a single stack of decoder layers; replace LayerNorm with pre-norm RMSNorm, sinusoidal positions with rotary RoPE, the ReLU feed-forward with SwiGLU, and shrink the inference KV cache with grouped-query attention (GQA). Qwen, Mistral, Gemma and most other open models follow nearly the same skeleton.",
+    en: "Llama 3 is Meta's open-weight model family from 2024, in 8B, 70B and 405B sizes. It represents today's standard recipe for dense decoder-only models: drop the encoder and keep a single stack of decoder layers; replace LayerNorm with pre-norm RMSNorm, sinusoidal positions with rotary RoPE, the ReLU feed-forward with SwiGLU, and shrink the inference KV cache with grouped-query attention (GQA). Qwen, Mistral, Gemma and most other open models follow nearly the same skeleton.",
   },
   facts: [
     { label: { zh: "類型", en: "Type" }, value: { zh: "純解碼器、稠密", en: "Decoder-only, dense" } },
@@ -234,7 +234,7 @@ export const llama3: ModelSpec = {
   links: [{ from: "l-gqa", to: "l-kvcache", style: "kv", label: { zh: "存入／讀取 K、V", en: "Store / read K, V" } }],
   tourOrder: ["l-emb", "l-norm1", "l-rope", "l-gqa", "l-kvcache", "l-res1", "l-swiglu", "l-final-norm", "l-head", "l-sample"],
   sources: [
-    { label: "Meta, “The Llama 3 Herd of Models” (2024)", url: "https://arxiv.org/abs/2407.21783" },
+    { label: "Meta, \"The Llama 3 Herd of Models\" (2024)", url: "https://arxiv.org/abs/2407.21783" },
     { label: "meta-llama/llama-models · GitHub", url: "https://github.com/meta-llama/llama-models" },
   ],
   accent: 0x8b9a5b,

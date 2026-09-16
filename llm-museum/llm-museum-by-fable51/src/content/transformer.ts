@@ -45,7 +45,7 @@ const selfAttention: Block = {
   },
   detail: {
     zh: "這是 Transformer 的心臟。每個詞的向量會被投影成三種角色：查詢（Q）、鍵（K）、值（V）。用 Q 和所有 K 做內積、除以 √64 再過 softmax，就得到「該把多少注意力放在每個詞上」的權重，再用權重加總 V。八個頭平行做這件事，各自學到不同的關係，例如主詞與動詞、代名詞與它指的對象，最後把八份結果拼接起來。",
-    en: "This is the heart of the Transformer. Each token’s vector is projected into three roles: a query (Q), a key (K) and a value (V). Taking the dot product of Q with every K, dividing by √64 and applying softmax gives the weights that say how much attention to pay to each token; those weights then sum the values. Eight heads do this in parallel, each learning a different relation, such as subject–verb or a pronoun and what it refers to, and their outputs are concatenated.",
+    en: "This is the heart of the Transformer. Each token's vector is projected into three roles: a query (Q), a key (K) and a value (V). Taking the dot product of Q with every K, dividing by √64 and applying softmax gives the weights that say how much attention to pay to each token; those weights then sum the values. Eight heads do this in parallel, each learning a different relation, such as subject–verb or a pronoun and what it refers to, and their outputs are concatenated.",
   },
   facts: [
     { label: { zh: "頭數", en: "Heads" }, value: { zh: "8 個，每頭 64 維", en: "8, 64 dims each" } },
@@ -66,7 +66,7 @@ const addNorm: Block = {
   },
   detail: {
     zh: "每個子層外面都包著一條「殘差連接」：輸出等於輸入加上子層算出的修正量。這讓梯度有一條捷徑可以直接往下傳，深層網路才練得起來。相加之後再做 LayerNorm，把每個位置的向量調整成平均 0、變異數 1，讓數值穩定。原始 Transformer 把正規化放在相加之後（Post-LN），後來的模型大多改成放在子層之前。",
-    en: "Every sublayer is wrapped in a residual connection: the output equals the input plus the correction the sublayer computed. This gives gradients a shortcut straight down the network, which is what makes deep stacks trainable. After the addition, LayerNorm rescales each position’s vector to mean 0 and variance 1 to keep the numbers stable. The original Transformer normalises after the addition (Post-LN); most later models moved the norm in front of the sublayer.",
+    en: "Every sublayer is wrapped in a residual connection: the output equals the input plus the correction the sublayer computed. This gives gradients a shortcut straight down the network, which is what makes deep stacks trainable. After the addition, LayerNorm rescales each position's vector to mean 0 and variance 1 to keep the numbers stable. The original Transformer normalises after the addition (Post-LN); most later models moved the norm in front of the sublayer.",
   },
   height: 0.4,
 };
@@ -82,7 +82,7 @@ const feedForward: Block = {
   },
   detail: {
     zh: "注意力負責「詞與詞之間」的交流，前饋網路則負責「每個詞自己」的加工。它是兩層全連接：先把 512 維放大到 2048 維、經過 ReLU 只留下正值，再壓回 512 維。同一組權重套用在每個位置上。後來的研究發現，模型記住的大量事實知識，主要就存放在這些前饋層裡。",
-    en: "Attention handles communication between tokens; the feed-forward network processes each token on its own. It is two dense layers: expand 512 dims to 2048, keep only the positive values with ReLU, then project back to 512. The same weights are applied at every position. Later research found that much of a model’s factual knowledge lives in these feed-forward layers.",
+    en: "Attention handles communication between tokens; the feed-forward network processes each token on its own. It is two dense layers: expand 512 dims to 2048, keep only the positive values with ReLU, then project back to 512. The same weights are applied at every position. Later research found that much of a model's factual knowledge lives in these feed-forward layers.",
   },
   facts: [{ label: { zh: "隱藏維度", en: "Hidden size" }, value: "2048" }],
   height: 1.1,
@@ -96,7 +96,7 @@ const encoderOutput: Block = {
   short: { zh: "編碼器輸出", en: "Encoder output" },
   brief: {
     zh: "六層之後的向量序列，交給解碼器的交叉注意力使用",
-    en: "The sequence after six layers, handed to the decoder’s cross-attention",
+    en: "The sequence after six layers, handed to the decoder's cross-attention",
   },
   detail: {
     zh: "六層編碼器疊完後，每個原文詞都變成一個吸收了整句脈絡的向量。這些向量不會直接變成輸出，而是被解碼器的每一層當成鍵（K）與值（V）來查詢——這條連線就是編碼器與解碼器之間唯一的橋。",
@@ -116,7 +116,7 @@ const outputEmbedding: Block = {
   },
   detail: {
     zh: "解碼器的輸入是「到目前為止已經產生的目標句」。訓練時把整個正確答案往右移一格、前面補一個起始符號，這樣第 t 個位置看到的都是前 t−1 個詞，任務就是預測第 t 個詞。這種「用前文預測下一個詞」的做法，正是後來所有 GPT 類模型的訓練方式。",
-    en: "The decoder’s input is the target sentence produced so far. During training the whole correct answer is shifted one position to the right with a start symbol in front, so position t only sees the first t−1 tokens and must predict token t. This “predict the next token from the prefix” recipe became the training objective of every GPT-style model.",
+    en: "The decoder's input is the target sentence produced so far. During training the whole correct answer is shifted one position to the right with a start symbol in front, so position t only sees the first t−1 tokens and must predict token t. This \"predict the next token from the prefix\" recipe became the training objective of every GPT-style model.",
   },
   deco: { count: 8 },
 };
@@ -132,7 +132,7 @@ const maskedAttention: Block = {
   },
   detail: {
     zh: "解碼器是一個字一個字生成的，所以在訓練時不能讓第 t 個位置偷看後面的答案。做法是在注意力分數上蓋一張三角形遮罩，把「未來」的位置設成負無限大，softmax 之後權重就變成 0。這個因果遮罩就是「因果語言模型」名字的由來，也是今天 Llama、DeepSeek 等模型每一層都在用的機制。",
-    en: "The decoder generates one token at a time, so during training position t must not peek at later answers. A triangular mask sets the scores of all future positions to minus infinity, so after softmax their weights become zero. This causal mask is where the name “causal language model” comes from, and it is the mechanism every layer of Llama and DeepSeek still uses today.",
+    en: "The decoder generates one token at a time, so during training position t must not peek at later answers. A triangular mask sets the scores of all future positions to minus infinity, so after softmax their weights become zero. This causal mask is where the name \"causal language model\" comes from, and it is the mechanism every layer of Llama and DeepSeek still uses today.",
   },
   height: 1.25,
   deco: { count: 8 },
@@ -149,7 +149,7 @@ const crossAttention: Block = {
   },
   detail: {
     zh: "這一層讓解碼器「回頭看原文」。查詢（Q）來自解碼器目前的狀態，鍵（K）與值（V）則來自編碼器的輸出，所以每產生一個目標詞，模型都能重新決定該對齊原文的哪幾個詞。純解碼器的模型（GPT、Llama）沒有這一層，因為它們把「原文」和「答案」放在同一條序列裡處理。",
-    en: "This layer lets the decoder look back at the source. Queries (Q) come from the decoder’s current state, while keys (K) and values (V) come from the encoder output, so for every target token the model can re-decide which source words to align with. Decoder-only models such as GPT and Llama have no such layer, because they place the source and the answer in the same sequence.",
+    en: "This layer lets the decoder look back at the source. Queries (Q) come from the decoder's current state, while keys (K) and values (V) come from the encoder output, so for every target token the model can re-decide which source words to align with. Decoder-only models such as GPT and Llama have no such layer, because they place the source and the answer in the same sequence.",
   },
   height: 1.25,
   deco: { count: 8 },
@@ -165,7 +165,7 @@ const linear: Block = {
   },
   detail: {
     zh: "最後一步先把解碼器頂端的向量乘上一個矩陣，變成詞彙表裡每個 token 的分數（logits）。原始 Transformer 讓這個矩陣直接重用嵌入表的權重，省下大量參數。",
-    en: "The final step multiplies the vector at the top of the decoder by a matrix to obtain a score (logit) for every token in the vocabulary. The original Transformer reuses the embedding table’s weights for this matrix, saving many parameters.",
+    en: "The final step multiplies the vector at the top of the decoder by a matrix to obtain a score (logit) for every token in the vocabulary. The original Transformer reuses the embedding table's weights for this matrix, saving many parameters.",
   },
   height: 0.6,
 };
@@ -199,7 +199,7 @@ export const transformer: ModelSpec = {
   },
   intro: {
     zh: "2017 年的論文《Attention Is All You Need》提出了 Transformer。它是一個為機器翻譯設計的「編碼器–解碼器」模型：左邊的編碼器讀入整句原文，右邊的解碼器一次產生一個目標語言的詞。它完全拋棄了循環神經網路，只靠「注意力」讓每個詞直接看到句中任何其他詞，因此可以大量平行運算。今天所有的大語言模型，都是從這座建築的藍圖演變而來。",
-    en: "The 2017 paper “Attention Is All You Need” introduced the Transformer. It is an encoder–decoder model built for machine translation: the encoder on the left reads the whole source sentence, and the decoder on the right produces the target sentence one token at a time. It dropped recurrence entirely and relies only on attention, so every word can look directly at every other word and computation runs in parallel. Every large language model today descends from this blueprint.",
+    en: "The 2017 paper \"Attention Is All You Need\" introduced the Transformer. It is an encoder–decoder model built for machine translation: the encoder on the left reads the whole source sentence, and the decoder on the right produces the target sentence one token at a time. It dropped recurrence entirely and relies only on attention, so every word can look directly at every other word and computation runs in parallel. Every large language model today descends from this blueprint.",
   },
   facts: [
     { label: { zh: "層數", en: "Layers" }, value: { zh: "6 層編碼器 + 6 層解碼器", en: "6 encoder + 6 decoder" } },
@@ -267,7 +267,7 @@ export const transformer: ModelSpec = {
     "t-softmax",
   ],
   sources: [
-    { label: "Vaswani et al., “Attention Is All You Need” (2017)", url: "https://arxiv.org/abs/1706.03762" },
+    { label: "Vaswani et al., \"Attention Is All You Need\" (2017)", url: "https://arxiv.org/abs/1706.03762" },
     { label: "The Annotated Transformer (Harvard NLP)", url: "https://nlp.seas.harvard.edu/annotated-transformer/" },
   ],
   accent: 0xc9a24c,

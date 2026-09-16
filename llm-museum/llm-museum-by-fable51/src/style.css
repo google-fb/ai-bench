@@ -211,6 +211,7 @@ a:focus-visible {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  z-index: 0;
 }
 
 .viewport canvas.webgl {
@@ -224,6 +225,10 @@ a:focus-visible {
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+  /* CSS2DRenderer assigns depth-sorted z-indexes to labels; keep them inside this layer
+     so they never rise above the side panel or dock. */
+  z-index: 1;
+  isolation: isolate;
 }
 
 .hint {
@@ -237,6 +242,7 @@ a:focus-visible {
   background: rgba(250, 245, 236, 0.75);
   border-radius: 8px;
   pointer-events: none;
+  z-index: 3;
 }
 
 .loading {

@@ -28,11 +28,11 @@ const projector: Block = {
   short: { zh: "投影器", en: "Projector" },
   brief: {
     zh: "把視覺特徵數量壓成九分之一，再投影到語言模型的向量空間",
-    en: "Cuts the visual tokens to one ninth and projects them into the language model’s space",
+    en: "Cuts the visual tokens to one ninth and projects them into the language model's space",
   },
   detail: {
     zh: "視覺編碼器輸出的特徵網格，先用 3×3 的 pixel-unshuffle 把九個相鄰格子合併成一個，token 數量變成九分之一，最高可支援約 1344×1344 的圖片。接著經過一個兩層、隱藏維度 5,120 的 MLP 投影器，變成和文字嵌入同一個空間的「視覺 token」，之後就和文字一起送進主幹。",
-    en: "The feature grid from the vision encoder is first pixel-unshuffled 3×3, merging nine neighbouring cells into one so the token count drops to a ninth, supporting images up to about 1344×1344. A two-layer MLP projector with hidden size 5,120 then maps them into the same space as text embeddings as “visual tokens”, which enter the backbone together with the text.",
+    en: "The feature grid from the vision encoder is first pixel-unshuffled 3×3, merging nine neighbouring cells into one so the token count drops to a ninth, supporting images up to about 1344×1344. A two-layer MLP projector with hidden size 5,120 then maps them into the same space as text embeddings as \"visual tokens\", which enter the backbone together with the text.",
   },
   height: 0.7,
 };
@@ -103,7 +103,7 @@ const csa2EncFull: Block = {
   },
   detail: {
     zh: "壓縮稀疏注意力第二代（CSA2）是 V4.1 的全域注意力。Full 模式的層會自己產生「主 KV」：在編碼器裡，每兩個 token 的鍵值被壓成一筆，長度直接減半。接著一個輕量索引器（32 頭 × 128 維）替每個查詢替所有主 KV 打分，只挑分數最高的 512 筆做真正的注意力，再加上本層的滑動視窗。每六層只有第一層是 Full 模式，它算出的主 KV 與 Top-512 索引會分給後面五層重用。",
-    en: "Compressed Sparse Attention 2 (CSA2) is V4.1’s global attention. A Full-mode layer produces its own main KV: in the encoder every two tokens’ keys and values are compressed into one entry, halving the length. A lightweight indexer (32 heads × 128 dims) then scores all main KV entries for each query and keeps only the top 512 for real attention, plus the layer’s own sliding window. Only the first layer of every group of six is Full mode; the main KV and Top-512 indices it computes are handed to the next five layers.",
+    en: "Compressed Sparse Attention 2 (CSA2) is V4.1's global attention. A Full-mode layer produces its own main KV: in the encoder every two tokens' keys and values are compressed into one entry, halving the length. A lightweight indexer (32 heads × 128 dims) then scores all main KV entries for each query and keeps only the top 512 for real attention, plus the layer's own sliding window. Only the first layer of every group of six is Full mode; the main KV and Top-512 indices it computes are handed to the next five layers.",
   },
   facts: [
     { label: { zh: "查詢頭", en: "Query heads" }, value: { zh: "64 個 × 512 維", en: "64 × 512 dims" } },
@@ -120,7 +120,7 @@ const csa2EncReuse: Block = {
   short: { zh: "CSA2 · 2:1 · Reuse", en: "CSA2 · 2:1 · Reuse" },
   brief: {
     zh: "不算自己的 KV 也不做索引，直接沿用前面 Full 層的主 KV 與 Top-512",
-    en: "Computes no KV and no indexing; reuses the preceding Full layer’s main KV and Top-512",
+    en: "Computes no KV and no indexing; reuses the preceding Full layer's main KV and Top-512",
   },
   detail: {
     zh: "Reuse 模式的層最省：它只算自己的查詢與滑動視窗 KV，主 KV 和 Top-512 選擇都直接沿用同一組裡 Full 層的結果。這就是「跨層共享」——六層只存一份 KV、只做一次索引，KV 快取和索引計算都大幅下降。因為省掉的步驟多，這種層在推理時只需要十來個 GPU kernel 就能跑完。",
@@ -141,7 +141,7 @@ const encoderOutput: Block = {
   },
   detail: {
     zh: "這是 CED 架構的關鍵。傳統模型每一層都用自己的隱藏狀態算 KV；V4.1 的解碼器則把「全域 KV」統一從編碼器最後一層的隱藏狀態投影出來（每個 Full 層有自己的一組投影權重）。因此在讀取長提示（prefill）時，只需要跑完 20 層編碼器就能把解碼器要用的 KV 全部備妥，計算量幾乎減半。",
-    en: "This is the key to the CED architecture. In a conventional model every layer derives KV from its own hidden state; V4.1’s decoder instead projects its global KV from the hidden state of the encoder’s last layer (each Full layer with its own projection weights). So when reading a long prompt (prefill), running the 20 encoder layers is enough to prepare all the KV the decoder needs, cutting computation nearly in half.",
+    en: "This is the key to the CED architecture. In a conventional model every layer derives KV from its own hidden state; V4.1's decoder instead projects its global KV from the hidden state of the encoder's last layer (each Full layer with its own projection weights). So when reading a long prompt (prefill), running the 20 encoder layers is enough to prepare all the KV the decoder needs, cutting computation nearly in half.",
   },
   height: 0.5,
 };
@@ -153,11 +153,11 @@ const csa2DecFull: Block = {
   short: { zh: "CSA2 · 1:1 · Full", en: "CSA2 · 1:1 · Full" },
   brief: {
     zh: "解碼器第一層：KV 來自編碼器輸出，不壓縮，並替後面的層選出候選池",
-    en: "The decoder’s first layer: KV from the encoder output, uncompressed, and it picks a candidate pool for later layers",
+    en: "The decoder's first layer: KV from the encoder output, uncompressed, and it picks a candidate pool for later layers",
   },
   detail: {
     zh: "解碼器的 CSA2 壓縮比是 1，也就是不壓縮，每個 token 一筆主 KV，但這些 KV 是從編碼器輸出投影來的。第一層是 Full 模式：它替每個查詢挑出 Top-512，並且把被選到的位置所在的區塊（每塊 8 個位置，最多 2,048 塊）集合成一個「候選池」，最多 16,384 個候選位置。後面的 Reindex 層只在這個池子裡重新打分，讓索引成本不再隨上下文長度成長。",
-    en: "The decoder’s CSA2 uses a compression ratio of 1, so there is one main KV entry per token, but those entries are projected from the encoder output. The first layer is Full mode: it selects Top-512 for each query and gathers the blocks containing the chosen positions (8 positions per block, up to 2,048 blocks) into a candidate pool of at most 16,384 positions. Later Reindex layers rescore only within this pool, so indexing cost no longer grows with context length.",
+    en: "The decoder's CSA2 uses a compression ratio of 1, so there is one main KV entry per token, but those entries are projected from the encoder output. The first layer is Full mode: it selects Top-512 for each query and gathers the blocks containing the chosen positions (8 positions per block, up to 2,048 blocks) into a candidate pool of at most 16,384 positions. Later Reindex layers rescore only within this pool, so indexing cost no longer grows with context length.",
   },
   height: 1.25,
   deco: { count: 16 },
@@ -170,11 +170,11 @@ const csa2DecReuse: Block = {
   short: { zh: "CSA2 · 1:1 · Reuse", en: "CSA2 · 1:1 · Reuse" },
   brief: {
     zh: "沿用同組前一個 Full／Reindex 層的 KV 與選擇",
-    en: "Reuses the KV and selection from its group’s Full or Reindex layer",
+    en: "Reuses the KV and selection from its group's Full or Reindex layer",
   },
   detail: {
     zh: "解碼器每四層一組，其中三層是 Reuse 模式，直接使用同組第一層的主 KV 和 Top-512 選擇，自己只算查詢與滑動視窗。二十層解碼器因此只需要五次索引。",
-    en: "Decoder layers come in groups of four, three of which are Reuse mode: they take the main KV and Top-512 selection from the group’s first layer and compute only their own queries and sliding window. Twenty decoder layers therefore need just five indexing passes.",
+    en: "Decoder layers come in groups of four, three of which are Reuse mode: they take the main KV and Top-512 selection from the group's first layer and compute only their own queries and sliding window. Twenty decoder layers therefore need just five indexing passes.",
   },
   height: 1.0,
   deco: { count: 16 },
@@ -208,7 +208,7 @@ const outputHead: Block = {
   },
   detail: {
     zh: "和其他模型一樣，最後一層的輸出經過預測頭變成每個 token 的分數，再抽樣出下一個 token。不同的是，正式服務時 V4.1 不會一次只產生一個 token，而是交給旁邊的 DSpark 先一次猜五個，再由主模型驗證。",
-    en: "As in other models, the last layer’s output passes through a prediction head to score every token, and the next token is sampled. The difference is that in production V4.1 does not produce one token at a time: DSpark, alongside, first drafts five at once and the main model verifies them.",
+    en: "As in other models, the last layer's output passes through a prediction head to score every token, and the next token is sampled. The difference is that in production V4.1 does not produce one token at a time: DSpark, alongside, first drafts five at once and the main model verifies them.",
   },
   height: 0.8,
   deco: { count: 10 },
@@ -278,11 +278,11 @@ const candidatePool: Block = {
   short: { zh: "候選池", en: "Candidate pool" },
   brief: {
     zh: "解碼器第一層挑出的最多 16,384 個位置，後面的層只在這裡面搜尋",
-    en: "Up to 16,384 positions picked by the decoder’s first layer; later layers search only here",
+    en: "Up to 16,384 positions picked by the decoder's first layer; later layers search only here",
   },
   detail: {
     zh: "在一百萬 token 的上下文裡，即使索引器很輕，每一層都替全部位置打分還是很貴。候選池讓深層的索引器只在淺層已經覺得重要的區塊裡尋找，每個查詢的成本從「隨長度成長」變成「固定」。這個機制是在後訓練階段加入的，讓模型學會與它共處。",
-    en: "In a one-million-token context, even a light indexer is expensive if every layer scores every position. The candidate pool lets deeper indexers search only within blocks that shallower layers already found important, turning per-query cost from “grows with length” into “constant”. The mechanism is introduced during post-training so the model learns to work with it.",
+    en: "In a one-million-token context, even a light indexer is expensive if every layer scores every position. The candidate pool lets deeper indexers search only within blocks that shallower layers already found important, turning per-query cost from \"grows with length\" into \"constant\". The mechanism is introduced during post-training so the model learns to work with it.",
   },
   facts: [{ label: { zh: "大小", en: "Size" }, value: { zh: "最多 2,048 塊 × 8 個位置", en: "Up to 2,048 blocks × 8 positions" } }],
   height: 0.8,
@@ -319,7 +319,7 @@ export const deepseekV41Flash: ModelSpec = {
   },
   intro: {
     zh: "DeepSeek-V4.1-Flash 是 DeepSeek 在 2026 年 9 月開放權重的多模態 MoE 模型：主幹 5,520 億參數，另有 1,960 億 Engram 記憶參數，但每個 token 在讀取（prefill）階段只啟用 80 億、生成（decode）階段 160 億，上下文可達一百萬 token。它的骨架叫「因果編碼器–解碼器」（CED）：40 層被分成 20 層因果編碼器與 20 層解碼器，解碼器的全域 KV 直接從編碼器的最終狀態投影出來，因此讀長文只要跑一半的層。再搭配跨層共享 KV 的 CSA2 稀疏注意力、FP4 KV 快取、Single-Pass mHC 殘差流、Engram 記憶與 DSpark 推測解碼，把每個 token 的全域 KV 快取壓到只有 890 bytes。",
-    en: "DeepSeek-V4.1-Flash is the multimodal MoE model DeepSeek released with open weights in September 2026: 552B backbone parameters plus 196B Engram memory parameters, yet each token activates only 8B parameters while reading the prompt (prefill) and 16B while generating (decode), with a context of up to one million tokens. Its skeleton is a Causal Encoder–Decoder (CED): the 40 layers are split into a 20-layer causal encoder and a 20-layer decoder, and the decoder’s global KV is projected straight from the encoder’s final states, so reading a long prompt only runs half the layers. Combined with CSA2 sparse attention that shares KV across layers, FP4 KV caching, Single-Pass mHC residual streams, Engram memory and DSpark speculative decoding, the global KV cache shrinks to just 890 bytes per token.",
+    en: "DeepSeek-V4.1-Flash is the multimodal MoE model DeepSeek released with open weights in September 2026: 552B backbone parameters plus 196B Engram memory parameters, yet each token activates only 8B parameters while reading the prompt (prefill) and 16B while generating (decode), with a context of up to one million tokens. Its skeleton is a Causal Encoder–Decoder (CED): the 40 layers are split into a 20-layer causal encoder and a 20-layer decoder, and the decoder's global KV is projected straight from the encoder's final states, so reading a long prompt only runs half the layers. Combined with CSA2 sparse attention that shares KV across layers, FP4 KV caching, Single-Pass mHC residual streams, Engram memory and DSpark speculative decoding, the global KV cache shrinks to just 890 bytes per token.",
   },
   facts: [
     { label: { zh: "類型", en: "Type" }, value: { zh: "多模態 MoE，因果編碼器–解碼器（CED）", en: "Multimodal MoE, Causal Encoder–Decoder (CED)" } },
@@ -431,7 +431,7 @@ export const deepseekV41Flash: ModelSpec = {
     "d-dspark",
   ],
   sources: [
-    { label: "DeepSeek-AI, “DeepSeek-V4.1-Flash: Pushing the Limits of KV Cache Compression” (2026)", url: "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/blob/main/DeepSeek_V41_Tech_Report.pdf" },
+    { label: "DeepSeek-AI, \"DeepSeek-V4.1-Flash: Pushing the Limits of KV Cache Compression\" (2026)", url: "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/blob/main/DeepSeek_V41_Tech_Report.pdf" },
     { label: "deepseek-ai/DeepSeek-V4.1-Flash · Hugging Face", url: "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash" },
     { label: "DeepSeek API Docs · V4.1-Flash release note", url: "https://api-docs.deepseek.com/news/news260910" },
   ],
