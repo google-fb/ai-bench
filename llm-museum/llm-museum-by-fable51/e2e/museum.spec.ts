@@ -18,8 +18,8 @@ declare global {
  * Headless Chrome has no speech engine, so install a deterministic fake
  * `speechSynthesis` that records every utterance and fires start/end events.
  */
-async function installFakeSpeech(page: Page, utteranceMs = 120): Promise<void> {
-  await page.addInitScript((ms: number) => {
+async function installFakeSpeech(page: Page, utteranceMs = 120, silent = false): Promise<void> {
+  await page.addInitScript(({ ms, silent }: { ms: number; silent: boolean }) => {
     window.__utterances = [];
     window.__utteranceMs = ms;
     class FakeUtterance {
@@ -50,6 +50,8 @@ async function installFakeSpeech(page: Page, utteranceMs = 120): Promise<void> {
         window.__utterances.push({ text: u.text, lang: u.lang, rate: u.rate, voice: u.voice ? u.voice.voiceURI : null });
         current = u;
         synth.speaking = true;
+        // A silent engine accepts utterances but never fires start/end events.
+        if (silent) return;
         setTimeout(() => {
           if (current === u) u.onstart?.({});
         }, 5);
@@ -89,7 +91,7 @@ async function installFakeSpeech(page: Page, utteranceMs = 120): Promise<void> {
     };
     Object.defineProperty(window, "speechSynthesis", { value: synth, configurable: true });
     (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = FakeUtterance;
-  }, utteranceMs);
+  }, { ms: utteranceMs, silent });
 }
 
 async function openMuseum(page: Page, hash = ""): Promise<void> {
@@ -272,6 +274,24 @@ test.describe("LLM Architecture Museum", () => {
     await expect(page.locator("#tour-progress")).toHaveText("");
     await expect(page.locator("#tour-toggle")).toContainText("開始導覽");
     await expect(page.locator("#speech-status")).toHaveText("");
+  });
+
+  test("a speech engine that never starts is detected and reported instead of hanging", async ({ page }) => {
+    await installFakeSpeech(page, 120, true);
+    await openMuseum(page, "#/transformer/t-in-pos");
+    await expect(page.locator(".detail-title")).toHaveText("位置編碼（正弦波）", { timeout: 15_000 });
+    await page.click("[data-read='block']");
+    await expect(page.locator("#speech-status")).toContainText("朗讀中");
+    await expect(page.locator("#speech-status")).toContainText("語音引擎沒有回應", { timeout: 10_000 });
+    await expect(page.locator(".s.is-current")).toHaveCount(0);
+    await expect(page.locator("#speech-stop")).toBeDisabled();
+
+    // The tour then falls back to timed advancing rather than waiting on speech.
+    await page.click("#tour-toggle");
+    await expect(page.locator("#tour-progress")).toHaveText("第 1 / 12 站");
+    await page.click("#tour-next");
+    await expect(page.locator("#tour-progress")).toHaveText("第 2 / 12 站");
+    await expect(page.locator("#speech-status")).toContainText("語音引擎沒有回應");
   });
 
   test("without a speech engine the controls explain why and the tour still advances", async ({ page }) => {

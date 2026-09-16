@@ -26,6 +26,7 @@ class App {
   private tourTimer: ReturnType<typeof setTimeout> | null = null;
   private tourWatchdog: ReturnType<typeof setTimeout> | null = null;
   private tourToken = 0;
+  private silentTourRestarted = false;
 
   constructor() {
     this.ui = new UI({
@@ -76,6 +77,11 @@ class App {
       if (snap.state === "idle" && !this.tourActive) {
         this.reading = null;
         this.ui.setReading(null);
+      }
+      // The engine never started talking: restart this stop on the silent timer instead of waiting.
+      if (snap.engine === "silent" && this.tourActive && !this.silentTourRestarted) {
+        this.silentTourRestarted = true;
+        this.tourStep(this.tourIndex);
       }
     });
     this.ui.setSpeech(this.speech.snapshot());
@@ -293,8 +299,7 @@ class App {
     };
 
     const estimate = estimateSpeechMs(text, this.locale, this.speech.rate);
-    const canSpeak = this.speech.supported && this.speech.voicesFor(this.locale).length > 0;
-    if (canSpeak) {
+    if (this.speech.canSpeak(this.locale)) {
       this.speech.speak(text, this.locale, { onDone: () => goNext(900) });
       // Watchdog: some engines never fire "end"; never let the tour stall.
       this.tourWatchdog = setTimeout(() => goNext(0), estimate * 2.5 + 6000);

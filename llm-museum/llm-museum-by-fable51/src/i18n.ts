@@ -94,6 +94,10 @@ export const UI = {
     zh: "找不到對應語言的語音，將使用瀏覽器預設語音",
     en: "No voice for this language was found; the browser default will be used",
   },
+  speechSilent: {
+    zh: "語音引擎沒有回應：這個裝置可能沒有安裝語音，請換個瀏覽器或裝置再試",
+    en: "The speech engine did not respond: this device may have no voices installed; try another browser or device",
+  },
   speechSpeaking: { zh: "朗讀中", en: "Speaking" },
   speechPaused: { zh: "已暫停", en: "Paused" },
   speechIdle: { zh: "", en: "" },

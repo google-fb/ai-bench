@@ -437,6 +437,7 @@ export class UI {
 
     let status = "";
     if (!this.speechSupported) status = pick(T.speechUnsupported, l);
+    else if (snapshot.engine === "silent") status = pick(T.speechSilent, l);
     else if (state === "speaking") status = `${pick(T.speechSpeaking, l)} ${snapshot.sentenceIndex + 1}/${snapshot.sentenceCount}`;
     else if (state === "paused") status = pick(T.speechPaused, l);
     else if (!this.hasVoice) status = pick(T.speechNoVoice, l);

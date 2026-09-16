@@ -2,11 +2,18 @@ import { BCP47, type Locale } from "./i18n.ts";
 
 export type SpeechState = "idle" | "speaking" | "paused";
 
+/** Whether the browser's speech engine has proven it can actually talk. */
+export type EngineStatus = "unknown" | "ok" | "silent";
+
 export interface SpeechSnapshot {
   state: SpeechState;
   sentenceIndex: number;
   sentenceCount: number;
+  engine: EngineStatus;
 }
+
+/** How long we wait for an utterance to start before declaring the engine silent. */
+export const START_TIMEOUT_MS = 4000;
 
 const HARD_BREAK = /([。！？；!?]|\.(?=\s|$))(["”」』）)]*)/g;
 const SOFT_BREAK = /([，、；,;:：]|\s—\s|——)/g;
@@ -114,6 +121,8 @@ export class SpeechController {
   private voiceListeners = new Set<() => void>();
   private restartTimer: ReturnType<typeof setTimeout> | null = null;
   private rateTimer: ReturnType<typeof setTimeout> | null = null;
+  private startWatchdog: ReturnType<typeof setTimeout> | null = null;
+  private engine: EngineStatus = "unknown";
   private preferredVoice: Record<string, string | null> = {};
 
   constructor() {
@@ -134,7 +143,12 @@ export class SpeechController {
   }
 
   snapshot(): SpeechSnapshot {
-    return { state: this.state, sentenceIndex: this.index, sentenceCount: this.queue.length };
+    return { state: this.state, sentenceIndex: this.index, sentenceCount: this.queue.length, engine: this.engine };
+  }
+
+  /** True when speaking is worth attempting: supported, a voice exists, and the engine has not gone silent. */
+  canSpeak(locale: Locale): boolean {
+    return this.supported && this.engine !== "silent" && this.voicesFor(locale).length > 0;
   }
 
   subscribe(listener: Listener): () => void {
@@ -229,7 +243,10 @@ export class SpeechController {
     const voice = this.resolveVoice(this.currentLocale);
     if (voice) utterance.voice = voice;
     utterance.onstart = () => {
-      if (this.current === utterance) this.emit();
+      if (this.current !== utterance) return;
+      this.clearWatchdog();
+      this.engine = "ok";
+      this.emit();
     };
     utterance.onend = () => {
       if (this.current !== utterance) return;
@@ -244,7 +261,33 @@ export class SpeechController {
     };
     this.current = utterance;
     this.synth.speak(utterance);
+    this.armWatchdog(utterance);
     this.emit();
+  }
+
+  /**
+   * Some browsers expose speechSynthesis but never produce audio (no engine installed).
+   * If an utterance has not started after a few seconds, stop and report it instead of
+   * leaving the UI stuck in "speaking".
+   */
+  private armWatchdog(utterance: SpeechSynthesisUtterance): void {
+    this.clearWatchdog();
+    if (this.engine === "ok") return;
+    this.startWatchdog = setTimeout(() => {
+      this.startWatchdog = null;
+      if (this.current !== utterance) return;
+      if (this.state === "paused") {
+        this.armWatchdog(utterance);
+        return;
+      }
+      this.engine = "silent";
+      this.stop();
+    }, START_TIMEOUT_MS);
+  }
+
+  private clearWatchdog(): void {
+    if (this.startWatchdog) clearTimeout(this.startWatchdog);
+    this.startWatchdog = null;
   }
 
   pause(): void {
@@ -299,6 +342,7 @@ export class SpeechController {
   }
 
   private cancelInternal(): void {
+    this.clearWatchdog();
     if (this.restartTimer) {
       clearTimeout(this.restartTimer);
       this.restartTimer = null;
