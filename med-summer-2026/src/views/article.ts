@@ -1,5 +1,6 @@
-import { articles, stageCopy, tagCopy } from "../data/articles";
-import { hrefArticle, hrefHome } from "../router";
+import { stageCopy, tagCopy } from "../data/articles";
+import { articlesFor, findArticle, unitOf, units } from "../data/catalog";
+import { hrefArticle, hrefHome, hrefUnit } from "../router";
 import { prefs } from "../store";
 import type { Article, Copy } from "../types";
 
@@ -20,9 +21,12 @@ function escapeAttr(value: string): string {
 function figure(article: Article, index: number): string {
   const img = article.images[index];
   if (!img) return "";
+  const media = img.svg
+    ? `<div class="figure-svg">${img.svg}</div>`
+    : `<img src="${import.meta.env.BASE_URL}${img.src}" alt="${escapeAttr(text(img.alt))}" />`;
   return `
     <figure class="figure">
-      <img src="${import.meta.env.BASE_URL}${img.src}" alt="${escapeAttr(text(img.alt))}" />
+      ${media}
       <figcaption>
         <span lang="zh">${img.alt.zh}</span>
         <span lang="en">${img.alt.en}</span>
@@ -31,9 +35,13 @@ function figure(article: Article, index: number): string {
   `;
 }
 
-function labBlock(article: Article): string {
+function labStage(article: Article): string {
+  const svg = article.lab.format === "svg";
+  const stage = svg
+    ? `<div class="svg-lab" data-svg-host tabindex="0" role="img" aria-label="${escapeAttr(text(article.lab.title))}" aria-describedby="lab-note-${article.slug}"></div>`
+    : `<canvas width="960" height="540" tabindex="0" role="img" aria-label="${escapeAttr(text(article.lab.title))}" aria-describedby="lab-note-${article.slug}"></canvas>`;
   return `
-      <section class="lab" data-lab="${article.lab.kind}" data-slug="${article.slug}">
+      <section class="lab" data-lab="${article.lab.kind}" data-slug="${article.slug}" data-format="${article.lab.format ?? "canvas"}">
         <div class="lab-head">
           <strong lang="zh">${article.lab.title.zh}</strong>
           <span lang="en">${article.lab.title.en}</span>
@@ -64,7 +72,7 @@ function labBlock(article: Article): string {
             )
             .join("")}
         </ol>
-        <canvas width="960" height="540" tabindex="0" role="img" aria-label="${escapeAttr(text(article.lab.title))}" aria-describedby="lab-note-${article.slug}"></canvas>
+        ${stage}
         <div class="lab-note" id="lab-note-${article.slug}" aria-live="polite">
           <b lang="zh">${article.lab.hint.zh}</b>
           <p lang="zh">${article.lab.how.zh}</p>
@@ -82,7 +90,7 @@ function labBlock(article: Article): string {
 }
 
 export function renderArticle(slug: string): string {
-  const article = articles.find((item) => item.slug === slug);
+  const article = findArticle(slug);
   if (!article) {
     return `
       <main class="article-wrap">
@@ -92,22 +100,27 @@ export function renderArticle(slug: string): string {
     `;
   }
 
-  const index = articles.findIndex((item) => item.slug === slug);
-  const prev = articles[index - 1];
-  const next = articles[index + 1];
+  const unit = unitOf(article);
+  const list = articlesFor(unit);
+  const index = list.findIndex((item) => item.slug === slug);
+  const prev = list[index - 1];
+  const next = list[index + 1];
   const tag = tagCopy[article.tag];
-  const stage = stageCopy[article.stage];
+  const stage = article.stage ? stageCopy[article.stage] : null;
+  const unitMeta = units.find((item) => item.id === unit);
 
   return `
     <article class="article-wrap">
       <nav class="crumbs" aria-label="Breadcrumb">
-        <a href="${hrefHome()}">目錄 / Index</a> · NO. ${String(article.rank).padStart(2, "0")}
+        <a href="${hrefHome()}">單元 / Units</a>
+        · <a href="${hrefUnit(unit)}">${unitMeta?.title.zh ?? unit} / ${unitMeta?.title.en ?? unit}</a>
+        · NO. ${String(article.rank).padStart(2, "0")}
       </nav>
       <p class="meta">
         <span lang="zh">${article.dateLabel.zh}</span>
         <span lang="en">${article.dateLabel.en}</span>
         <span>${tag.zh} / ${tag.en}</span>
-        <span>${stage.zh} / ${stage.en}</span>
+        ${stage ? `<span>${stage.zh} / ${stage.en}</span>` : ""}
       </p>
       <h1 class="article-title" lang="zh" tabindex="-1">${article.title.zh}</h1>
       <h1 class="article-title" lang="en" tabindex="-1">${article.title.en}</h1>
@@ -116,7 +129,7 @@ export function renderArticle(slug: string): string {
         <span lang="zh">先玩下面這格，再往下讀。</span>
         <span lang="en">Try the lab first, then keep reading.</span>
       </p>
-      ${labBlock(article)}
+      ${labStage(article)}
       ${figure(article, 0)}
       ${article.sections
         .map(

@@ -1,4 +1,4 @@
-import type { Article } from "../types";
+import type { Article, Stage } from "../types";
 
 export const articles: Article[] = [
   {
@@ -1412,9 +1412,14 @@ export const tagCopy: Record<Article["tag"], { zh: string; en: string }> = {
   gene: { zh: "基因", en: "Gene" },
   cancer: { zh: "癌症", en: "Cancer" },
   brain: { zh: "大腦", en: "Brain" },
+  starter: { zh: "菌種", en: "Starter" },
+  ingredient: { zh: "材料", en: "Ingredients" },
+  method: { zh: "工法", en: "Method" },
+  bake: { zh: "烘烤", en: "Bake" },
+  tools: { zh: "器材", en: "Tools" },
 };
 
-export const stageCopy: Record<Article["stage"], { zh: string; en: string }> = {
+export const stageCopy: Record<Stage, { zh: string; en: string }> = {
   approved: { zh: "已核准", en: "Approved" },
   phase3: { zh: "第三期", en: "Phase 3" },
   early: { zh: "實驗室", en: "Early lab" },

@@ -1,4 +1,4 @@
-import { articles } from "../data/articles";
+import { findArticle } from "../data/catalog";
 import { prefs } from "../store";
 import type { Copy } from "../types";
 
@@ -322,7 +322,7 @@ export function setNote(box: HTMLElement, title: Copy, body: Copy): void {
 }
 
 export function articleBySlug(slug: string) {
-  return articles.find((item) => item.slug === slug);
+  return findArticle(slug);
 }
 
 export function wrapLabel(

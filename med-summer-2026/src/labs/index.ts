@@ -12,6 +12,7 @@ import {
   type LabState,
 } from "./engine";
 import { scenes } from "./scenes";
+import { mountSvgLab } from "./svg";
 
 function paintHud(section: HTMLElement, article: Article, done: Record<string, boolean>): string | null {
   const ids = article.lab.steps.map((step) => step.id);
@@ -30,6 +31,10 @@ function paintHud(section: HTMLElement, article: Article, done: Record<string, b
 }
 
 export function mountLab(section: HTMLElement): void {
+  if (section.dataset.format === "svg") {
+    mountSvgLab(section);
+    return;
+  }
   const canvas = section.querySelector("canvas");
   const note = section.querySelector<HTMLElement>(".lab-note");
   const kind = section.dataset.lab ?? "";

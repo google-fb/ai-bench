@@ -1,6 +1,14 @@
-export type Tag = "vaccine" | "gene" | "cancer" | "brain";
+export type UnitId = "med" | "bread";
+
+export type MedTag = "vaccine" | "gene" | "cancer" | "brain";
+
+export type BreadTag = "starter" | "ingredient" | "method" | "bake" | "tools";
+
+export type Tag = MedTag | BreadTag;
 
 export type Stage = "approved" | "phase3" | "early";
+
+export type LabFormat = "canvas" | "svg";
 
 export type Copy = {
   zh: string;
@@ -31,6 +39,7 @@ export type LabStep = {
 
 export type Lab = {
   kind: string;
+  format?: LabFormat;
   title: Copy;
   lesson: Copy;
   how: Copy;
@@ -39,16 +48,23 @@ export type Lab = {
   hotspots: LabHotspot[];
 };
 
+export type ArticleImage = {
+  src?: string;
+  svg?: string;
+  alt: Copy;
+};
+
 export type Article = {
+  unit?: UnitId;
   slug: string;
   rank: number;
-  date: string;
+  date?: string;
   dateLabel: Copy;
   tag: Tag;
-  stage: Stage;
+  stage?: Stage;
   title: Copy;
   dek: Copy;
-  images: Array<{ src: string; alt: Copy }>;
+  images: ArticleImage[];
   sections: Section[];
   sources: Source[];
   lab: Lab;

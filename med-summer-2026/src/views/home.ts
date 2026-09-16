@@ -1,10 +1,10 @@
-import { articles, stageCopy, tagCopy } from "../data/articles";
-import { hrefArticle } from "../router";
-import type { Article } from "../types";
+import { tagCopy } from "../data/articles";
+import { articlesFor, units } from "../data/catalog";
+import { hrefArticle, hrefUnit } from "../router";
+import type { Article, UnitId } from "../types";
 
 function card(article: Article): string {
   const tag = tagCopy[article.tag];
-  const stage = stageCopy[article.stage];
   return `
     <a class="card" href="${hrefArticle(article.slug)}" data-tag="${article.tag}">
       <div class="rank">NO. ${String(article.rank).padStart(2, "0")}</div>
@@ -13,7 +13,6 @@ function card(article: Article): string {
           <span lang="zh">${article.dateLabel.zh}</span>
           <span lang="en">${article.dateLabel.en}</span>
           <span>${tag.zh} / ${tag.en}</span>
-          <span>${stage.zh} / ${stage.en}</span>
         </div>
         <h2 class="card-title" lang="zh">${article.title.zh}</h2>
         <p class="card-en" lang="en">${article.title.en}</p>
@@ -28,34 +27,90 @@ export function renderHome(): string {
   return `
     <main class="page">
       <section class="hero">
-        <p class="kicker">July – August 2026 · Top 10</p>
-        <svg class="hero-mark" viewBox="0 0 80 80" aria-hidden="true">
+        <p class="kicker">Two units · 兩個單元</p>
+        <h1 lang="zh">先選一間教室</h1>
+        <h1 lang="en">Pick a classroom</h1>
+        <p class="subhead" lang="zh">醫學筆記還在。旁邊新開一間酸種廚房。</p>
+        <p class="subhead" lang="en">The medicine notes stay. A sourdough kitchen opened next door.</p>
+      </section>
+      <section class="unit-grid">
+        ${units
+          .map(
+            (unit) => `
+          <a class="unit-card" href="${hrefUnit(unit.id)}">
+            <p class="kicker">${unit.kicker.zh} · ${unit.kicker.en}</p>
+            <h2 lang="zh">${unit.title.zh}</h2>
+            <h2 lang="en">${unit.title.en}</h2>
+            <p lang="zh">${unit.subhead.zh}</p>
+            <p lang="en">${unit.subhead.en}</p>
+          </a>`,
+          )
+          .join("")}
+      </section>
+    </main>
+  `;
+}
+
+export function renderUnitHome(unit: UnitId): string {
+  const meta = units.find((item) => item.id === unit) ?? units[0];
+  const list = articlesFor(unit);
+  const filters =
+    unit === "bread"
+      ? [
+          ["all", "全部 / All"],
+          ["starter", "菌種 / Starter"],
+          ["ingredient", "材料 / Ingredients"],
+          ["method", "工法 / Method"],
+          ["bake", "烘烤 / Bake"],
+          ["tools", "器材 / Tools"],
+        ]
+      : [
+          ["all", "全部 / All"],
+          ["vaccine", "疫苗 / Vaccine"],
+          ["gene", "基因 / Gene"],
+          ["cancer", "癌症 / Cancer"],
+          ["brain", "大腦 / Brain"],
+        ];
+
+  return `
+    <main class="page">
+      <section class="hero">
+        <p class="kicker">${meta.kicker.zh} · ${meta.kicker.en}</p>
+        ${
+          unit === "bread"
+            ? `<svg class="hero-mark" viewBox="0 0 80 80" aria-hidden="true">
+          <ellipse cx="40" cy="52" rx="18" ry="8" fill="none" stroke="currentColor"/>
+          <rect x="28" y="22" width="24" height="30" fill="none" stroke="currentColor"/>
+          <circle cx="36" cy="34" r="2" fill="currentColor">
+            <animate attributeName="cy" values="36;28;36" dur="2.4s" repeatCount="indefinite"/>
+          </circle>
+        </svg>`
+            : `<svg class="hero-mark" viewBox="0 0 80 80" aria-hidden="true">
           <circle cx="40" cy="40" r="24" fill="none" stroke="currentColor" stroke-width="1.4"/>
           <circle cx="40" cy="40" r="7" fill="currentColor">
             <animate attributeName="r" values="6;8;6" dur="3.2s" repeatCount="indefinite"/>
           </circle>
-          <circle cx="40" cy="14" r="3" fill="currentColor">
-            <animateTransform attributeName="transform" type="rotate" from="0 40 40" to="360 40 40" dur="8s" repeatCount="indefinite"/>
-          </circle>
-        </svg>
-        <h1 lang="zh">今年夏天，醫學界在吵什麼</h1>
-        <h1 lang="en">What medicine was shouting about this summer</h1>
-        <p class="subhead" lang="zh">十篇故事。細胞可以戳。最後沒有考卷。</p>
-        <p class="subhead" lang="en">Ten stories. Cells you can poke. No exam at the end.</p>
+        </svg>`
+        }
+        <h1 lang="zh">${meta.title.zh}</h1>
+        <h1 lang="en">${meta.title.en}</h1>
+        <p class="subhead" lang="zh">${meta.subhead.zh}</p>
+        <p class="subhead" lang="en">${meta.subhead.en}</p>
         <div class="pair lede">
-          <p lang="zh">我們把 7、8 月跟疫苗、基因、癌症、大腦有關的大事收成十篇。用國中生物那種「點細胞核、看細胞壁」的方式，讓你動手摸一摸原理。口語、中英對照，不是考卷。</p>
-          <p lang="en">Ten vaccine-first plus big-medicine stories from July and August. Each piece has a biology-class canvas — tap a nucleus, drag a memo, unstick a switch. Colloquial, bilingual, zero pop quiz.</p>
+          <p lang="zh">${meta.lede.zh}</p>
+          <p lang="en">${meta.lede.en}</p>
         </div>
         <div class="toolbar" role="group" aria-label="篩選 / Filter">
-          <button class="chip" type="button" data-filter="all" aria-pressed="true">全部 / All</button>
-          <button class="chip" type="button" data-filter="vaccine">疫苗 / Vaccine</button>
-          <button class="chip" type="button" data-filter="gene">基因 / Gene</button>
-          <button class="chip" type="button" data-filter="cancer">癌症 / Cancer</button>
-          <button class="chip" type="button" data-filter="brain">大腦 / Brain</button>
+          ${filters
+            .map(
+              ([id, label], i) =>
+                `<button class="chip" type="button" data-filter="${id}" aria-pressed="${i === 0 ? "true" : "false"}">${label}</button>`,
+            )
+            .join("")}
         </div>
       </section>
       <section class="feed">
-        ${articles.map(card).join("")}
+        ${list.map(card).join("")}
         <div class="feed-empty" hidden>
           <p lang="zh">這個分類現在沒有文章。</p>
           <p lang="en">Nothing in this filter yet.</p>
