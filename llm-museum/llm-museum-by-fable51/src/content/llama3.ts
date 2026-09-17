@@ -1,4 +1,5 @@
-import { cloneBlock, type Block, type ModelSpec } from "./types.ts";
+import { attachExamples, cloneBlock, type Block, type ModelSpec } from "./types.ts";
+import { llama3Example, llama3Examples, llama3FlowTokens } from "./examples/llama3.ts";
 
 const tokenEmbedding: Block = {
   id: "l-emb",
@@ -164,7 +165,7 @@ const kvCache: Block = {
   deco: { count: 32 },
 };
 
-export const llama3: ModelSpec = {
+export const llama3: ModelSpec = attachExamples({
   id: "llama3",
   name: { zh: "Llama 3", en: "Llama 3" },
   shortName: { zh: "Llama 3", en: "Llama 3" },
@@ -178,6 +179,7 @@ export const llama3: ModelSpec = {
     zh: "Llama 3 是 Meta 在 2024 年開放權重的模型家族，有 8B、70B、405B 三種尺寸。它代表了今天「純解碼器」稠密模型的標準配方：拿掉編碼器，只留下一疊解碼器層；把 LayerNorm 換成前置的 RMSNorm、位置編碼換成旋轉式的 RoPE、ReLU 前饋換成 SwiGLU，注意力則用分組查詢（GQA）來縮小推理時的 KV 快取。Qwen、Mistral、Gemma 等開源模型幾乎都沿用同一套骨架。",
     en: "Llama 3 is Meta's open-weight model family from 2024, in 8B, 70B and 405B sizes. It represents today's standard recipe for dense decoder-only models: drop the encoder and keep a single stack of decoder layers; replace LayerNorm with pre-norm RMSNorm, sinusoidal positions with rotary RoPE, the ReLU feed-forward with SwiGLU, and shrink the inference KV cache with grouped-query attention (GQA). Qwen, Mistral, Gemma and most other open models follow nearly the same skeleton.",
   },
+  example: llama3Example,
   facts: [
     { label: { zh: "類型", en: "Type" }, value: { zh: "純解碼器、稠密", en: "Decoder-only, dense" } },
     { label: { zh: "層數", en: "Layers" }, value: { zh: "32 / 80 / 126（8B / 70B / 405B）", en: "32 / 80 / 126 (8B / 70B / 405B)" } },
@@ -207,6 +209,7 @@ export const llama3: ModelSpec = {
       z: 0,
       labelSide: "right",
       main: true,
+      flowTokens: llama3FlowTokens,
       blocks: [
         tokenEmbedding,
         rmsNorm,
@@ -238,4 +241,4 @@ export const llama3: ModelSpec = {
     { label: "meta-llama/llama-models · GitHub", url: "https://github.com/meta-llama/llama-models" },
   ],
   accent: 0x8b9a5b,
-};
+}, llama3Examples);

@@ -1,8 +1,9 @@
-import type { Block, BlockKind, ModelSpec } from "./content/types.ts";
+import { pickViz, type Block, type BlockKind, type ModelSpec } from "./content/types.ts";
 import { format, pick, UI as T, type L, type Locale } from "./i18n.ts";
 import { blockParts, introParts, type ReadingPart } from "./reading.ts";
 import { hex, KIND_COLOR } from "./scene/palette.ts";
 import { splitSentences, type SpeechSnapshot } from "./speech.ts";
+import { catImageSvg, renderViz } from "./viz.ts";
 
 export interface UIHandlers {
   onSelectHall: (modelId: string | null) => void;
@@ -297,16 +298,40 @@ export class UI {
     const eyebrow = el("p", "eyebrow");
     eyebrow.append(`${pick(T.hall, l)} ${this.models.indexOf(model) + 1} · ${model.year}${pick(T.year, l)} · ${pick(model.org, l)}`);
     const name = el("h2", "model-name");
-    sentenceSpans(name, parts[0], counter);
+    sentenceSpans(name, parts.find((p) => p.role === "title"), counter);
     const tagline = el("p", "tagline");
-    sentenceSpans(tagline, parts[1], counter);
+    sentenceSpans(tagline, parts.find((p) => p.role === "tagline"), counter);
     const intro = el("p", "prose");
-    sentenceSpans(intro, parts[2], counter);
+    sentenceSpans(intro, parts.find((p) => p.role === "intro"), counter);
+    this.modelCard.append(eyebrow, name, tagline, intro);
+
+    if (model.example) {
+      const box = el("section", "example-box");
+      box.append(el("h3", "example-title", `✦ ${pick(T.exampleTitle, l)}`));
+      if (model.example.image) {
+        const figure = el("figure", "example-figure");
+        const img = catImageSvg(0);
+        img.setAttribute("aria-label", pick(T.exampleImageAlt, l));
+        figure.append(img);
+        box.append(figure);
+      }
+      const io = el("dl", "example-io");
+      io.append(el("dt", undefined, pick(T.exampleInput, l)), el("dd", undefined, pick(model.example.input, l)));
+      io.append(el("dt", undefined, pick(T.exampleOutput, l)), el("dd", "example-output", pick(model.example.output, l)));
+      box.append(io);
+      const sentence = el("p", "example-sentence");
+      sentenceSpans(sentence, parts.find((p) => p.role === "example"), counter);
+      box.append(sentence);
+      if (model.example.note) box.append(el("p", "muted example-note", pick(model.example.note, l)));
+      box.append(el("p", "muted example-hint", pick(T.exampleHint, l)));
+      this.modelCard.append(box);
+    }
+
     const readBtn = el("button", "read-btn", `🔈 ${pick(T.readIntro, l)}`);
     readBtn.type = "button";
     readBtn.dataset.read = "intro";
     readBtn.addEventListener("click", () => this.handlers.onSpeakIntro());
-    this.modelCard.append(eyebrow, name, tagline, intro, readBtn);
+    this.modelCard.append(readBtn);
     this.modelCard.dataset.reading = "intro";
 
     const factsTitle = el("h3", "section-title", pick(T.keyFacts, l));
@@ -385,12 +410,26 @@ export class UI {
     head.append(badge, where, steps);
 
     const title = el("h3", "detail-title");
-    sentenceSpans(title, parts[0], counter);
+    sentenceSpans(title, parts.find((p) => p.role === "title"), counter);
     const brief = el("p", "detail-brief");
-    sentenceSpans(brief, parts[1], counter);
+    sentenceSpans(brief, parts.find((p) => p.role === "brief"), counter);
+    this.moduleDetail.append(head, title, brief);
+
+    const storyPart = parts.find((p) => p.role === "story");
+    if (block.example && storyPart) {
+      const section = el("section", "example-section");
+      section.append(el("h4", "example-section-title", `✦ ${pick(T.exampleAtModule, l)}`));
+      const viz = pickViz(block.example.viz, l);
+      if (viz) section.append(renderViz(viz, l));
+      const story = el("p", "prose example-story");
+      sentenceSpans(story, storyPart, counter);
+      section.append(story);
+      this.moduleDetail.append(section);
+    }
+
     const detail = el("p", "prose");
-    sentenceSpans(detail, parts[2], counter);
-    this.moduleDetail.append(head, title, brief, detail);
+    sentenceSpans(detail, parts.find((p) => p.role === "detail"), counter);
+    this.moduleDetail.append(detail);
 
     if (block.facts?.length) {
       const facts = el("dl", "facts facts-compact");

@@ -1,4 +1,5 @@
-import { cloneBlock, type Block, type ModelSpec } from "./types.ts";
+import { attachExamples, cloneBlock, type Block, type ModelSpec } from "./types.ts";
+import { transformerExample, transformerExamples, transformerFlowTokens } from "./examples/transformer.ts";
 
 const inputEmbedding: Block = {
   id: "t-in-emb",
@@ -187,7 +188,7 @@ const softmax: Block = {
   deco: { count: 10 },
 };
 
-export const transformer: ModelSpec = {
+export const transformer: ModelSpec = attachExamples({
   id: "transformer",
   name: { zh: "原始 Transformer", en: "Original Transformer" },
   shortName: { zh: "Transformer", en: "Transformer" },
@@ -201,6 +202,7 @@ export const transformer: ModelSpec = {
     zh: "2017 年的論文《Attention Is All You Need》提出了 Transformer。它是一個為機器翻譯設計的「編碼器–解碼器」模型：左邊的編碼器讀入整句原文，右邊的解碼器一次產生一個目標語言的詞。它完全拋棄了循環神經網路，只靠「注意力」讓每個詞直接看到句中任何其他詞，因此可以大量平行運算。今天所有的大語言模型，都是從這座建築的藍圖演變而來。",
     en: "The 2017 paper \"Attention Is All You Need\" introduced the Transformer. It is an encoder–decoder model built for machine translation: the encoder on the left reads the whole source sentence, and the decoder on the right produces the target sentence one token at a time. It dropped recurrence entirely and relies only on attention, so every word can look directly at every other word and computation runs in parallel. Every large language model today descends from this blueprint.",
   },
+  example: transformerExample,
   facts: [
     { label: { zh: "層數", en: "Layers" }, value: { zh: "6 層編碼器 + 6 層解碼器", en: "6 encoder + 6 decoder" } },
     { label: { zh: "模型維度 d_model", en: "Model dim d_model" }, value: { zh: "512（Big 版 1,024）", en: "512 (1,024 in Big)" } },
@@ -219,6 +221,7 @@ export const transformer: ModelSpec = {
       z: 0,
       labelSide: "left",
       main: true,
+      flowTokens: transformerFlowTokens.encoder,
       blocks: [
         inputEmbedding,
         positionalEncoding,
@@ -237,6 +240,7 @@ export const transformer: ModelSpec = {
       z: 0,
       labelSide: "right",
       main: true,
+      flowTokens: transformerFlowTokens.decoder,
       blocks: [
         outputEmbedding,
         cloneBlock(positionalEncoding, "t-out-pos"),
@@ -271,4 +275,4 @@ export const transformer: ModelSpec = {
     { label: "The Annotated Transformer (Harvard NLP)", url: "https://nlp.seas.harvard.edu/annotated-transformer/" },
   ],
   accent: 0xc9a24c,
-};
+}, transformerExamples);

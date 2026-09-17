@@ -1,4 +1,5 @@
-import { cloneBlock, type Block, type ModelSpec } from "./types.ts";
+import { attachExamples, cloneBlock, type Block, type ModelSpec } from "./types.ts";
+import { deepseekExample, deepseekExamples, deepseekFlowTokens } from "./examples/deepseek-v41-flash.ts";
 
 const visionEncoder: Block = {
   id: "d-vit",
@@ -307,7 +308,7 @@ const dspark: Block = {
   deco: { count: 5 },
 };
 
-export const deepseekV41Flash: ModelSpec = {
+export const deepseekV41Flash: ModelSpec = attachExamples({
   id: "deepseek-v41-flash",
   name: { zh: "DeepSeek V4.1 Flash", en: "DeepSeek V4.1 Flash" },
   shortName: { zh: "DeepSeek V4.1", en: "DeepSeek V4.1" },
@@ -321,6 +322,7 @@ export const deepseekV41Flash: ModelSpec = {
     zh: "DeepSeek-V4.1-Flash 是 DeepSeek 在 2026 年 9 月開放權重的多模態 MoE 模型：主幹 5,520 億參數，另有 1,960 億 Engram 記憶參數，但每個 token 在讀取（prefill）階段只啟用 80 億、生成（decode）階段 160 億，上下文可達一百萬 token。它的骨架叫「因果編碼器–解碼器」（CED）：40 層被分成 20 層因果編碼器與 20 層解碼器，解碼器的全域 KV 直接從編碼器的最終狀態投影出來，因此讀長文只要跑一半的層。再搭配跨層共享 KV 的 CSA2 稀疏注意力、FP4 KV 快取、Single-Pass mHC 殘差流、Engram 記憶與 DSpark 推測解碼，把每個 token 的全域 KV 快取壓到只有 890 bytes。",
     en: "DeepSeek-V4.1-Flash is the multimodal MoE model DeepSeek released with open weights in September 2026: 552B backbone parameters plus 196B Engram memory parameters, yet each token activates only 8B parameters while reading the prompt (prefill) and 16B while generating (decode), with a context of up to one million tokens. Its skeleton is a Causal Encoder–Decoder (CED): the 40 layers are split into a 20-layer causal encoder and a 20-layer decoder, and the decoder's global KV is projected straight from the encoder's final states, so reading a long prompt only runs half the layers. Combined with CSA2 sparse attention that shares KV across layers, FP4 KV caching, Single-Pass mHC residual streams, Engram memory and DSpark speculative decoding, the global KV cache shrinks to just 890 bytes per token.",
   },
+  example: deepseekExample,
   facts: [
     { label: { zh: "類型", en: "Type" }, value: { zh: "多模態 MoE，因果編碼器–解碼器（CED）", en: "Multimodal MoE, Causal Encoder–Decoder (CED)" } },
     { label: { zh: "層數", en: "Layers" }, value: { zh: "20 層因果編碼器 + 20 層解碼器", en: "20 causal encoder + 20 decoder" } },
@@ -350,6 +352,7 @@ export const deepseekV41Flash: ModelSpec = {
       z: 0,
       labelSide: "left",
       main: true,
+      flowTokens: deepseekFlowTokens.encoder,
       blocks: [
         embedding,
         swa,
@@ -373,6 +376,7 @@ export const deepseekV41Flash: ModelSpec = {
       z: 0,
       labelSide: "right",
       main: true,
+      flowTokens: deepseekFlowTokens.decoder,
       blocks: [
         csa2DecFull,
         cloneBlock(moe, "d-moe-d"),
@@ -436,4 +440,4 @@ export const deepseekV41Flash: ModelSpec = {
     { label: "DeepSeek API Docs · V4.1-Flash release note", url: "https://api-docs.deepseek.com/news/news260910" },
   ],
   accent: 0xb5773f,
-};
+}, deepseekExamples);

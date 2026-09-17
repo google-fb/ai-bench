@@ -46,6 +46,11 @@ interface Particle {
   curve: THREE.Curve<THREE.Vector3>;
   offset: number;
   period: number;
+  /** Example tokens that ride this particle, one per loop. */
+  tokens?: { zh: string[]; en: string[] };
+  tokenIndex: number;
+  labelEl?: HTMLElement;
+  lastT: number;
 }
 
 const _tmpColor = new THREE.Color();
@@ -74,9 +79,11 @@ export class Exhibit {
   private readonly particles: Particle[] = [];
   private readonly particleGroup = new THREE.Group();
   private labelsVisible = false;
+  private locale: Locale;
 
   constructor(model: ModelSpec, origin: THREE.Vector3, locale: Locale, private readonly onSelect: (blockId: string) => void, onPlaque: () => void) {
     this.model = model;
+    this.locale = locale;
     this.group.position.copy(origin);
 
     const columnTops: number[] = [];
@@ -267,12 +274,12 @@ export class Exhibit {
       });
     }
 
-    // Token flow along main columns.
+    // Token flow along main columns, carrying the running example's tokens.
     if (column.main && column.blocks.length > 1) {
       const start = new THREE.Vector3(column.x, (column.baseY ?? 0) + 0.05, column.z);
       const end = new THREE.Vector3(column.x, columnTop, column.z);
       const curve = new THREE.LineCurve3(start, end);
-      for (let i = 0; i < 2; i++) this.addParticle(curve, i / 2, 7, PALETTE.token, 0.1 * s);
+      for (let i = 0; i < 2; i++) this.addParticle(curve, i / 2, 7, PALETTE.token, 0.1 * s, column.flowTokens, i);
     }
 
     return columnTop;
@@ -555,14 +562,41 @@ export class Exhibit {
     this.addParticle(curve, 0.5, 5, color, 0.08);
   }
 
-  private addParticle(curve: THREE.Curve<THREE.Vector3>, offset: number, period: number, color: number, radius: number): void {
+  private addParticle(
+    curve: THREE.Curve<THREE.Vector3>,
+    offset: number,
+    period: number,
+    color: number,
+    radius: number,
+    tokens?: { zh: string[]; en: string[] },
+    tokenStart = 0,
+  ): void {
     const mesh = new THREE.Mesh(
       new THREE.SphereGeometry(radius, 12, 12),
       new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 1.2, roughness: 0.3 }),
     );
     mesh.visible = false;
     this.particleGroup.add(mesh);
-    this.particles.push({ mesh, curve, offset, period });
+    const particle: Particle = { mesh, curve, offset, period, tokens, tokenIndex: tokenStart, lastT: 0 };
+    if (tokens) {
+      const el = document.createElement("span");
+      el.className = "flow-token";
+      const label = new CSS2DObject(el);
+      label.position.set(0, radius + 0.12, 0);
+      label.center.set(0.5, 1);
+      mesh.add(label);
+      this.labels.push(label);
+      particle.labelEl = el;
+      this.paintToken(particle);
+    }
+    this.particles.push(particle);
+  }
+
+  private paintToken(p: Particle): void {
+    if (!p.tokens || !p.labelEl) return;
+    const list = p.tokens[this.locale];
+    const text = list[p.tokenIndex % Math.max(1, list.length)] ?? "";
+    p.labelEl.textContent = text;
   }
 
   private pickExperts(grid: MoeGrid): void {
@@ -595,7 +629,9 @@ export class Exhibit {
   }
 
   applyLocale(locale: Locale): void {
+    this.locale = locale;
     for (const item of this.localized) item.element.textContent = pick(item.text, locale);
+    for (const p of this.particles) this.paintToken(p);
     this.renderPlaque(this.plaque.element, locale);
   }
 
@@ -607,10 +643,17 @@ export class Exhibit {
     if (this.particleGroup.visible) {
       for (const p of this.particles) {
         const t = ((time / p.period + p.offset) % 1 + 1) % 1;
+        if (t < p.lastT && p.tokens) {
+          // Looped back to the bottom: the next example token rides up.
+          p.tokenIndex += 2;
+          this.paintToken(p);
+        }
+        p.lastT = t;
         p.mesh.visible = true;
         p.curve.getPointAt(t, p.mesh.position);
         const fade = Math.min(1, Math.min(t, 1 - t) * 8);
         p.mesh.scale.setScalar(0.6 + 0.4 * fade);
+        if (p.labelEl) p.labelEl.style.opacity = String(Math.min(1, fade * 1.2));
       }
     }
     for (const grid of this.moeGrids) {

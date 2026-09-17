@@ -159,7 +159,7 @@ test.describe("LLM Architecture Museum", () => {
     await expect(page.locator("#module-detail")).toHaveClass(/is-open/);
     await expect(page.locator(".detail-title")).toHaveText("多頭自注意力");
     await expect(page.locator(".kind-badge")).toHaveText("注意力");
-    await expect(page.locator("#module-detail .prose")).toContainText("這是 Transformer 的心臟");
+    await expect(page.locator("#module-detail .prose").last()).toContainText("這是 Transformer 的心臟");
     await expect(page.locator(".lbl[data-block-id='t-enc-attn']")).toHaveClass(/is-selected/);
     await expect(page.locator(".module-item[data-block-id='t-enc-attn']")).toHaveClass(/is-active/);
     await expect(page).toHaveURL(/#\/transformer\/t-enc-attn$/);
@@ -171,6 +171,71 @@ test.describe("LLM Architecture Museum", () => {
     // Stepping follows the curated learning order.
     await page.click(".step-btn[title='下一個模組']");
     await expect(page.locator(".detail-title")).toHaveText("線性層");
+  });
+
+  test("each module shows what the running example looks like at that layer", async ({ page }) => {
+    await openMuseum(page, "#/transformer/t-enc-attn");
+    await expect(page.locator(".detail-title")).toHaveText("多頭自注意力", { timeout: 15_000 });
+    // The exhibit card states the example input and output.
+    await expect(page.locator(".example-box .example-io dd").first()).toContainText("The cat sat on the mat.");
+    await expect(page.locator(".example-box .example-output")).toHaveText("貓坐在墊子上。");
+    // Attention over the example sentence: a 7×7 heat map with the row for "sat" highlighted.
+    const example = page.locator("#module-detail .example-section");
+    await expect(example.locator(".example-section-title")).toContainText("以範例來看");
+    await expect(example.locator(".heat-col")).toHaveText(["The", "cat", "sat", "on", "the", "mat", "."]);
+    await expect(example.locator(".heat-row:not(.heat-head)")).toHaveCount(7);
+    await expect(example.locator(".heat-row.is-highlight .heat-label")).toHaveText("sat");
+    await expect(example.locator(".example-story")).toContainText("cat（0.40");
+
+    // The final layer shows the probabilities and the generated translation.
+    await page.click(".module-item[data-block-id='t-softmax']");
+    await expect(page.locator(".detail-title")).toHaveText("Softmax → 輸出機率");
+    await expect(page.locator("#module-detail .bar-row.is-highlight .bar-label")).toHaveText("墊子");
+    await expect(page.locator("#module-detail .chip.state-new .chip-text")).toHaveText("墊子");
+
+    // In English the same walkthrough translates into German.
+    await page.click("#lang-toggle");
+    await expect(page.locator("#module-detail .bar-row.is-highlight .bar-label")).toHaveText("Matte");
+    await expect(page.locator(".example-box .example-output")).toHaveText("Die Katze saß auf der Matte.");
+    await expect(page.locator(".example-section-title")).toContainText("With our example");
+
+    // Example tokens ride the token flow in the 3D scene.
+    await expect(page.locator(".flow-token").filter({ hasText: /^(The|cat|sat|on|the|mat|\.)$/ }).first()).toBeAttached();
+  });
+
+  test("the DeepSeek walkthrough starts from a picture and shows expert routing", async ({ page }) => {
+    await openMuseum(page, "#/deepseek-v41-flash");
+    await expect(page.locator(".example-box .cat-image")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator(".example-box .example-output")).toHaveText("一隻貓坐在墊子上。");
+
+    await page.click(".module-item[data-block-id='d-vit']");
+    await expect(page.locator("#module-detail .viz-image .cat-grid")).toBeAttached();
+    await expect(page.locator("#module-detail .example-story")).toContainText("42×42");
+
+    await page.click(".module-item[data-block-id='d-moe-a']");
+    await expect(page.locator("#module-detail .grid-cells .grid-cell")).toHaveCount(384);
+    await expect(page.locator("#module-detail .grid-cells .grid-cell.is-active")).toHaveCount(6);
+    await expect(page.locator("#module-detail .grid-cells .grid-cell.is-secondary")).toHaveCount(6);
+
+    // Repeated MoE layers reuse the same example.
+    await page.click(".module-item[data-block-id='d-moe-g']");
+    await expect(page.locator("#module-detail .grid-cells .grid-cell.is-active")).toHaveCount(6);
+  });
+
+  test("reading a module aloud includes the example story, in order", async ({ page }) => {
+    await installFakeSpeech(page, 30);
+    await openMuseum(page, "#/llama3/l-sample");
+    await expect(page.locator(".detail-title")).toHaveText("Softmax → 取樣下一個 token", { timeout: 15_000 });
+    await page.click("[data-read='block']");
+    await expect
+      .poll(() => page.evaluate(() => window.__utterances.some((u) => u.text.startsWith("分數經 softmax 變成機率分佈"))), { timeout: 20_000 })
+      .toBe(true);
+    const texts = await page.evaluate(() => window.__utterances.map((u) => u.text));
+    const storyIndex = texts.findIndex((t) => t.startsWith("softmax 變成機率"));
+    const detailIndex = texts.findIndex((t) => t.startsWith("分數經 softmax 變成機率分佈"));
+    expect(texts[0]).toBe("Softmax → 取樣下一個 token。");
+    expect(storyIndex).toBeGreaterThan(1);
+    expect(detailIndex).toBeGreaterThan(storyIndex);
   });
 
   test("a deep link opens the right hall and module", async ({ page }) => {

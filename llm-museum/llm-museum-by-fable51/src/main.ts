@@ -89,6 +89,8 @@ class App {
 
     window.addEventListener("resize", () => this.syncInsets());
     document.addEventListener("keydown", (e) => this.onKey(e));
+    // Pasted links and back/forward navigation change the hash without reloading.
+    window.addEventListener("hashchange", () => this.applyHash());
 
     this.museum.start();
     this.syncInsets();
@@ -101,14 +103,23 @@ class App {
 
   private applyHash(): void {
     const hash = decodeURIComponent(location.hash.replace(/^#\/?/, ""));
-    if (!hash) return;
     const [modelId, blockId] = hash.split("/");
     const model = modelId ? findModel(modelId) : undefined;
-    if (!model) return;
-    if (blockId && findBlock(model, blockId)) {
+    if (!model) {
+      if (!hash && this.activeModelId !== null) this.goToHall(null);
+      return;
+    }
+    const block = blockId ? findBlock(model, blockId) : undefined;
+    const sameHall = this.activeModelId === model.id;
+    if (block) {
+      if (sameHall && this.selectedBlockId === block.id) return;
+      if (sameHall) {
+        this.selectBlock(model.id, block.id, { pan: true });
+        return;
+      }
       this.goToHall(model.id, 1.2);
-      setTimeout(() => this.selectBlock(model.id, blockId, { pan: true }), 900);
-    } else {
+      setTimeout(() => this.selectBlock(model.id, block.id, { pan: true }), 900);
+    } else if (!sameHall || this.selectedBlockId !== null) {
       this.goToHall(model.id, 1.2);
     }
   }
