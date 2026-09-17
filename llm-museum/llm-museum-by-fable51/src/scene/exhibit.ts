@@ -142,9 +142,10 @@ export class Exhibit {
       e.stopPropagation();
       onPlaque();
     });
+    // Front-centre of the pedestal, hanging below the top edge: away from the side labels.
     this.plaque = new CSS2DObject(plaqueEl);
-    this.plaque.position.set(center.x - pedW / 2 + 1.2, PEDESTAL_H + 0.05, center.z + pedD / 2 + 0.1);
-    this.plaque.center.set(0, 0);
+    this.plaque.position.set(center.x, PEDESTAL_H + 0.02, center.z + pedD / 2 + 0.05);
+    this.plaque.center.set(0.5, 0);
     this.group.add(this.plaque);
     this.applyLocale(locale);
 

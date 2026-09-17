@@ -24,7 +24,7 @@ interface CameraTween {
 const EXHIBIT_SPACING = 21;
 const SELECTED_EDGE = 0xf2c14e;
 const LABEL_GAP = 2;
-const LABEL_MAX_SHIFT = 72;
+const LABEL_MAX_SHIFT = 96;
 
 function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -335,8 +335,12 @@ export class Museum {
     this.flyTo(target.clone().add(this.orbitOffset(distance, 0.38, 0.27)), target, duration);
   }
 
-  /** Moves close to one block, keeping its neighbours and label in view. */
-  focusBlock(modelId: string, blockId: string, duration = 1.1): void {
+  /**
+   * Moves close to one block, keeping its neighbours and label in view.
+   * `narrow` (phones) looks straight on and shifts towards the label side so the
+   * selected block's label stays inside the screen.
+   */
+  focusBlock(modelId: string, blockId: string, duration = 1.1, options: { narrow?: boolean } = {}): void {
     const exhibit = this.exhibitFor(modelId);
     const view = exhibit?.blocks.get(blockId);
     if (!exhibit || !view) return;
@@ -346,8 +350,10 @@ export class Museum {
       for (const other of this.exhibits) other.setLabelsVisible(other === exhibit);
     }
     const target = view.mesh.getWorldPosition(new THREE.Vector3());
-    const distance = Math.max(5.5, this.frameDistance(view.size.x * 2.6 + 2, view.size.y * 6 + 2.5));
-    const azimuth = view.column.labelSide === "left" ? -0.35 : 0.42;
+    const side = view.column.labelSide === "left" ? -1 : view.column.labelSide === "right" ? 1 : 0;
+    if (options.narrow) target.x += side * view.size.x * 0.45;
+    const distance = Math.max(5.5, this.frameDistance(view.size.x * (options.narrow ? 3.4 : 2.6) + 2, view.size.y * 6 + 2.5));
+    const azimuth = options.narrow ? 0.12 : view.column.labelSide === "left" ? -0.35 : 0.42;
     this.flyTo(target.clone().add(this.orbitOffset(distance, azimuth, 0.2)), target, duration);
   }
 

@@ -220,7 +220,7 @@ class App {
     if (!options.fromTour && this.ui.ensurePanelOpen()) this.syncInsets();
     if (options.pan && !options.fromTour) {
       // Phones hide the other labels, so move right up to the chosen block instead of only panning.
-      if (this.ui.isStacked()) this.museum.focusBlock(modelId, blockId);
+      if (this.ui.isStacked()) this.museum.focusBlock(modelId, blockId, 1.1, { narrow: true });
       else this.museum.panToBlock(modelId, blockId);
     }
     this.ui.setBlock(model, block);
