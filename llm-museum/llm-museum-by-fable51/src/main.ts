@@ -10,6 +10,50 @@ type TourStep = { kind: "intro" } | { kind: "block"; blockId: string };
 
 const FLOW_KEY = "llm-museum.flow";
 
+/** A setTimeout that can be paused and resumed with its remaining time intact. */
+class PausableTimer {
+  private handle: ReturnType<typeof setTimeout> | null = null;
+  private fn: (() => void) | null = null;
+  private remaining = 0;
+  private startedAt = 0;
+
+  start(ms: number, fn: () => void): void {
+    this.clear();
+    this.fn = fn;
+    this.remaining = ms;
+    this.arm();
+  }
+
+  pause(): void {
+    if (!this.handle) return;
+    clearTimeout(this.handle);
+    this.handle = null;
+    this.remaining = Math.max(400, this.remaining - (performance.now() - this.startedAt));
+  }
+
+  resume(): void {
+    if (this.handle || !this.fn) return;
+    this.arm();
+  }
+
+  clear(): void {
+    if (this.handle) clearTimeout(this.handle);
+    this.handle = null;
+    this.fn = null;
+    this.remaining = 0;
+  }
+
+  private arm(): void {
+    this.startedAt = performance.now();
+    this.handle = setTimeout(() => {
+      this.handle = null;
+      const fn = this.fn;
+      this.fn = null;
+      fn?.();
+    }, this.remaining);
+  }
+}
+
 class App {
   private locale: Locale = loadLocale();
   private readonly speech = new SpeechController();
@@ -23,11 +67,12 @@ class App {
   private tourActive = false;
   private tourSteps: TourStep[] = [];
   private tourIndex = 0;
-  private tourTimer: ReturnType<typeof setTimeout> | null = null;
-  private tourWatchdog: ReturnType<typeof setTimeout> | null = null;
-  /** Remaining watchdog time while narration is paused, so pausing never advances the tour. */
-  private tourWatchdogRemaining = 0;
-  private tourWatchdogStarted = 0;
+  /** Advances to the next stop after narration (or, without speech, after an estimated time). */
+  private readonly tourTimer = new PausableTimer();
+  /** Never lets the tour stall if the speech engine forgets to fire "end". */
+  private readonly tourWatchdog = new PausableTimer();
+  /** True while the visitor has paused the tour; both timers and narration are held. */
+  private tourHeld = false;
   private tourToken = 0;
   private silentTourRestarted = false;
   /** Pending deep-link selection; cancelled by any newer navigation. */
@@ -43,7 +88,7 @@ class App {
       onSpeakIntro: () => this.speakIntro(),
       onSpeakBlock: () => this.speakBlock(),
       onSpeechPlay: () => this.play(),
-      onSpeechPause: () => this.speech.toggle(),
+      onSpeechPause: () => this.togglePause(),
       onSpeechStop: () => (this.tourActive ? this.stopTour() : this.stopSpeech()),
       onRateChange: (rate) => this.speech.setRate(rate),
       onVoiceChange: (uri) => {
@@ -83,10 +128,10 @@ class App {
         this.reading = null;
         this.ui.setReading(null);
       }
-      // A paused narration must hold the tour: suspend the watchdog and resume it later.
+      // Pausing the narration (dock, Space) must hold the tour; resuming releases it.
       if (this.tourActive) {
-        if (snap.state === "paused") this.suspendTourWatchdog();
-        else if (snap.state === "speaking") this.resumeTourWatchdog();
+        if (snap.state === "paused" && !this.tourHeld) this.holdTour();
+        else if (snap.state === "speaking" && this.tourHeld) this.releaseTour();
       }
       // The engine never started talking: restart this stop on the silent timer instead of waiting.
       if (snap.engine === "silent" && this.tourActive && !this.silentTourRestarted) {
@@ -95,7 +140,7 @@ class App {
       }
     });
     this.ui.setSpeech(this.speech.snapshot());
-    this.ui.setTour({ active: false, index: 0, total: 0 });
+    this.ui.setTour({ active: false, index: 0, total: 0, held: false });
 
     window.addEventListener("resize", () => this.syncInsets());
     document.addEventListener("keydown", (e) => this.onKey(e));
@@ -286,12 +331,42 @@ class App {
 
   private stopTour(): void {
     this.tourActive = false;
+    this.tourHeld = false;
     this.tourToken += 1;
     this.clearTourTimers();
     this.speech.stop();
     this.reading = null;
     this.ui.setReading(null);
-    this.ui.setTour({ active: false, index: 0, total: 0 });
+    this.ui.setTour({ active: false, index: 0, total: 0, held: false });
+  }
+
+  /** Pause button: pauses narration when there is any, otherwise holds the timed tour. */
+  private togglePause(): void {
+    const state = this.speech.snapshot().state;
+    if (this.tourActive) {
+      if (this.tourHeld) this.releaseTour();
+      else this.holdTour();
+      return;
+    }
+    if (state !== "idle") this.speech.toggle();
+  }
+
+  private holdTour(): void {
+    if (!this.tourActive || this.tourHeld) return;
+    this.tourHeld = true;
+    this.tourTimer.pause();
+    this.tourWatchdog.pause();
+    if (this.speech.snapshot().state === "speaking") this.speech.pause();
+    this.ui.setTour({ active: true, index: this.tourIndex, total: this.tourSteps.length, held: true });
+  }
+
+  private releaseTour(): void {
+    if (!this.tourActive || !this.tourHeld) return;
+    this.tourHeld = false;
+    if (this.speech.snapshot().state === "paused") this.speech.resume();
+    this.tourTimer.resume();
+    this.tourWatchdog.resume();
+    this.ui.setTour({ active: true, index: this.tourIndex, total: this.tourSteps.length, held: false });
   }
 
   private tourStep(index: number): void {
@@ -305,7 +380,8 @@ class App {
     this.tourToken += 1;
     const token = this.tourToken;
     this.clearTourTimers();
-    this.ui.setTour({ active: true, index, total: this.tourSteps.length });
+    this.tourHeld = false;
+    this.ui.setTour({ active: true, index, total: this.tourSteps.length, held: false });
 
     const step = this.tourSteps[index];
     if (!step) return;
@@ -330,54 +406,25 @@ class App {
 
     const goNext = (delay: number) => {
       if (!this.tourActive || token !== this.tourToken) return;
-      if (this.tourTimer) clearTimeout(this.tourTimer);
-      this.tourTimer = setTimeout(() => {
+      this.tourTimer.start(delay, () => {
         if (this.tourActive && token === this.tourToken) this.tourStep(index + 1);
-      }, delay);
+      });
+      if (this.tourHeld) this.tourTimer.pause();
     };
 
     const estimate = estimateSpeechMs(text, this.locale, this.speech.rate);
     if (this.speech.canSpeak(this.locale)) {
-      this.tourAdvance = () => goNext(0);
       this.speech.speak(text, this.locale, { onDone: () => goNext(900) });
       // Watchdog: some engines never fire "end"; never let the tour stall.
-      this.armTourWatchdog(estimate * 2.5 + 6000);
+      this.tourWatchdog.start(estimate * 2.5 + 6000, () => goNext(0));
     } else {
       goNext(estimate);
     }
   }
 
-  private tourAdvance: (() => void) | null = null;
-
-  private armTourWatchdog(ms: number): void {
-    if (this.tourWatchdog) clearTimeout(this.tourWatchdog);
-    this.tourWatchdogRemaining = ms;
-    this.tourWatchdogStarted = performance.now();
-    this.tourWatchdog = setTimeout(() => {
-      this.tourWatchdog = null;
-      this.tourAdvance?.();
-    }, ms);
-  }
-
-  private suspendTourWatchdog(): void {
-    if (!this.tourWatchdog) return;
-    clearTimeout(this.tourWatchdog);
-    this.tourWatchdog = null;
-    this.tourWatchdogRemaining = Math.max(1000, this.tourWatchdogRemaining - (performance.now() - this.tourWatchdogStarted));
-  }
-
-  private resumeTourWatchdog(): void {
-    if (this.tourWatchdog || this.tourWatchdogRemaining <= 0 || !this.tourAdvance) return;
-    this.armTourWatchdog(this.tourWatchdogRemaining);
-  }
-
   private clearTourTimers(): void {
-    if (this.tourTimer) clearTimeout(this.tourTimer);
-    if (this.tourWatchdog) clearTimeout(this.tourWatchdog);
-    this.tourTimer = null;
-    this.tourWatchdog = null;
-    this.tourWatchdogRemaining = 0;
-    this.tourAdvance = null;
+    this.tourTimer.clear();
+    this.tourWatchdog.clear();
   }
 
   private onKey(event: KeyboardEvent): void {
@@ -392,9 +439,9 @@ class App {
     } else if (event.key === "ArrowLeft") {
       if (this.tourActive) this.tourStep(this.tourIndex - 1);
       else if (this.activeModelId) this.stepBlock(-1);
-    } else if (event.key === " " && this.speech.snapshot().state !== "idle") {
+    } else if (event.key === " " && (this.tourActive || this.speech.snapshot().state !== "idle")) {
       event.preventDefault();
-      this.speech.toggle();
+      this.togglePause();
     }
   }
 }

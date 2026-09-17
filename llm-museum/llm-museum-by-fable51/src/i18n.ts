@@ -118,6 +118,7 @@ export const UI = {
   tourPrev: { zh: "上一站", en: "Previous" },
   tourNext: { zh: "下一站", en: "Next" },
   tourStep: { zh: "第 {i} / {n} 站", en: "Stop {i} of {n}" },
+  tourHeld: { zh: "已暫停", en: "paused" },
   tourIntro: { zh: "展品介紹", en: "Exhibit introduction" },
   prevModule: { zh: "上一個模組", en: "Previous module" },
   nextModule: { zh: "下一個模組", en: "Next module" },

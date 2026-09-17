@@ -352,7 +352,7 @@ test.describe("LLM Architecture Museum", () => {
     await page.click("#speech-pause");
     await expect(page.locator("#speech-status")).toHaveText("已暫停");
     await page.waitForTimeout(4_500);
-    await expect(page.locator("#tour-progress")).toHaveText("第 1 / 11 站");
+    await expect(page.locator("#tour-progress")).toHaveText("第 1 / 11 站 · 已暫停");
 
     // Resume: the tour continues to the next stop by itself.
     await page.click("#speech-pause");
@@ -424,5 +424,14 @@ test.describe("LLM Architecture Museum", () => {
     await page.click("#tour-next");
     await expect(page.locator("#tour-progress")).toHaveText("第 2 / 12 站");
     await expect(page.locator(".detail-title")).toHaveText("輸入嵌入");
+
+    // Even with nothing to narrate, the visitor can hold the timed tour and release it.
+    await expect(page.locator("#speech-pause")).toBeEnabled();
+    await page.click("#speech-pause");
+    await expect(page.locator("#tour-progress")).toHaveText("第 2 / 12 站 · 已暫停");
+    await expect(page.locator("#speech-pause")).toContainText("繼續");
+    await page.keyboard.press(" ");
+    await expect(page.locator("#tour-progress")).toHaveText("第 2 / 12 站");
+    await expect(page.locator("#speech-pause")).toContainText("暫停");
   });
 });

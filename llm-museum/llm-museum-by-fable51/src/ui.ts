@@ -28,6 +28,8 @@ export interface TourState {
   active: boolean;
   index: number;
   total: number;
+  /** The visitor paused the tour (narration and timers are held). */
+  held: boolean;
 }
 
 export type ReadingKind = "intro" | "block";
@@ -84,7 +86,7 @@ export class UI {
   private readingKind: ReadingKind | null = null;
   private panelOpen = true;
   private flowOn = true;
-  private tour: TourState = { active: false, index: 0, total: 0 };
+  private tour: TourState = { active: false, index: 0, total: 0, held: false };
   private speechSupported = true;
   private hasVoice = true;
 
@@ -490,12 +492,18 @@ export class UI {
     this.voiceSelect.disabled = !supported;
   }
 
+  private lastSpeech: SpeechSnapshot = { state: "idle", sentenceIndex: 0, sentenceCount: 0, engine: "unknown" };
+
   setSpeech(snapshot: SpeechSnapshot): void {
+    this.lastSpeech = snapshot;
     const l = this.locale;
     const { state } = snapshot;
-    this.pauseBtn.textContent = state === "paused" ? `▶ ${pick(T.resume, l)}` : `⏸ ${pick(T.pause, l)}`;
-    this.pauseBtn.disabled = !this.speechSupported || state === "idle";
-    this.stopBtn.disabled = !this.speechSupported || state === "idle";
+    const held = state === "paused" || this.tour.held;
+    this.pauseBtn.textContent = held ? `▶ ${pick(T.resume, l)}` : `⏸ ${pick(T.pause, l)}`;
+    // While a tour runs the controls stay usable even when nothing is being spoken (timed fallback).
+    const busy = this.tour.active || (this.speechSupported && state !== "idle");
+    this.pauseBtn.disabled = !busy;
+    this.stopBtn.disabled = !busy;
     this.app.dataset.speech = state;
 
     let status = "";
@@ -547,8 +555,10 @@ export class UI {
     this.tourToggle.disabled = !this.activeModelId && !active;
     this.tourPrev.disabled = !active || index <= 0;
     this.tourNext.disabled = !active || index >= total - 1;
-    this.tourProgress.textContent = active ? format(pick(T.tourStep, l), { i: index + 1, n: total }) : "";
+    const progress = active ? format(pick(T.tourStep, l), { i: index + 1, n: total }) : "";
+    this.tourProgress.textContent = active && this.tour.held ? `${progress} · ${pick(T.tourHeld, l)}` : progress;
     this.app.dataset.tour = active ? "on" : "off";
+    this.setSpeech(this.lastSpeech);
   }
 
   /** Read-aloud availability for the currently shown texts. */
