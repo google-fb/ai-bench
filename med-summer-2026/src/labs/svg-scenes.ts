@@ -1,5 +1,5 @@
 function svgShell(inner: string): string {
-  return `<svg class="svg-lab-art" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" role="img">
+  return `<svg class="svg-lab-art" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <rect width="960" height="540" fill="#0a0a0a"/>
     ${inner}
   </svg>`;

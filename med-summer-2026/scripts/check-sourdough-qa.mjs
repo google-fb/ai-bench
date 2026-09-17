@@ -27,6 +27,8 @@ if (bread.includes("一間 fort") || bread.includes("想成一間 fort")) fail("
 if (bread.includes("麵包機 knead")) fail("Chinese knead leftover");
 if (bread.includes("發酵籃或布碗")) fail("布碗 should be 碗加布");
 if (!bread.includes("50 g 舊種 + 50 g 粉 + 50 g 水")) fail("feed ratios need gram examples");
+if (bread.includes("只要一小份就能帶菌")) fail("feed hotspot should use grams, not 一小份");
+if (!bread.includes("留下 20–50 g 就能帶菌")) fail("feed hotspot should say 20–50 g");
 if (!bread.includes("只算碗裡加的水")) fail("68% example should mention starter water");
 if (!bread.includes("揭蓋時鍋口會噴熱蒸氣")) fail("missing steam-burn caution");
 if (!chrome.includes("unit === \"bread\" ? bread : unit === \"med\" ? med")) fail("home footer should show both units");

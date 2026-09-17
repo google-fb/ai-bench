@@ -259,7 +259,7 @@ export const breadArticles: Article[] = [
         ["peak", { zh: "等高峰", en: "Wait for peak" }, { zh: "點橡筋高峰線，看罐子長高。", en: "Tap the rubber-band line and watch it rise." }],
       ]),
       hotspots: spots([
-        ["old", { zh: "舊種", en: "Seed" }, { zh: "只要一小份就能帶菌。", en: "A spoonful carries the culture." }],
+        ["old", { zh: "舊種", en: "Seed" }, { zh: "留下 20–50 g 就能帶菌。", en: "Keep 20–50 g. That’s enough culture." }],
         ["flour", { zh: "粉", en: "Flour" }, { zh: "開飯。", en: "Dinner." }],
         ["water", { zh: "水", en: "Water" }, { zh: "讓菌游得動。", en: "Lets the crew swim." }],
         ["peak", { zh: "高峰", en: "Peak" }, { zh: "最高、氣泡最多的時候。", en: "Tallest, most bubbles." }],
@@ -338,7 +338,7 @@ export const breadArticles: Article[] = [
       steps: steps([
         ["flour", { zh: "粉 = 100%", en: "Flour = 100%" }, { zh: "點粉。它是分母。", en: "Tap flour. It’s the denominator." }],
         ["h60", { zh: "60% 水", en: "60% water" }, { zh: "點 60。麵團偏硬。", en: "Tap 60. The dough stays stiff." }],
-        ["h70", { zh: "70% 水", en: "70% water" }, { zh: "點 70。新手甜蜜點附近。", en: "Tap 70. Near the beginner sweet spot." }],
+        ["h70", { zh: "70% 水", en: "70% water" }, { zh: "點 70。落在 68–75% 新手區間。", en: "Tap 70. Inside the 68–75% beginner range." }],
         ["h80", { zh: "80% 水", en: "80% water" }, { zh: "點 80。很黏，先別追。", en: "Tap 80. Very sticky. Don’t chase it yet." }],
       ]),
       hotspots: spots([
