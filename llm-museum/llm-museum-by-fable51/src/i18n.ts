@@ -59,6 +59,8 @@ export const UI = {
     en: "Drag to orbit · Scroll to zoom · Right-drag to pan · Click a module to read about it",
   },
   hall: { zh: "展廳", en: "Hall" },
+  hallsNav: { zh: "展廳導覽列", en: "Halls" },
+  viewportLabel: { zh: "3D 博物館場景", en: "3D museum scene" },
   exhibit: { zh: "展品", en: "Exhibit" },
   keyFacts: { zh: "關鍵數據", en: "Key facts" },
   modules: { zh: "模組導覽", en: "Modules" },

@@ -25,6 +25,9 @@ class App {
   private tourIndex = 0;
   private tourTimer: ReturnType<typeof setTimeout> | null = null;
   private tourWatchdog: ReturnType<typeof setTimeout> | null = null;
+  /** Remaining watchdog time while narration is paused, so pausing never advances the tour. */
+  private tourWatchdogRemaining = 0;
+  private tourWatchdogStarted = 0;
   private tourToken = 0;
   private silentTourRestarted = false;
 
@@ -39,7 +42,7 @@ class App {
       onSpeakBlock: () => this.speakBlock(),
       onSpeechPlay: () => this.play(),
       onSpeechPause: () => this.speech.toggle(),
-      onSpeechStop: () => this.stopSpeech(),
+      onSpeechStop: () => (this.tourActive ? this.stopTour() : this.stopSpeech()),
       onRateChange: (rate) => this.speech.setRate(rate),
       onVoiceChange: (uri) => {
         this.speech.setPreferredVoice(this.locale, uri);
@@ -77,6 +80,11 @@ class App {
       if (snap.state === "idle" && !this.tourActive) {
         this.reading = null;
         this.ui.setReading(null);
+      }
+      // A paused narration must hold the tour: suspend the watchdog and resume it later.
+      if (this.tourActive) {
+        if (snap.state === "paused") this.suspendTourWatchdog();
+        else if (snap.state === "speaking") this.resumeTourWatchdog();
       }
       // The engine never started talking: restart this stop on the silent timer instead of waiting.
       if (snap.engine === "silent" && this.tourActive && !this.silentTourRestarted) {
@@ -195,7 +203,12 @@ class App {
     }
     this.selectedBlockId = blockId;
     this.museum.select(modelId, blockId);
-    if (options.pan && !options.fromTour) this.museum.panToBlock(modelId, blockId);
+    if (!options.fromTour && this.ui.ensurePanelOpen()) this.syncInsets();
+    if (options.pan && !options.fromTour) {
+      // Phones hide the other labels, so move right up to the chosen block instead of only panning.
+      if (this.ui.isStacked()) this.museum.focusBlock(modelId, blockId);
+      else this.museum.panToBlock(modelId, blockId);
+    }
     this.ui.setBlock(model, block);
     history.replaceState(null, "", `#/${modelId}/${blockId}`);
   }
@@ -311,12 +324,37 @@ class App {
 
     const estimate = estimateSpeechMs(text, this.locale, this.speech.rate);
     if (this.speech.canSpeak(this.locale)) {
+      this.tourAdvance = () => goNext(0);
       this.speech.speak(text, this.locale, { onDone: () => goNext(900) });
       // Watchdog: some engines never fire "end"; never let the tour stall.
-      this.tourWatchdog = setTimeout(() => goNext(0), estimate * 2.5 + 6000);
+      this.armTourWatchdog(estimate * 2.5 + 6000);
     } else {
       goNext(estimate);
     }
+  }
+
+  private tourAdvance: (() => void) | null = null;
+
+  private armTourWatchdog(ms: number): void {
+    if (this.tourWatchdog) clearTimeout(this.tourWatchdog);
+    this.tourWatchdogRemaining = ms;
+    this.tourWatchdogStarted = performance.now();
+    this.tourWatchdog = setTimeout(() => {
+      this.tourWatchdog = null;
+      this.tourAdvance?.();
+    }, ms);
+  }
+
+  private suspendTourWatchdog(): void {
+    if (!this.tourWatchdog) return;
+    clearTimeout(this.tourWatchdog);
+    this.tourWatchdog = null;
+    this.tourWatchdogRemaining = Math.max(1000, this.tourWatchdogRemaining - (performance.now() - this.tourWatchdogStarted));
+  }
+
+  private resumeTourWatchdog(): void {
+    if (this.tourWatchdog || this.tourWatchdogRemaining <= 0 || !this.tourAdvance) return;
+    this.armTourWatchdog(this.tourWatchdogRemaining);
   }
 
   private clearTourTimers(): void {
@@ -324,6 +362,8 @@ class App {
     if (this.tourWatchdog) clearTimeout(this.tourWatchdog);
     this.tourTimer = null;
     this.tourWatchdog = null;
+    this.tourWatchdogRemaining = 0;
+    this.tourAdvance = null;
   }
 
   private onKey(event: KeyboardEvent): void {

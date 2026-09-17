@@ -341,6 +341,31 @@ test.describe("LLM Architecture Museum", () => {
     await expect(page.locator("#speech-status")).toHaveText("");
   });
 
+  test("pausing the narration holds the tour, and Stop ends it", async ({ page }) => {
+    await installFakeSpeech(page, 400);
+    await openMuseum(page, "#/llama3");
+    await expect(page.locator("#tour-toggle")).toBeEnabled({ timeout: 15_000 });
+    await page.click("#tour-toggle");
+    await expect(page.locator("#tour-progress")).toHaveText("第 1 / 11 站");
+
+    // Pause right away: the narration of stop 1 must not finish and advance the tour.
+    await page.click("#speech-pause");
+    await expect(page.locator("#speech-status")).toHaveText("已暫停");
+    await page.waitForTimeout(4_500);
+    await expect(page.locator("#tour-progress")).toHaveText("第 1 / 11 站");
+
+    // Resume: the tour continues to the next stop by itself.
+    await page.click("#speech-pause");
+    await expect(page.locator("#tour-progress")).toHaveText("第 2 / 11 站", { timeout: 30_000 });
+
+    // Stop in the dock ends the tour rather than leaving it to auto-advance silently.
+    await page.click("#speech-stop");
+    await expect(page.locator("#tour-progress")).toHaveText("");
+    await expect(page.locator("#tour-toggle")).toContainText("開始導覽");
+    await page.waitForTimeout(3_000);
+    await expect(page.locator("#tour-progress")).toHaveText("");
+  });
+
   test("a speech engine that never starts is detected and reported instead of hanging", async ({ page }) => {
     await installFakeSpeech(page, 120, true);
     await openMuseum(page, "#/transformer/t-in-pos");
@@ -357,6 +382,37 @@ test.describe("LLM Architecture Museum", () => {
     await page.click("#tour-next");
     await expect(page.locator("#tour-progress")).toHaveText("第 2 / 12 站");
     await expect(page.locator("#speech-status")).toContainText("語音引擎沒有回應");
+  });
+
+  test.describe("phone layout", () => {
+    test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+
+    test("stacks the panel as a bottom sheet, hides unselected labels and opens the sheet on selection", async ({ page }) => {
+      await openMuseum(page, "#/llama3");
+      await expect(page.locator(".hall-btn[data-hall='llama3']")).toHaveClass(/is-active/, { timeout: 15_000 });
+
+      const panel = await page.locator("#panel").boundingBox();
+      const dock = await page.locator("#dock").boundingBox();
+      const brand = await page.locator(".brand").boundingBox();
+      const nav = await page.locator("#hall-nav").boundingBox();
+      expect(panel && panel.width).toBeGreaterThan(380);
+      expect(panel && panel.y).toBeGreaterThan(400);
+      expect(dock && dock.height).toBeLessThan(70);
+      expect(dock && panel && dock.y + dock.height).toBeLessThanOrEqual(panel.y + 1);
+      // The hall navigation wraps onto its own row under the brand.
+      expect(nav && brand && nav.y).toBeGreaterThan(brand.y + 20);
+
+      // Only a selected block keeps its 3D label on a phone.
+      await expect(page.locator(".lbl:visible")).toHaveCount(0);
+
+      await page.click("#panel-toggle");
+      await expect(page.locator("#panel")).toHaveClass(/is-collapsed/);
+      await page.keyboard.press("ArrowRight");
+      await expect(page.locator("#panel")).not.toHaveClass(/is-collapsed/);
+      await expect(page.locator(".detail-title")).toHaveText("Token 嵌入（128K 詞彙）");
+      await expect(page.locator(".lbl.is-selected:visible")).toHaveCount(1);
+      await expect(page.locator(".lbl:visible")).toHaveCount(1);
+    });
   });
 
   test("without a speech engine the controls explain why and the tour still advances", async ({ page }) => {

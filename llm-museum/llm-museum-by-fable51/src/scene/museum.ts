@@ -23,6 +23,8 @@ interface CameraTween {
 
 const EXHIBIT_SPACING = 21;
 const SELECTED_EDGE = 0xf2c14e;
+const LABEL_GAP = 2;
+const LABEL_MAX_SHIFT = 72;
 
 function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -96,6 +98,9 @@ export class Museum {
   private lastTime = 0;
   private flowVisible = true;
   private readonly resizeObserver: ResizeObserver;
+  private pickables: THREE.Object3D[] = [];
+  private readonly lastCameraMatrix = new THREE.Matrix4();
+  private labelLayoutDirty = true;
 
   constructor(
     private readonly container: HTMLElement,
@@ -146,6 +151,7 @@ export class Museum {
       this.exhibits.push(exhibit);
       this.scene.add(exhibit.group);
     });
+    this.pickables = this.exhibits.flatMap((e) => e.pickables);
 
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(container);
@@ -302,6 +308,7 @@ export class Museum {
 
   focusOverview(duration = 1.6): void {
     this.activeModelId = null;
+    this.labelLayoutDirty = true;
     for (const exhibit of this.exhibits) exhibit.setLabelsVisible(false);
     const bounds = new THREE.Box3();
     for (const exhibit of this.exhibits) bounds.union(exhibit.bounds);
@@ -316,6 +323,7 @@ export class Museum {
     const exhibit = this.exhibitFor(modelId);
     if (!exhibit) return;
     this.activeModelId = modelId;
+    this.labelLayoutDirty = true;
     for (const other of this.exhibits) other.setLabelsVisible(other === exhibit);
     const size = exhibit.bounds.getSize(new THREE.Vector3());
     const center = exhibit.bounds.getCenter(new THREE.Vector3());
@@ -332,6 +340,7 @@ export class Museum {
     if (!exhibit || !view) return;
     if (this.activeModelId !== modelId) {
       this.activeModelId = modelId;
+      this.labelLayoutDirty = true;
       for (const other of this.exhibits) other.setLabelsVisible(other === exhibit);
     }
     const target = view.mesh.getWorldPosition(new THREE.Vector3());
@@ -386,10 +395,63 @@ export class Museum {
     view.edgeMaterial.color.set(SELECTED_EDGE);
     view.edgeMaterial.opacity = 1;
     view.labelButton.classList.add("is-selected");
+    this.labelLayoutDirty = true;
   }
 
   setLocale(locale: Locale): void {
     for (const exhibit of this.exhibits) exhibit.applyLocale(locale);
+    this.labelLayoutDirty = true;
+  }
+
+  /**
+   * Keeps the 2D labels of the active exhibit from piling on top of each other:
+   * labels are sorted by screen position and nudged downwards until they clear
+   * earlier labels, column titles, repeat badges and link captions.
+   */
+  private layoutLabels(): void {
+    if (!this.activeModelId) return;
+    if (!this.labelLayoutDirty && this.camera.matrixWorld.equals(this.lastCameraMatrix)) return;
+    this.lastCameraMatrix.copy(this.camera.matrixWorld);
+    this.labelLayoutDirty = false;
+
+    const root = this.labelRenderer.domElement;
+    const placed: DOMRect[] = [];
+    for (const el of root.querySelectorAll<HTMLElement>(".col-title, .repeat-badge, .link-label, .plaque")) {
+      if (el.style.display === "none") continue;
+      const r = el.getBoundingClientRect();
+      if (r.width > 0) placed.push(r);
+    }
+
+    const movable: { el: HTMLElement; base: DOMRect }[] = [];
+    for (const anchor of root.querySelectorAll<HTMLElement>(".lbl-anchor")) {
+      if (anchor.style.display === "none") continue;
+      const button = anchor.firstElementChild as HTMLElement | null;
+      if (!button) continue;
+      const rect = button.getBoundingClientRect();
+      if (rect.width === 0) continue;
+      const previous = parseFloat(button.style.getPropertyValue("--dy")) || 0;
+      movable.push({ el: button, base: new DOMRect(rect.x, rect.y - previous, rect.width, rect.height) });
+    }
+    movable.sort((a, b) => a.base.y - b.base.y);
+
+    for (const item of movable) {
+      let top = item.base.y;
+      for (let pass = 0; pass < 6; pass++) {
+        let moved = false;
+        for (const other of placed) {
+          const overlapsX = item.base.x < other.right - 1 && item.base.right > other.x + 1;
+          const overlapsY = top < other.bottom + LABEL_GAP && top + item.base.height > other.y - LABEL_GAP;
+          if (overlapsX && overlapsY) {
+            top = other.bottom + LABEL_GAP;
+            moved = true;
+          }
+        }
+        if (!moved) break;
+      }
+      const dy = Math.min(LABEL_MAX_SHIFT, top - item.base.y);
+      item.el.style.setProperty("--dy", dy > 0.5 ? `${dy.toFixed(1)}px` : "0px");
+      placed.push(new DOMRect(item.base.x, item.base.y + dy, item.base.width, item.base.height));
+    }
   }
 
   setFlowVisible(visible: boolean): void {
@@ -420,8 +482,7 @@ export class Museum {
 
   private pick(): THREE.Intersection | null {
     this.raycaster.setFromCamera(this.pointer, this.camera);
-    const pickables = this.exhibits.flatMap((e) => e.pickables);
-    const hits = this.raycaster.intersectObjects(pickables, false);
+    const hits = this.raycaster.intersectObjects(this.pickables, false);
     return hits[0] ?? null;
   }
 
@@ -474,6 +535,7 @@ export class Museum {
     this.updateHover();
     this.renderer.render(this.scene, this.camera);
     this.labelRenderer.render(this.scene, this.camera);
+    this.layoutLabels();
   }
 
   dispose(): void {

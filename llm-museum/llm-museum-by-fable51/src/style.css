@@ -5,7 +5,7 @@
   --panel-solid: #faf5ec;
   --ink: #3b2f25;
   --ink-soft: #6b5a4a;
-  --ink-faint: #8d7c6b;
+  --ink-faint: #7a6a5a;
   --line: #d8cbb8;
   --line-strong: #bfae97;
   --accent: #b5773f;
@@ -313,19 +313,20 @@ a:focus-visible {
   transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 
+/* --dy is set by the collision pass in museum.ts to nudge overlapping labels apart. */
 .side-left .lbl {
   right: 0;
-  transform: translateY(-50%);
+  transform: translateY(calc(-50% + var(--dy, 0px)));
 }
 
 .side-right .lbl {
   left: 0;
-  transform: translateY(-50%);
+  transform: translateY(calc(-50% + var(--dy, 0px)));
 }
 
 .side-top .lbl {
   left: 0;
-  transform: translate(-50%, -100%);
+  transform: translate(-50%, calc(-100% + var(--dy, 0px)));
 }
 
 .lbl.lbl-sm {
@@ -1222,7 +1223,12 @@ a:focus-visible {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 6px 8px;
+  min-width: 0;
+}
+
+.speech-group {
+  flex: 1 1 520px;
 }
 
 .dock-label {
@@ -1293,7 +1299,7 @@ a:focus-visible {
 }
 
 .voice select {
-  max-width: 190px;
+  max-width: 150px;
   padding: 6px 8px;
   border: 1px solid var(--line-strong);
   border-radius: 8px;
@@ -1307,6 +1313,45 @@ a:focus-visible {
   font-size: 12.5px;
   color: var(--ink-faint);
   font-variant-numeric: tabular-nums;
+}
+
+.speech-status {
+  flex: 1 1 40px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.speech-status:hover {
+  white-space: normal;
+}
+
+/* Short laptop screens: smaller 3D labels so the exhibit keeps room to breathe. */
+@media (max-height: 760px) {
+  .lbl {
+    font-size: 12px;
+    padding: 2px 8px 2px 6px;
+  }
+
+  .col-title {
+    font-size: 12.5px;
+  }
+
+  .repeat-badge {
+    font-size: 11px;
+    padding: 3px 7px;
+  }
+
+  .dock {
+    padding: 8px 12px;
+    gap: 6px 16px;
+  }
+
+  .dock-btn {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
 }
 
 .app[data-speech="speaking"] .speech-status {
@@ -1327,17 +1372,70 @@ a:focus-visible {
     display: none;
   }
 
+  /* Two rows: brand + tools, then the scrollable hall navigation. */
   .topbar {
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 6px 10px;
     padding: 8px 12px;
+    min-height: 0;
+  }
+
+  .brand {
+    order: 1;
+    flex: 1 1 auto;
+  }
+
+  .top-tools {
+    order: 2;
+  }
+
+  .hall-nav {
+    order: 3;
+    flex: 1 1 100%;
+    margin-left: 0;
+    padding-bottom: 2px;
+  }
+
+  .hall-btn {
+    padding: 5px 10px 5px 6px;
+    font-size: 13px;
   }
 
   .brand h1 {
     font-size: 17px;
   }
 
+  .chip {
+    padding: 6px 10px;
+    font-size: 12.5px;
+  }
+
   .hint {
     display: none;
+  }
+
+  /* On a phone only the selected block keeps its label; the list in the sheet does the naming. */
+  .lbl:not(.is-selected),
+  .link-label,
+  .flow-token {
+    display: none;
+  }
+
+  .col-title {
+    font-size: 12px;
+  }
+
+  .repeat-badge {
+    font-size: 10.5px;
+    padding: 2px 6px;
+  }
+
+  .plaque {
+    padding: 4px 8px;
+  }
+
+  .plaque-name {
+    font-size: 12px;
   }
 
   .panel {
@@ -1346,7 +1444,7 @@ a:focus-visible {
     right: 0;
     bottom: 0;
     width: auto;
-    height: 46vh;
+    height: 42vh;
     border-radius: var(--radius) var(--radius) 0 0;
   }
 
@@ -1367,24 +1465,66 @@ a:focus-visible {
     padding: 22px 16px 26px;
   }
 
+  /* A single compact row of controls; labels and status move out of the way. */
   .dock {
-    left: 10px;
-    right: 10px;
-    bottom: calc(46vh + 10px);
-    padding: 8px 10px;
-    gap: 8px 14px;
+    left: 8px;
+    right: 8px;
+    bottom: calc(42vh + 8px);
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 6px 8px;
+    gap: 6px 12px;
+    border-radius: 12px;
   }
 
-  .panel.is-collapsed ~ .dock {
-    right: 10px;
-    bottom: 52px;
+  .dock::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dock-group {
+    flex: none;
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+
+  .dock-label,
+  .voice {
+    display: none;
+  }
+
+  .speech-status {
+    flex: none;
+    max-width: 130px;
+    font-size: 10.5px;
+    line-height: 1.25;
+    white-space: normal;
+  }
+
+  .speech-status:empty {
+    display: none;
+  }
+
+  .dock-btn {
+    padding: 6px 9px;
+    font-size: 12.5px;
+  }
+
+  .rate {
+    gap: 5px;
   }
 
   .rate input[type="range"] {
-    width: 90px;
+    width: 64px;
   }
 
-  .voice {
-    display: none;
+  .rate output {
+    min-width: 30px;
+    font-size: 12px;
+  }
+
+  .panel.is-collapsed ~ .dock {
+    right: 8px;
+    bottom: 48px;
   }
 }

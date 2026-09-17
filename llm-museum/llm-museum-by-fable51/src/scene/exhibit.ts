@@ -581,6 +581,7 @@ export class Exhibit {
     if (tokens) {
       const el = document.createElement("span");
       el.className = "flow-token";
+      el.setAttribute("aria-hidden", "true");
       const label = new CSS2DObject(el);
       label.position.set(0, radius + 0.12, 0);
       label.center.set(0.5, 1);

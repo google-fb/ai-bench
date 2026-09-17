@@ -92,6 +92,8 @@ export class UI {
   private readonly title = must<HTMLElement>("app-title");
   private readonly subtitle = must<HTMLElement>("app-subtitle");
   private readonly hallNav = must<HTMLElement>("hall-nav");
+  private readonly viewport = must<HTMLElement>("viewport");
+  private readonly dock = must<HTMLElement>("dock");
   private readonly flowToggle = must<HTMLButtonElement>("flow-toggle");
   private readonly langToggle = must<HTMLButtonElement>("lang-toggle");
   private readonly loading = must<HTMLElement>("loading");
@@ -144,13 +146,33 @@ export class UI {
     });
   }
 
-  /** Width in CSS pixels that the side panel covers on the right of the viewport (0 when stacked). */
+  /**
+   * How much of the viewport the overlaid UI covers: the side panel on the right on
+   * wide screens, or the bottom sheet plus the dock on stacked (narrow) layouts.
+   */
   panelInset(): { right: number; bottom: number } {
-    const rect = this.panel.getBoundingClientRect();
+    const stage = this.viewport.getBoundingClientRect();
+    const panel = this.panel.getBoundingClientRect();
     const stacked = window.matchMedia("(max-width: 900px)").matches;
+    if (stacked) {
+      const dock = this.dock.getBoundingClientRect();
+      const top = Math.min(this.panelOpen ? panel.top : stage.bottom, dock.top);
+      return { right: 0, bottom: Math.max(0, stage.bottom - top) };
+    }
     if (!this.panelOpen) return { right: 0, bottom: 0 };
-    if (stacked) return { right: 0, bottom: rect.height };
-    return { right: rect.width + 16, bottom: 0 };
+    return { right: panel.width + 16, bottom: 0 };
+  }
+
+  /** True on narrow screens where the panel is a bottom sheet and 3D labels are hidden. */
+  isStacked(): boolean {
+    return window.matchMedia("(max-width: 900px)").matches;
+  }
+
+  /** Opens a collapsed panel so a freshly selected module is actually visible. */
+  ensurePanelOpen(): boolean {
+    if (this.panelOpen) return false;
+    this.setPanelOpen(true);
+    return true;
   }
 
   setPanelOpen(open: boolean): void {
@@ -211,6 +233,8 @@ export class UI {
     const l = this.locale;
     this.title.textContent = pick(T.appTitle, l);
     this.subtitle.textContent = pick(T.appSubtitle, l);
+    this.hallNav.setAttribute("aria-label", pick(T.hallsNav, l));
+    this.viewport.setAttribute("aria-label", pick(T.viewportLabel, l));
     document.title = l === "zh" ? "LLM 建築博物館 · LLM Architecture Museum" : "LLM Architecture Museum · LLM 建築博物館";
     this.langToggle.textContent = pick(T.langToggle, l);
     this.langToggle.title = pick(T.langToggleTitle, l);
