@@ -50,8 +50,8 @@ export const breadArticles: Article[] = [
       {
         label: { zh: "用廚房講", en: "Kitchen picture" },
         body: {
-          zh: "把罐子想成一間 fort：酵母是負責吹氣球的，乳酸菌是負責調味和趕壞菌的。你餵麵粉和水，等於開飯。開飯後氣泡變多、體積變高，就是「種熟了」。",
-          en: "Treat the jar as a fort. Yeast blows the balloons. Bacteria season the place and crowd out spoilage. Feeding flour and water is dinner. When the jar is tall and webby, the starter is ripe.",
+          zh: "把罐子想成一座小城堡：酵母是負責吹氣球的，乳酸菌是負責調味和趕壞菌的。你餵麵粉和水，等於開飯。開飯後氣泡變多、體積變高，就是「種熟了」。",
+          en: "Treat the jar as a little castle. Yeast blows the balloons. Bacteria season the place and crowd out spoilage. Feeding flour and water is dinner. When the jar is tall and webby, the starter is ripe.",
         },
       },
       {
@@ -107,8 +107,8 @@ export const breadArticles: Article[] = [
     dateLabel: { zh: "第 02 課", en: "Lesson 02" },
     tag: "ingredient",
     title: {
-      zh: "材料其實很少：麵粉、水、鹽，再加一匙你養的種",
-      en: "Very few ingredients: flour, water, salt, plus the jar you keep",
+      zh: "材料其實很少：麵粉、水、鹽，再加約兩成你養的種",
+      en: "Very few ingredients: flour, water, salt, plus about 20% starter",
     },
     dek: {
       zh: "經典鄉村麵包不加糖、油、奶。蛋白高一點的麵粉比較好拉網；水決定軟硬；鹽約麵粉重的 2%。",
@@ -212,8 +212,8 @@ export const breadArticles: Article[] = [
       {
         label: { zh: "怎麼餵", en: "How to feed" },
         body: {
-          zh: "用乾淨罐。留下一份種，加入等重或更多的粉與水，攪到沒有乾粉，鬆蓋，放室溫。夏天 1:3:3 或 1:5:5 比較不容易暴衝；冬天 1:1:1 比較快。丟掉的那份可以做鬆餅，不是垃圾。",
-          en: "Use a clean jar. Keep some starter, add equal or larger weights of flour and water, stir out dry lumps, lid loose, room temp. In a hot kitchen 1:3:3 or 1:5:5 keeps it from racing; in the cold 1:1:1 is faster. Discard can become pancakes. It is not trash.",
+          zh: "用乾淨罐。留下一份種，加入等重或更多的粉與水，攪到沒有乾粉，鬆蓋，放室溫。1:1:1 就是例如 50 g 舊種 + 50 g 粉 + 50 g 水；1:5:5 是 20 g 舊種 + 100 g 粉 + 100 g 水。夏天 1:3:3 或 1:5:5 比較不容易暴衝；冬天 1:1:1 比較快。丟掉的那份可以做鬆餅，不是垃圾。",
+          en: "Use a clean jar. Keep some starter, add equal or larger weights of flour and water, stir out dry lumps, lid loose, room temp. 1:1:1 is e.g. 50 g starter + 50 g flour + 50 g water; 1:5:5 is 20 g starter + 100 g flour + 100 g water. In a hot kitchen 1:3:3 or 1:5:5 keeps it from racing; in the cold 1:1:1 is faster. Discard can become pancakes. It is not trash.",
         },
       },
       {
@@ -295,8 +295,8 @@ export const breadArticles: Article[] = [
       {
         label: { zh: "一顆新手球", en: "A beginner ballpark" },
         body: {
-          zh: "常見家用：粉 500 g（100%）、水 340 g（68%）、鹽 10 g（2%）、種 100 g（20%）。總麵團大約 950 g，剛好進 5 夸脫鑄鐵鍋。水合可先 68%，熟了再爬到 72–75%。",
-          en: "A common home loaf: 500 g flour (100%), 340 g water (68%), 10 g salt (2%), 100 g starter (20%). About 950 g dough — a 5-quart Dutch oven’s friend. Stay near 68% until shaping feels easy, then climb toward 72–75%.",
+          zh: "常見家用：粉 500 g（100%）、水 340 g（68%）、鹽 10 g（2%）、種 100 g（20%）。這 68% 只算碗裡加的水；100 g 的 100% 種還帶約 50 g 水。總麵團大約 950 g，剛好進 5 夸脫鑄鐵鍋。水合可先 68%，熟了再爬到 72–75%。",
+          en: "A common home loaf: 500 g flour (100%), 340 g water (68%), 10 g salt (2%), 100 g starter (20%). That 68% is bowl water only; 100 g of a 100% starter still brings ~50 g water. About 950 g dough — a 5-quart Dutch oven’s friend. Stay near 68% until shaping feels easy, then climb toward 72–75%.",
         },
       },
       {
@@ -509,11 +509,11 @@ export const breadArticles: Article[] = [
         ["temp", { zh: "看溫度", en: "Check heat" }, { zh: "點溫度計。太熱就快，太冷就慢。", en: "Tap the thermometer. Hot is fast; cold is slow." }],
       ]),
       hotspots: spots([
-        ["north", { zh: "摺", en: "Fold" }, { zh: "把氣留在裡面，網拉整齊。", en: "Keeps gas in and lines up the net." }],
-        ["east", { zh: "轉碗", en: "Turn" }, { zh: "四面都要做。", en: "All four sides." }],
-        ["south", { zh: "一組", en: "One set" }, { zh: "四摺等於一組。", en: "Four folds make a set." }],
-        ["west", { zh: "休息", en: "Rest" }, { zh: "做完讓它躺。", en: "Then leave it." }],
-        ["temp", { zh: "溫度", en: "Heat" }, { zh: "油門。", en: "The throttle." }],
+        ["north", { zh: "上摺", en: "Top fold" }, { zh: "上邊拉起，蓋到中間。把氣留在裡面。", en: "Lift the top over the middle. Keeps gas in." }],
+        ["east", { zh: "右摺", en: "Right fold" }, { zh: "右邊拉起，蓋到中間。", en: "Lift the right side over the middle." }],
+        ["south", { zh: "下摺", en: "Bottom fold" }, { zh: "下邊拉起，蓋到中間。", en: "Lift the bottom over the middle." }],
+        ["west", { zh: "左摺", en: "Left fold" }, { zh: "左邊拉起，蓋到中間。四面做完才叫一組。", en: "Lift the left side over. Four sides make one set." }],
+        ["temp", { zh: "溫度", en: "Heat" }, { zh: "油門。太熱就快，太冷就慢。", en: "The throttle. Hot is fast; cold is slow." }],
       ]),
     },
   },
@@ -546,8 +546,8 @@ export const breadArticles: Article[] = [
       {
         label: { zh: "工法", en: "The method" },
         body: {
-          zh: "把發酵好的麵團倒在薄粉檯上，輕輕收成圓，休息 20 分鐘。再翻開，左右摺、再捲成橢圓，或繼續收成圓。接縫朝下，放進撒米糠或布的發酵籃。刮板沿桌面推，讓外皮繃。",
-          en: "Tip the dough onto a lightly floured bench, gather a loose round, rest 20 minutes. Flip, fold the sides, roll an oval — or tighten a round. Seam down into a rice-floured or lined banneton. A scraper drives along the bench so the skin tautens.",
+          zh: "把發酵好的麵團倒在薄粉檯上，輕輕收成圓，休息 20 分鐘。再翻開，左右摺、再捲成橢圓，或繼續收成圓。接縫朝下，放進撒米粉（或墊乾布）的發酵籃。刮板沿桌面推，讓外皮繃。",
+          en: "Tip the dough onto a lightly floured bench, gather a loose round, rest 20 minutes. Flip, fold the sides, roll an oval — or tighten a round. Seam down into a rice-flour-dusted or cloth-lined banneton. A scraper drives along the bench so the skin tautens.",
         },
       },
       {
@@ -712,15 +712,15 @@ export const breadArticles: Article[] = [
       {
         label: { zh: "工法", en: "The method" },
         body: {
-          zh: "鑄鐵鍋或 combo cooker 先在烤箱裡預熱到約 230°C，常要 30–45 分鐘。麵團倒出、割一刀（30–45 度、乾淨、不要來回鋸）、入鍋、立刻蓋蓋。約 20 分鐘後揭蓋再 20–25 分鐘。內部大約 96–99°C 就熟。",
-          en: "Preheat a Dutch oven or combo cooker near 230°C, often 30–45 minutes. Tip out the dough, one confident score (30–45°, no sawing), load, lid on at once. About 20 minutes covered, 20–25 uncovered. The crumb is usually done around 96–99°C inside.",
+          zh: "鑄鐵鍋或 combo cooker 先在烤箱裡預熱到約 230°C，常要 30–45 分鐘。麵團倒出、割一刀（30–45 度、乾淨、不要來回鋸）、入鍋、立刻蓋蓋。約 20 分鐘後揭蓋再 20–25 分鐘。內部大約 96–99°C 就熟。揭蓋時鍋口會噴熱蒸氣，手和臉離遠，用隔熱手套。",
+          en: "Preheat a Dutch oven or combo cooker near 230°C, often 30–45 minutes. Tip out the dough, one confident score (30–45°, no sawing), load, lid on at once. About 20 minutes covered, 20–25 uncovered. The crumb is usually done around 96–99°C inside. Steam rushes out when you uncover — keep face and hands back, use oven mitts.",
         },
       },
       {
         label: { zh: "沒有鑄鐵鍋", en: "No Dutch oven" },
         body: {
-          zh: "用烤石或厚烤盤，底下再放鐵盤，進爐時倒開水或冰塊做蒸氣。比較不穩，但做得到。不要對熱玻璃門噴水。",
-          en: "Use a stone or thick tray, plus a preheated metal pan. Pour boiling water or ice for steam as you load. Fiddlier, still real. Don’t spray a hot glass door.",
+          zh: "用烤石或厚烤盤，底下再放鐵盤，進爐時倒開水或冰塊做蒸氣。比較不穩，但做得到。倒熱水時蒸汽會爆衝，站側邊。不要對熱玻璃門噴水。",
+          en: "Use a stone or thick tray, plus a preheated metal pan. Pour boiling water or ice for steam as you load. Fiddlier, still real. Stand to the side — the burst can scald. Don’t spray a hot glass door.",
         },
       },
       {
@@ -756,7 +756,7 @@ export const breadArticles: Article[] = [
         ["score", { zh: "割紋", en: "Score" }, { zh: "點刀。一條就好。", en: "Tap the blade. One line." }],
         ["lid", { zh: "蓋上", en: "Lid on" }, { zh: "點鍋蓋，把蒸氣關住。", en: "Tap the lid and trap steam." }],
         ["spring", { zh: "烤箱彈升", en: "Oven spring" }, { zh: "點麵包，看它長高。", en: "Tap the loaf and watch it rise." }],
-        ["uncover", { zh: "揭蓋上色", en: "Uncover" }, { zh: "再點蓋，讓皮變脆。", en: "Tap the lid again so the skin crisps." }],
+        ["uncover", { zh: "揭蓋上色", en: "Uncover" }, { zh: "點右邊「揭蓋」，不要再點鍋蓋。", en: "Tap Uncover on the right — not the lid again." }],
       ]),
       hotspots: spots([
         ["score", { zh: "割", en: "Score" }, { zh: "你選的裂口。", en: "The crack you chose." }],
@@ -795,8 +795,8 @@ export const breadArticles: Article[] = [
       {
         label: { zh: "家用五件", en: "Five at home" },
         body: {
-          zh: "電子秤（克）、刮板、發酵籃或布碗、雙面刀片或 lame、5 夸脫左右鑄鐵鍋。總價常常低於一台華麗麵包機。麵包機 knead 很兇、也難做蒸汽，不適合作為酸種主場。",
-          en: "Gram scale, bench scraper, banneton or towel-bowl, razor or lame, ~5-quart Dutch oven. Often cheaper than a glossy bread machine. Those machines knead hard and steam poorly — a weak sourdough home.",
+          zh: "電子秤（克）、刮板、發酵籃或碗加布、雙面刀片或 lame、5 夸脫左右鑄鐵鍋。總價常常低於一台華麗麵包機。麵包機揉麵很兇、也難做蒸汽，不適合作為酸種主場。",
+          en: "Gram scale, bench scraper, banneton or a bowl plus cloth, razor or lame, ~5-quart Dutch oven. Often cheaper than a glossy bread machine. Those machines knead hard and steam poorly — a weak sourdough home.",
         },
       },
       {

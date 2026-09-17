@@ -38,7 +38,7 @@ function figure(article: Article, index: number): string {
 function labStage(article: Article): string {
   const svg = article.lab.format === "svg";
   const stage = svg
-    ? `<div class="svg-lab" data-svg-host tabindex="0" role="img" aria-label="${escapeAttr(text(article.lab.title))}" aria-describedby="lab-note-${article.slug}"></div>`
+        ? `<div class="svg-lab" data-svg-host tabindex="0" role="application" aria-label="${escapeAttr(text(article.lab.title))}" aria-describedby="lab-note-${article.slug}"></div>`
     : `<canvas width="960" height="540" tabindex="0" role="img" aria-label="${escapeAttr(text(article.lab.title))}" aria-describedby="lab-note-${article.slug}"></canvas>`;
   return `
       <section class="lab" data-lab="${article.lab.kind}" data-slug="${article.slug}" data-format="${article.lab.format ?? "canvas"}">
@@ -62,7 +62,7 @@ function labStage(article: Article): string {
           ${article.lab.steps
             .map(
               (step, i) => `
-            <li data-step="${step.id}" class="${i === 0 ? "is-current" : ""}" aria-current="${i === 0 ? "step" : "false"}">
+            <li data-step="${step.id}" class="${i === 0 ? "is-current" : ""}"${i === 0 ? ' aria-current="step"' : ""}>
               <span class="n">${i + 1}</span>
               <span class="lab-step-copy">
                 <span lang="zh">${step.title.zh}</span>

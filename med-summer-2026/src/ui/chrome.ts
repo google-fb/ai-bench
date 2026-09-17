@@ -35,17 +35,15 @@ export function renderHeader(unit?: UnitId): string {
 }
 
 export function renderFooter(unit?: UnitId): string {
-  const bread = unit === "bread";
+  const med = `<p lang="zh">這是科普整理，不是診斷或用藥建議。要不要打針、吃藥，請跟你的醫師討論。數字來自公開新聞與論文，我們用白話重寫，細節以原始來源為準。</p>
+        <p lang="en">This is a reading guide, not medical advice. Talk to a clinician before any shot or drug. Figures come from public papers and press notes; the originals win if we simplified too hard.</p>`;
+  const bread = `<p lang="zh">這是廚房科普，不是食品安全檢驗，也不是職業烘焙課。發霉的種要整罐丟掉。數字是常見家用範圍，麵粉與室溫會改結果。</p>
+        <p lang="en">This is kitchen literacy, not a food-safety lab or a bakery course. Toss a moldy starter. The numbers are home ranges; flour and room heat will move them.</p>`;
+  const copy = unit === "bread" ? bread : unit === "med" ? med : `${med}${bread}`;
   return `
     <footer class="site-footer">
       <div class="disclaimer">
-        ${
-          bread
-            ? `<p lang="zh">這是廚房科普，不是食品安全檢驗，也不是職業烘焙課。發霉的種要整罐丟掉。數字是常見家用範圍，麵粉與室溫會改結果。</p>
-        <p lang="en">This is kitchen literacy, not a food-safety lab or a bakery course. Toss a moldy starter. The numbers are home ranges; flour and room heat will move them.</p>`
-            : `<p lang="zh">這是科普整理，不是診斷或用藥建議。要不要打針、吃藥，請跟你的醫師討論。數字來自公開新聞與論文，我們用白話重寫，細節以原始來源為準。</p>
-        <p lang="en">This is a reading guide, not medical advice. Talk to a clinician before any shot or drug. Figures come from public papers and press notes; the originals win if we simplified too hard.</p>`
-        }
+        ${copy}
       </div>
     </footer>
   `;

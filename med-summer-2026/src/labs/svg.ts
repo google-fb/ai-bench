@@ -1,5 +1,5 @@
 import type { Article, Copy } from "../types";
-import { articleBySlug, currentStep, setNote } from "./engine";
+import { articleBySlug, currentStep, resolveLabTap, setNote } from "./engine";
 import { svgScenes } from "./svg-scenes";
 
 function paintHud(section: HTMLElement, article: Article, done: Record<string, boolean>): string | null {
@@ -10,7 +10,8 @@ function paintHud(section: HTMLElement, article: Article, done: Record<string, b
     const id = item.dataset.step ?? "";
     item.classList.toggle("is-done", !!done[id]);
     item.classList.toggle("is-current", id === current);
-    item.setAttribute("aria-current", id === current ? "step" : "false");
+    if (id === current) item.setAttribute("aria-current", "step");
+    else item.removeAttribute("aria-current");
   });
   const progress = section.querySelector("[data-lab-progress]");
   if (progress) progress.textContent = `${cleared}/${ids.length}`;
@@ -93,6 +94,20 @@ export function mountSvgLab(section: HTMLElement): void {
 
   const activate = (id: string | null) => {
     if (!id) return;
+    const done = doneMap();
+    const current = currentStep(
+      article.lab.steps.map((step) => step.id),
+      done,
+    );
+    const verdict = resolveLabTap(id, current, !!done[id]);
+    if (verdict === "miss") {
+      explain(null, true);
+      return;
+    }
+    if (verdict === "recap") {
+      explain(id);
+      return;
+    }
     flags[id] = 1;
     explain(id);
   };
@@ -112,6 +127,7 @@ export function mountSvgLab(section: HTMLElement): void {
   });
 
   host.tabIndex = 0;
+  host.setAttribute("role", "application");
   host.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();

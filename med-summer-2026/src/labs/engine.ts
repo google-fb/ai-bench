@@ -301,6 +301,16 @@ export function currentStep(stepIds: string[], done: Record<string, boolean>): s
   return stepIds.find((id) => !done[id]) ?? null;
 }
 
+export function resolveLabTap(
+  id: string,
+  current: string | null,
+  alreadyDone: boolean,
+): "mark" | "recap" | "miss" {
+  if (id === current) return "mark";
+  if (alreadyDone) return "recap";
+  return "miss";
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")

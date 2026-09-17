@@ -23,7 +23,8 @@ function paintHud(section: HTMLElement, article: Article, done: Record<string, b
     const id = item.dataset.step ?? "";
     item.classList.toggle("is-done", !!done[id]);
     item.classList.toggle("is-current", id === current);
-    item.setAttribute("aria-current", id === current ? "step" : "false");
+    if (id === current) item.setAttribute("aria-current", "step");
+    else item.removeAttribute("aria-current");
   });
   const progress = section.querySelector("[data-lab-progress]");
   if (progress) progress.textContent = `${cleared}/${total}`;
