@@ -271,6 +271,8 @@ export class Museum {
   }
 
   private applyViewOffset(): void {
+    // Projection changes move every label on screen; re-run the collision pass.
+    this.labelLayoutDirty = true;
     const right = Math.min(this.insets.right, this.width * 0.7);
     const bottom = Math.min(this.insets.bottom, this.height * 0.7);
     const fullW = this.width + right;

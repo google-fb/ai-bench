@@ -30,6 +30,8 @@ class App {
   private tourWatchdogStarted = 0;
   private tourToken = 0;
   private silentTourRestarted = false;
+  /** Pending deep-link selection; cancelled by any newer navigation. */
+  private hashTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     this.ui = new UI({
@@ -109,7 +111,13 @@ class App {
     });
   }
 
+  private cancelPendingHash(): void {
+    if (this.hashTimer) clearTimeout(this.hashTimer);
+    this.hashTimer = null;
+  }
+
   private applyHash(): void {
+    this.cancelPendingHash();
     const hash = decodeURIComponent(location.hash.replace(/^#\/?/, ""));
     const [modelId, blockId] = hash.split("/");
     const model = modelId ? findModel(modelId) : undefined;
@@ -126,7 +134,10 @@ class App {
         return;
       }
       this.goToHall(model.id, 1.2);
-      setTimeout(() => this.selectBlock(model.id, block.id, { pan: true }), 900);
+      this.hashTimer = setTimeout(() => {
+        this.hashTimer = null;
+        this.selectBlock(model.id, block.id, { pan: true });
+      }, 900);
     } else if (!sameHall || this.selectedBlockId !== null) {
       this.goToHall(model.id, 1.2);
     }
@@ -179,6 +190,8 @@ class App {
 
   private goToHall(modelId: string | null, duration?: number): void {
     if (this.tourActive) this.stopTour();
+    // A hall change supersedes any deep-link selection still in flight (applyHash re-arms its own).
+    this.cancelPendingHash();
     this.stopSpeech();
     this.activeModelId = modelId;
     this.selectedBlockId = null;
@@ -194,6 +207,7 @@ class App {
     const model = findModel(modelId);
     const block = model ? findBlock(model, blockId) : undefined;
     if (!model || !block) return;
+    this.cancelPendingHash();
     if (this.tourActive && !options.fromTour) this.stopTour();
     if (!options.fromTour) this.stopSpeech();
     if (this.activeModelId !== modelId) {
