@@ -61,4 +61,19 @@ src/
 
 新增展品只需在 `src/content/` 加一個 `ModelSpec` 並加入 `MODELS`。
 
-GitHub Pages：<https://google-fb.github.io/ai-bench/llm-museum/llm-museum-by-fable51/>
+## 部署（固定 HTTPS 網址）
+
+**GitHub Pages（已設定）**：推到 `main` 後，[`.github/workflows/pages.yml`](../../.github/workflows/pages.yml) 會自動建置整個 gallery 並部署，本專案的網址是 <https://google-fb.github.io/ai-bench/llm-museum/llm-museum-by-fable51/>。
+
+**Cloudflare Pages（可選，獨立網域 `https://llm-museum.pages.dev/`）**：[`.github/workflows/cloudflare-pages.yml`](../../.github/workflows/cloudflare-pages.yml) 會在 `main` 有變更時把 `dist/` 直接上傳到 Cloudflare Pages；憑證不存在時會略過而不失敗。設定步驟：
+
+1. Cloudflare 儀表板 → My Profile → API Tokens → Create Token，權限選 **Account · Cloudflare Pages · Edit**。
+2. 在 Workers & Pages 總覽頁右側找到 **Account ID**。
+3. 到 GitHub repo → Settings → Secrets and variables → Actions，新增 `CLOUDFLARE_API_TOKEN` 與 `CLOUDFLARE_ACCOUNT_ID`（若想換專案名稱，加一個 variable `CLOUDFLARE_PAGES_PROJECT`）。
+4. 之後每次推到 `main` 就會部署；也可以在 Actions 頁手動 Run workflow。
+
+在本機（或任何有上述兩個環境變數的地方）也可以一行部署：
+
+```bash
+CLOUDFLARE_API_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… npm run deploy:cf
+```
